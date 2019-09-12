@@ -1,0 +1,2 @@
+# flaskdoc
+Flask OpenAPI annotations
