@@ -1,2 +1,1 @@
-from flask.app import Flask
-from flask.blueprints import Blueprint
+from flaskdoc.pallets import Blueprint, Flask
