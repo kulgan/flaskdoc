@@ -13,6 +13,8 @@ class SwaggerBase(object):
         Args:
             name (str): custom extension name, must begin with x-
             value (Any): value, can be None, any object or list
+        Returns:
+            SwaggerBase: for chaining
         Raises:
             ValueError: if key name is invalid
         """
@@ -22,6 +24,7 @@ class SwaggerBase(object):
         if not self._extensions:
             self._extensions = {}
         self._extensions[name] = value
+        return self
 
     @staticmethod
     def validate_extension_name(name):

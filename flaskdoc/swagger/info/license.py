@@ -8,15 +8,6 @@ class License(SwaggerBase):
         self.url = url
         self.name = name
 
-    def __eq__(self, other):
-        if not isinstance(other, License):
-            return False
-        return self.name == other.name and self.url == other.url and \
-               self._extensions == other._extensions
-
-    def __hash__(self):
-        return hash((self.url, self.name, self._extensions))
-
     def as_dict(self):
         st = super(License, self).as_dict()
         st.update(dict(
@@ -25,3 +16,12 @@ class License(SwaggerBase):
         ))
 
         return st
+
+    def __eq__(self, other):
+        if not isinstance(other, License):
+            return False
+        return self.name == other.name and self.url == other.url and \
+               self._extensions == other._extensions
+
+    def __hash__(self):
+        return hash((self.url, self.name, self._extensions))

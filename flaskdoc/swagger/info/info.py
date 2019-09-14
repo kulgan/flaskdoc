@@ -26,17 +26,6 @@ class Info(SwaggerBase):
         self.license = license
         self.version = version
 
-    def __eq__(self, other):
-        if not isinstance(other, Info):
-            return False
-        return self.title == other.title and self.version == other.version and \
-               self.description == other.description and self.terms_of_service == other.terms_of_service and \
-               self.contact == other.contact and self.license == other.license
-
-    def __hash__(self):
-        return hash((self.title, self.version, self.description, self.terms_of_service,
-                     self.contact, self.license, self._extensions))
-
     def as_dict(self):
         st = super(Info, self).as_dict()
         st.update(dict(
@@ -50,3 +39,14 @@ class Info(SwaggerBase):
         ))
 
         return st
+
+    def __eq__(self, other):
+        if not isinstance(other, Info):
+            return False
+        return self.title == other.title and self.version == other.version and \
+               self.description == other.description and self.terms_of_service == other.terms_of_service and \
+               self.contact == other.contact and self.license == other.license
+
+    def __hash__(self):
+        return hash((self.title, self.version, self.description, self.terms_of_service,
+                     self.contact, self.license, self._extensions))

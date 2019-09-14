@@ -10,5 +10,5 @@ class Blueprint(flask.Blueprint):
                                         static_url_path=static_url_path, template_folder=template_folder,
                                         url_prefix=url_prefix, subdomain=subdomain, url_defaults=url_defaults)
 
-    def route(self, rule, **options):
-        pass
+    def route(self, rule, ref=None, description=None, tags=None, **options):
+        super(Blueprint, self).route(rule, **options)

@@ -3,20 +3,12 @@ from flaskdoc.swagger.base import SwaggerBase
 
 class Contact(SwaggerBase):
 
-    def __init__(self, name, url=None, email=None):
+    def __init__(self, name=None, url=None, email=None):
         super(Contact, self).__init__()
-        self.url = url
-        self.name = name
+
         self.email = email
-
-    def __eq__(self, other):
-        if not isinstance(other, Contact):
-            return False
-        return self.name == other.name and self.url == other.url and \
-               self.email == other.email and self._extensions == other._extensions
-
-    def __hash__(self):
-        return hash((self.url, self.email, self.name, self._extensions))
+        self.name = name
+        self.url = url
 
     def as_dict(self):
         st = super(Contact, self).as_dict()
@@ -27,3 +19,13 @@ class Contact(SwaggerBase):
         ))
 
         return st
+
+    def __eq__(self, other):
+        if not isinstance(other, Contact):
+            return False
+        return self.name == other.name and self.url == other.url and \
+               self.email == other.email and self._extensions == other._extensions
+
+    def __hash__(self):
+        return hash((self.url, self.email, self.name, self._extensions))
+
