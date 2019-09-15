@@ -1,9 +1,7 @@
-import collections
-
-from flaskdoc.swagger.base import SwaggerBase
+from flaskdoc.swagger import base
 
 
-class ExternalDocumentation(SwaggerBase):
+class ExternalDocumentation(base.SwaggerBase):
 
   def __init__(self, url, description=None):
     super(ExternalDocumentation, self).__init__()
@@ -11,9 +9,8 @@ class ExternalDocumentation(SwaggerBase):
     self.description = description
 
   def as_dict(self):
-    d = super(ExternalDocumentation, self).as_dict()
-    d.update(collections.OrderedDict(
-      name=self.url,
-      description=self.description
-    ))
+    d = base.SwaggerDict()
+    d["name"] = self.url
+    d["description"] = self.description
+    d.update(super(ExternalDocumentation, self).as_dict())
     return d

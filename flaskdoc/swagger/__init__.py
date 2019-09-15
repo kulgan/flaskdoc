@@ -1,4 +1,4 @@
-from base import SwaggerBase
+from base import SwaggerBase, SwaggerDict
 
 
 class OpenApi(SwaggerBase):
@@ -17,7 +17,7 @@ class OpenApi(SwaggerBase):
 
     # TODO disallow duplicates
     self.tags = []  # type -> swagger.tag.Tag
-    self.paths = []  # type -> swagger.paths.Path
+    self.paths = None  # type -> swagger.paths.Paths
 
   def add_tag(self, tag):
     """
@@ -27,21 +27,14 @@ class OpenApi(SwaggerBase):
     """
     self.tags.append(tag)
 
-  def add_path(self, path):
-    """
-    Adds a new path
-    Args:
-        path (swagger.paths.Path): path to add
-    """
-    self.paths.append(path)
-
   def as_dict(self):
-    d = super(OpenApi, self).as_dict()
-    d.update(dict(
-      openapi=self.open_api,
-      info=self.info.as_dict(),
-      paths=[path.as_dict() for path in self.paths],
-      tags=[tag.as_dict() for tag in self.tags]
-    ))
+    d = SwaggerDict()
+    d["openapi"] = self.open_api
+    d["info"] = self.info.as_dict()
+    d["paths"] = self.paths.as_dict()
 
+    if self.tags:
+      d["tags"] = [tag.as_dict() for tag in self.tags]
+
+    d.update(super(OpenApi, self).as_dict())
     return d

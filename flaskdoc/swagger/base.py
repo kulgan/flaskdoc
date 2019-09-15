@@ -23,7 +23,7 @@ class SwaggerBase(object):
     self.validate_extension_name(name)
 
     if not self._extensions:
-      self._extensions = OrderedDict()
+      self._extensions = SwaggerDict()
     self._extensions[name] = value
     return self
 
@@ -40,9 +40,15 @@ class SwaggerBase(object):
       raise ValueError("Custom extension must start with x-")
 
   def as_dict(self):
-    return OrderedDict(
-      extensions=self._extensions
-    )
+    return self._extensions or {}
 
   def __repr__(self):
-    return json.dumps(self.as_dict())
+    return json.dumps(self.as_dict(), indent=2)
+
+
+class SwaggerDict(OrderedDict):
+
+  def __setitem__(self, key, value):
+    if not value:
+      return
+    super(SwaggerDict, self).__setitem__(key, value)

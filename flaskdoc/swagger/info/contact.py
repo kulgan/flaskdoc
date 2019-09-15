@@ -1,9 +1,7 @@
-import collections
-
-from flaskdoc.swagger.base import SwaggerBase
+from flaskdoc.swagger import base
 
 
-class Contact(SwaggerBase):
+class Contact(base.SwaggerBase):
 
   def __init__(self, name=None, url=None, email=None):
     super(Contact, self).__init__()
@@ -13,14 +11,12 @@ class Contact(SwaggerBase):
     self.url = url
 
   def as_dict(self):
-    st = super(Contact, self).as_dict()
-    st.update(collections.OrderedDict(
-      name=self.name,
-      url=self.url,
-      email=self.email
-    ))
-
-    return st
+    d = base.SwaggerDict()
+    d["name"] = self.name
+    d["url"] = self.url
+    d["email"] = self.email
+    d.update(super(Contact, self).as_dict())
+    return d
 
   def __eq__(self, other):
     if not isinstance(other, Contact):

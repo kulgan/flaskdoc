@@ -1,2 +1,2 @@
-from path import Path, PathItem, Operation
-from path import GET
+from paths import Paths, PathItem, Operation
+from paths import GET

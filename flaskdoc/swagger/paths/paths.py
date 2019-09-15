@@ -1,23 +1,26 @@
-import collections
-
-from flaskdoc.swagger import SwaggerBase
+from flaskdoc.swagger import base
 
 
-class Path(SwaggerBase):
+class Paths(base.SwaggerBase):
 
-  def __init__(self):
-    super(Path, self).__init__()
-    self._items = collections.OrderedDict()
+  def __init__(self, path_items=None):
+    super(Paths, self).__init__()
+    self._items = path_items
 
   def add_path_item(self, name, path_item):
+    if not self._items:
+      self._items = base.SwaggerDict()
     self._items[name] = path_item
 
   def as_dict(self):
-    d = super(Path, self).as_dict()
-    d.update(self._items)
+    d = base.SwaggerDict()
+    for k, v in self._items.items():
+      d[k] = v.as_dict()
+    d.update(super(Paths, self).as_dict())
+    return d
 
 
-class PathItem(SwaggerBase):
+class PathItem(base.SwaggerBase):
 
   def __init__(self, ref=None, summary=None, description=None):
     super(PathItem, self).__init__()
@@ -52,17 +55,18 @@ class PathItem(SwaggerBase):
     pass
 
   def as_dict(self):
-      d = super(PathItem, self).as_dict()
-      if self.ref:
-        d["$ref"] = self.ref
-      d.update(collections.OrderedDict(
-          summary=self.summary,
-          description=self.description,
-          get=self.get.as_dict()
-      ))
+    d = base.SwaggerDict()
+    if self.ref:
+      d["$ref"] = self.ref
+    d["summary"] = self.summary
+    d["description"] = self.description
+    if self.get:
+      d["get"] = self.get.as_dict()
+    d.update(super(PathItem, self).as_dict())
+    return d
 
 
-class Operation(SwaggerBase):
+class Operation(base.SwaggerBase):
 
   def __init__(self, responses="200", tags=None, summary=None,
                description=None, operations_id=None, parameters=None):
@@ -74,14 +78,23 @@ class Operation(SwaggerBase):
     self.operation_id = operations_id
 
     self.deprecated = False
-    self.parameter = parameters or []
+    self.parameters = parameters or []
     self.op_type = None
+
+  def add_parameter(self, parameter):
+    self.parameters.append(parameter)
 
   @staticmethod
   def from_op(op_type):
     if op_type == "GET":
       return GET()
     return None
+
+  def as_dict(self):
+    d = base.SwaggerDict()
+    d["tags"] = [t.as_dict() for t in self.tags]
+    d["summary"] = self.summary
+    d["description"] = self.description
 
 
 class GET(Operation):

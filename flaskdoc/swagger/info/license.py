@@ -1,9 +1,7 @@
-import collections
-
-from flaskdoc.swagger.base import SwaggerBase
+from flaskdoc.swagger import base
 
 
-class License(SwaggerBase):
+class License(base.SwaggerBase):
 
   def __init__(self, name, url=None):
     super(License, self).__init__()
@@ -11,13 +9,11 @@ class License(SwaggerBase):
     self.name = name
 
   def as_dict(self):
-    st = super(License, self).as_dict()
-    st.update(collections.OrderedDict(
-      name=self.name,
-      url=self.url
-    ))
-
-    return st
+    d = base.SwaggerDict()
+    d["name"] = self.name
+    d["url"] = self.url
+    d.update(super(License, self).as_dict())
+    return d
 
   def __eq__(self, other):
     if not isinstance(other, License):

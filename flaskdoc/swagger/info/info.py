@@ -1,9 +1,7 @@
-import collections
-
-from flaskdoc.swagger.base import SwaggerBase
+from flaskdoc.swagger import base
 
 
-class Info(SwaggerBase):
+class Info(base.SwaggerBase):
 
   def __init__(self, title, version, description=None, terms_of_service=None,
                contact=None, license=None):
@@ -27,18 +25,17 @@ class Info(SwaggerBase):
     self.version = version
 
   def as_dict(self):
-    st = super(Info, self).as_dict()
-    st.update(collections.OrderedDict(
-      title=self.title,
-      description=self.description,
-      termsOfService=self.terms_of_service,
-      contact=self.contact.as_dict(),
-      license=self.license.as_dict(),
-      version=self.version,
-      extensions=self._extensions,
-    ))
-
-    return st
+    d = base.SwaggerDict()
+    d["title"] = self.title
+    d["description"] = self.description
+    d["termsOfService"] = self.terms_of_service
+    if self.contact:
+      d["contact"] = self.contact.as_dict()
+    if self.license:
+      d["license"] = self.license.as_dict()
+    d["version"] = self.version
+    d.update(super(Info, self).as_dict())
+    return d
 
   def __eq__(self, other):
     if not isinstance(other, Info):
