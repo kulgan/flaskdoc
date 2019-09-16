@@ -1,11 +1,11 @@
 import flask
 
 from flaskdoc import swagger
-from flaskdoc.pallets import blueprints
-from flaskdoc.swagger import info, mixin
+from blueprints import Blueprint
+from mixin import SwaggerMixin
 
 
-class Flask(flask.Flask, mixin.SwaggerMixin):
+class Flask(flask.Flask, SwaggerMixin):
 
   def __init__(self, import_name, version, static_url_path=None, static_folder="static",
                template_folder="templates", instance_path=None, instance_relative_config=False,
@@ -24,17 +24,16 @@ class Flask(flask.Flask, mixin.SwaggerMixin):
     if self.open_api:
       return
 
-    info_block = info.Info(title=self.api_title, version=self.api_version)
+    info_block = swagger.Info(title=self.api_title, version=self.api_version)
     if self.config["API_LICENSE_NAME"]:
-      license_block = info.License(name=self.config["API_LICENSE_NAME"],
+      license_block = swagger.License(name=self.config["API_LICENSE_NAME"],
                                    url=self.config.get("API_LICENSE_URL"))
       info_block.license = license_block
     if self.config["API_CONTACT_NAME"]:
-      contact_block = info.Contact(name=self.config["API_CONTACT_NAME"]). \
+      contact_block = swagger.Contact(name=self.config["API_CONTACT_NAME"]). \
         email(self.config.get("API_CONTACT_EMAIL")).url(self.config.get("API_CONTACT_URL"))
       info_block.contact = contact_block
-    self.open_api = swagger.OpenApi(open_api_version=self.open_api_version,
-                                    info=info_block, servers=None)
+    self.open_api = swagger.OpenApi(open_api_version=self.open_api_version, info=info_block, servers=None)
 
   def register_path(self):
     pass
@@ -49,7 +48,7 @@ class Flask(flask.Flask, mixin.SwaggerMixin):
 
     self.swagger_init()
 
-    if isinstance(blueprint, blueprints.Blueprint):
+    if isinstance(blueprint, Blueprint):
       # custom swaggered blueprint
       pass
     super(Flask, self).register_blueprint(blueprint, **options)

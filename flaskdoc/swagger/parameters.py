@@ -2,7 +2,7 @@ import collections
 
 from enum import Enum
 
-from swagger import SwaggerBase
+from flaskdoc.swagger.core import SwaggerBase, SwaggerDict
 
 
 class ParameterLocation(Enum):
@@ -38,7 +38,7 @@ class Parameter(SwaggerBase):
 
     super(Parameter, self).__init__()
     self.name = name
-    self.location = location
+    self.location = ParameterLocation(location)
     self.description = description
     self.deprecated = deprecated
 
@@ -60,19 +60,18 @@ class Parameter(SwaggerBase):
     return self._style
 
   def as_dict(self):
-    d = collections.OrderedDict(
-      name=self.name
-    )
-    d["in"] = self.location
-    d.update(collections.OrderedDict(
-      description=self.description,
-      required=self.required,
-      deprecated=self.deprecated,
-      allowEmptyValue=self.allow_empty_value,
-      style=self.style,
-      explode=self.explode
-    ))
+    d = SwaggerDict()
+    d["name"] = self.name
+    d["in"] = self.location.value if self.location else None
+
+    d["description"] = self.description
+    d["required"] = self.required
+    d["deprecated"] = self.deprecated
+    d["allowEmptyValue"] = self.allow_empty_value
+    d["style"] = self.style.value if self.style else None
+    d["explode"] = self.explode
     d.update(super(Parameter, self).as_dict())
+    return d
 
 
 class PathParameter(Parameter):
@@ -105,3 +104,7 @@ class CookieParameter(Parameter):
   @property
   def style(self):
     return self._style or Style.FORM
+
+
+if __name__ == '__main__':
+    print(ParameterLocation("query"))

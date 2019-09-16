@@ -1,7 +1,7 @@
-from flaskdoc.swagger import base
+import swagger.core
 
 
-class Contact(base.SwaggerBase):
+class Contact(swagger.core.SwaggerBase):
 
   def __init__(self, name=None, url=None, email=None):
     super(Contact, self).__init__()
@@ -11,7 +11,7 @@ class Contact(base.SwaggerBase):
     self.url = url
 
   def as_dict(self):
-    d = base.SwaggerDict()
+    d = swagger.core.SwaggerDict()
     d["name"] = self.name
     d["url"] = self.url
     d["email"] = self.email

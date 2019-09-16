@@ -1,8 +1,8 @@
-from flaskdoc.swagger import base
-from swagger.external import ExternalDocumentation
+from flaskdoc.swagger.core import SwaggerBase, SwaggerDict
+from flaskdoc.swagger.external import ExternalDocumentation
 
 
-class Tag(base.SwaggerBase):
+class Tag(SwaggerBase):
 
   def __init__(self, name, description=None, external_doc=None):
     super(Tag, self).__init__()
@@ -14,7 +14,7 @@ class Tag(base.SwaggerBase):
     self._external_doc = ExternalDocumentation(url=url, description=description)
 
   def as_dict(self):
-    d = base.SwaggerDict()
+    d = SwaggerDict()
     d["name"] = self.name
     if self._external_doc:
       d["description"] = self._external_doc.as_dict()

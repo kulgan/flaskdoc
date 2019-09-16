@@ -1,4 +1,4 @@
-from flaskdoc.swagger import SwaggerBase
+from swagger import SwaggerBase
 
 
 class Server(SwaggerBase):

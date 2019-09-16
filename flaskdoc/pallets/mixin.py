@@ -1,7 +1,8 @@
 import collections
 import six
 
-from swagger import tag, paths
+import swagger.path.operations
+from swagger import tag, path
 
 
 class SwaggerMixin(object):
@@ -9,7 +10,7 @@ class SwaggerMixin(object):
   def __init__(self):
     # collection of path items, param is here as a placeholder
     # child classes will have their own version of this variable
-    self.api_paths = collections.OrderedDict()  # type -> dict[str, paths.PathItem]
+    self.api_paths = collections.OrderedDict()  # type -> dict[str, path.PathItem]
 
   def add_path(self, path, path_item):
     """
@@ -48,13 +49,13 @@ class SwaggerMixin(object):
     """
     Extracts operations
     Args:
-      methods (paths.Operation|list[str|path.Operation])): operations
+      methods (path.Operation|list[str|path.Operation])): operations
 
     Returns:
-      tuple list[paths.Operations], list[str]: swagger operations and flask methods
+      tuple list[path.Operations], list[str]: swagger operations and flask methods
     """
-    if isinstance(methods, paths.Operation):
+    if isinstance(methods, swagger.path.operations.Operation):
       return [methods], [methods.op_type]
-    methods = [paths.Operation.from_op(m) if isinstance(m, six.string_types) else m for m in methods]
+    methods = [swagger.path.operations.Operation.from_op(m) if isinstance(m, six.string_types) else m for m in methods]
     flask_methods = [m.op_type for m in methods]
     return methods, flask_methods

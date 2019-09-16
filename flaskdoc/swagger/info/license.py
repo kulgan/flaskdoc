@@ -1,7 +1,7 @@
-from flaskdoc.swagger import base
+import swagger.core
 
 
-class License(base.SwaggerBase):
+class License(swagger.core.SwaggerBase):
 
   def __init__(self, name, url=None):
     super(License, self).__init__()
@@ -9,7 +9,7 @@ class License(base.SwaggerBase):
     self.name = name
 
   def as_dict(self):
-    d = base.SwaggerDict()
+    d = swagger.core.SwaggerDict()
     d["name"] = self.name
     d["url"] = self.url
     d.update(super(License, self).as_dict())

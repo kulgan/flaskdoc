@@ -1,7 +1,7 @@
-from flaskdoc.swagger import base
+import swagger.core
 
 
-class Info(base.SwaggerBase):
+class Info(swagger.core.SwaggerBase):
 
   def __init__(self, title, version, description=None, terms_of_service=None,
                contact=None, license=None):
@@ -25,7 +25,7 @@ class Info(base.SwaggerBase):
     self.version = version
 
   def as_dict(self):
-    d = base.SwaggerDict()
+    d = swagger.core.SwaggerDict()
     d["title"] = self.title
     d["description"] = self.description
     d["termsOfService"] = self.terms_of_service

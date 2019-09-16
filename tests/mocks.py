@@ -1,7 +1,7 @@
 import flask
 
 import flaskdoc
-from swagger.paths import GET
+from swagger.path import GET
 from swagger.tag import Tag
 
 blp = flaskdoc.Blueprint("Dummy", __name__)

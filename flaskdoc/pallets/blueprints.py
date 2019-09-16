@@ -2,7 +2,8 @@ import collections
 
 import flask
 
-from swagger import paths, mixin
+from flaskdoc import swagger
+import mixin
 
 
 class Blueprint(flask.Blueprint, mixin.SwaggerMixin):
@@ -17,7 +18,7 @@ class Blueprint(flask.Blueprint, mixin.SwaggerMixin):
 
   def route(self, rule, ref=None, description=None, summary=None, **options):
     # tags = self.extract_tags(tags)
-    path_item = paths.PathItem(description=description, summary=summary)
+    path_item = swagger.paths.PathItem(description=description, summary=summary)
 
     methods = options.pop("methods", ["GET"])
     operations, methods = self.extract_operations(methods)
