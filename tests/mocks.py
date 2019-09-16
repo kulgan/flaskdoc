@@ -1,8 +1,8 @@
 import flask
-
-import flaskdoc
 from swagger.path import GET
 from swagger.tag import Tag
+
+import flaskdoc
 
 blp = flaskdoc.Blueprint("Dummy", __name__)
 
@@ -13,9 +13,9 @@ blp = flaskdoc.Blueprint("Dummy", __name__)
                        tags=[Tag("Pets")],
                        description="Howdy API Test"))
 def get():
-  return "Echo"
+    return "Echo"
 
 
 @blp.route("/post", tags=["post", "message"], description="Howdy for post", methods=["POST"])
 def post():
-  return flask.jsonify(dict(a="Test", message="Success")), 200
+    return flask.jsonify(dict(a="Test", message="Success")), 200

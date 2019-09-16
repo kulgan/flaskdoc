@@ -1,28 +1,28 @@
-import swagger.core
+from flaskdoc.swagger.core import SwaggerBase, SwaggerDict
 
 
-class Contact(swagger.core.SwaggerBase):
+class Contact(SwaggerBase):
 
-  def __init__(self, name=None, url=None, email=None):
-    super(Contact, self).__init__()
+    def __init__(self, name=None, url=None, email=None):
+        super(Contact, self).__init__()
 
-    self.email = email
-    self.name = name
-    self.url = url
+        self.email = email
+        self.name = name
+        self.url = url
 
-  def as_dict(self):
-    d = swagger.core.SwaggerDict()
-    d["name"] = self.name
-    d["url"] = self.url
-    d["email"] = self.email
-    d.update(super(Contact, self).as_dict())
-    return d
+    def as_dict(self):
+        d = SwaggerDict()
+        d["name"] = self.name
+        d["url"] = self.url
+        d["email"] = self.email
+        d.update(super(Contact, self).as_dict())
+        return d
 
-  def __eq__(self, other):
-    if not isinstance(other, Contact):
-      return False
-    return self.name == other.name and self.url == other.url and \
-           self.email == other.email and self._extensions == other._extensions
+    def __eq__(self, other):
+        if not isinstance(other, Contact):
+            return False
+        return self.name == other.name and self.url == other.url and \
+               self.email == other.email and self._extensions == other._extensions
 
-  def __hash__(self):
-    return hash((self.url, self.email, self.name, self._extensions))
+    def __hash__(self):
+        return hash((self.url, self.email, self.name, self._extensions))
