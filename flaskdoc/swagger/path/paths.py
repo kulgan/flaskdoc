@@ -49,7 +49,7 @@ class PathItem(SwaggerBase):
         self.summary = summary
         self.description = description
 
-        self.servers = []
+        self.servers = set()
 
         self.get = None  # type -> Operation
         self.delete = None  # type -> Operation
@@ -68,6 +68,9 @@ class PathItem(SwaggerBase):
         """
         http_method = operation.http_method.value.lower()
         setattr(self, http_method, operation)
+
+    def add_server(self, server):
+        self.servers.add(server)
 
     def append_path_item(self, path_item):
         pass
@@ -88,8 +91,14 @@ class PathItem(SwaggerBase):
         d["patch"] = self.patch.as_dict() if self.patch else None
         d["trace"] = self.trace.as_dict() if self.trace else None
 
-        d["servers"] = []
+        d["servers"] = self.servers
+
+        # TODO
         d["parameters"] = []
 
         d.update(super(PathItem, self).as_dict())
         return d
+
+
+class Callback(PathItem):
+    pass

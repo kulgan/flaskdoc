@@ -49,12 +49,13 @@ class SwaggerBase(object):
 
 class OpenApi(SwaggerBase):
 
-    def __init__(self, open_api_version, info, servers):
+    def __init__(self, open_api_version, info, paths):
         """
         OpenApi specs tree, contains the overall specs for the API
         Args:
             open_api_version (str): Open API version used by API
             info (flaskdoc.swagger.info.Info): open api info object
+            paths (flaskdoc.swagger.path.Paths): Paths definitions
         """
         super(OpenApi, self).__init__()
 
@@ -63,7 +64,13 @@ class OpenApi(SwaggerBase):
 
         # TODO disallow duplicates
         self.tags = []  # type -> swagger.tag.Tag
-        self.paths = None  # type -> swagger.path.Paths
+        self.paths = paths  # type -> swagger.path.Paths
+        self.servers = set()
+
+        self.components = None
+        self.security = []
+
+        self.external_docs = None
 
     def add_tag(self, tag):
         """
@@ -73,14 +80,19 @@ class OpenApi(SwaggerBase):
         """
         self.tags.append(tag)
 
+    def add_server(self, server):
+        self.servers.add(server)
+
     def as_dict(self):
         d = SwaggerDict()
         d["openapi"] = self.open_api
         d["info"] = self.info.as_dict()
+        d["servers"] = [s.as_dict() for s in self.servers] if self.servers else None
         d["paths"] = self.paths.as_dict()
-
-        if self.tags:
-            d["tags"] = [tag.as_dict() for tag in self.tags]
+        d["components"] = self.components
+        d["security"] = [s.as_dict() for s in self.security] if self.security else None
+        d["tags"] = [tag.as_dict() for tag in self.tags] if self.tags else None
+        d["externalDocs"] = self.external_docs
 
         d.update(super(OpenApi, self).as_dict())
         return d

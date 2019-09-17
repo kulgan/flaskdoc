@@ -33,18 +33,18 @@ class Parameter(SwaggerBase):
                  schema=None):
         super(Parameter, self).__init__()
         self.name = name
-        self.location = ParameterLocation(location)
+        self.location = location if isinstance(location, ParameterLocation) else ParameterLocation(location)
         self.description = description
         self.deprecated = deprecated
 
         self.allow_empty_value = allow_empty_value
         self.allowReserved = allow_reserved
         self.schema = schema
-        self.content = {}
+        self.content = None
 
         self.explode = explode
         self._required = required
-        self._style = style
+        self._style = style if isinstance(style, Style) else Style(style)
 
     @property
     def required(self):
@@ -65,6 +65,7 @@ class Parameter(SwaggerBase):
         d["allowEmptyValue"] = self.allow_empty_value
         d["style"] = self.style.value if self.style else None
         d["explode"] = self.explode
+        d["content"] = self.content.as_dict() if self.content else None
         d.update(super(Parameter, self).as_dict())
         return d
 

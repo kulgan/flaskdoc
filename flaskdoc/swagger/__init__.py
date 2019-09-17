@@ -1,8 +1,12 @@
-from flaskdoc.swagger.core import OpenApi, SwaggerDict, SwaggerBase
-from flaskdoc.swagger.info.contact import *
-from flaskdoc.swagger.info.info import *
-from flaskdoc.swagger.info.license import *
-from flaskdoc.swagger.parameters import *
-from flaskdoc.swagger.path.operations import *
-from flaskdoc.swagger.path.paths import *
-from flaskdoc.swagger.tag import *
+from flaskdoc.swagger.component import Component
+from flaskdoc.swagger.core import SwaggerDict, SwaggerBase, OpenApi
+from flaskdoc.swagger.info.contact import Contact
+from flaskdoc.swagger.info.info import Info
+from flaskdoc.swagger.info.license import License
+from flaskdoc.swagger.parameters import CookieParameter, HeaderParameter, Parameter, ParameterLocation, PathParameter, \
+    Style, QueryParameter
+from flaskdoc.swagger.path.operations import Operation
+from flaskdoc.swagger.path.operations import GET, HEAD, OPTIONS, PATCH, POST, PUT, TRACE
+from flaskdoc.swagger.path.paths import HttpMethod, PathItem, Paths
+from flaskdoc.swagger.server import Server, ServerVariable
+from flaskdoc.swagger.tag import Tag
