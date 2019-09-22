@@ -15,22 +15,25 @@ class HttpMethod(enum.Enum):
 
 
 class Paths(SwaggerBase):
-    """ Paths collection used internally to aggregate all current path """
+    """
+    Holds the relative paths to the individual endpoints and their operations. The path is appended to the URL
+    from the Server Object in order to construct the full URL. The Paths MAY be empty, due to ACL constraints.
+    """
 
     def __init__(self, path_items=None):
         super(Paths, self).__init__()
         self._items = path_items
 
-    def add_path_item(self, name, path_item):
+    def add_path_item(self, relative_url, path_item):
         """
         Adds a path item
         Args:
-          name (str): path url name, eg `/echo`
+          relative_url (str): path url name, eg `/echo`
           path_item (PathItem) : PathItem instance describing the path
         """
         if not self._items:
             self._items = SwaggerDict()
-        self._items[name] = path_item
+        self._items[relative_url] = path_item
 
     def as_dict(self):
         d = SwaggerDict()
@@ -41,6 +44,11 @@ class Paths(SwaggerBase):
 
 
 class PathItem(SwaggerBase):
+    """
+    Describes the operations available on a single path. A Path Item MAY be empty, due to ACL constraints. The
+    path itself is still exposed to the documentation viewer but they will not know which operations and parameters
+    are available.
+    """
 
     def __init__(self, ref=None, summary=None, description=None):
         super(PathItem, self).__init__()
@@ -50,6 +58,7 @@ class PathItem(SwaggerBase):
         self.description = description
 
         self.servers = set()
+        self.parameters = set()
 
         self.get = None  # type -> Operation
         self.delete = None  # type -> Operation
@@ -72,13 +81,9 @@ class PathItem(SwaggerBase):
     def add_server(self, server):
         self.servers.add(server)
 
-    def append_path_item(self, path_item):
-        pass
-
     def as_dict(self):
         d = SwaggerDict()
-        if self.ref:
-            d["$ref"] = self.ref
+        d["$ref"] = self.ref
         d["summary"] = self.summary
         d["description"] = self.description
 
@@ -91,7 +96,7 @@ class PathItem(SwaggerBase):
         d["patch"] = self.patch.as_dict() if self.patch else None
         d["trace"] = self.trace.as_dict() if self.trace else None
 
-        d["servers"] = self.servers
+        d["servers"] = [s.as_dict() for s in self.servers] if self.servers else None
 
         # TODO
         d["parameters"] = []

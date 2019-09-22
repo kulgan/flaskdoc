@@ -48,8 +48,9 @@ class SwaggerBase(object):
 
 
 class OpenApi(SwaggerBase):
+    """ This is the root document object of the OpenAPI document. """
 
-    def __init__(self, open_api_version, info, paths):
+    def __init__(self, info, paths, open_api_version="3.0.2"):
         """
         OpenApi specs tree, contains the overall specs for the API
         Args:

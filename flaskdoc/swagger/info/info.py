@@ -2,6 +2,10 @@ from flaskdoc.swagger.core import SwaggerBase, SwaggerDict
 
 
 class Info(SwaggerBase):
+    """
+    The object provides metadata about the API. The metadata MAY be used by the clients if needed, and MAY be
+    presented in editing or documentation generation tools for convenience.
+    """
 
     def __init__(self, title, version, description=None, terms_of_service=None,
                  contact=None, license=None):

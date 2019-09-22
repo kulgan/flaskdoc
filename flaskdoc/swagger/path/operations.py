@@ -3,6 +3,7 @@ from flaskdoc.swagger.path import paths
 
 
 class Operation(SwaggerBase):
+    """ Describes a single API operation on a path. """
 
     def __init__(self, tags=None, summary=None,
                  description=None, operations_id=None):
@@ -40,7 +41,7 @@ class Operation(SwaggerBase):
         d["description"] = self.description
         d["externalDocs"] = self.external_docs.as_dict() if self.external_docs else None
         d["operationId"] = self.operation_id
-        d["parameters"] = [p.as_dict() for p in self.parameters] if self.parameters else []
+        d["parameters"] = [p.as_dict() for p in self.parameters] if self.parameters else None
         d["requestBody"] = self.request_body.as_dict() if self.request_body else None
         d["responses"] = self.responses.as_dict() if self.responses else None
         d["callbacks"] = {k: v.as_dict() for k,v in self.callbacks.items()}

@@ -17,7 +17,7 @@ class Blueprint(flask.Blueprint, mixin.SwaggerMixin):
 
     def route(self, rule, ref=None, description=None, summary=None, **options):
         # tags = self.extract_tags(tags)
-        path_item = swagger.paths.PathItem(description=description, summary=summary)
+        path_item = swagger.PathItem(ref=ref, description=description, summary=summary)
 
         methods = options.pop("methods", ["GET"])
         operations, methods = self.extract_operations(methods)

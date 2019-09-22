@@ -11,6 +11,8 @@ class ParameterLocation(Enum):
 
 
 class Style(Enum):
+    """ Style values defined to aid serializing different simple parameters """
+
     FORM = "form"
     LABEL = "label"
     MATRIX = "matrix"
@@ -21,24 +23,28 @@ class Style(Enum):
 
 
 class Parameter(SwaggerBase):
+    """
+    Describes a single operation parameter.
+    A unique parameter is defined by a combination of a name and location.
+    """
 
-    def __init__(self, name, location,
+    def __init__(self, name, location="query",
                  required=False,
                  description=None,
                  deprecated=False,
-                 style=None,
+                 style="form",
                  allow_empty_value=False,
                  explode=False,
                  allow_reserved=False,
                  schema=None):
         super(Parameter, self).__init__()
         self.name = name
-        self.location = location if isinstance(location, ParameterLocation) else ParameterLocation(location)
+        self.location = ParameterLocation(location)
         self.description = description
         self.deprecated = deprecated
 
         self.allow_empty_value = allow_empty_value
-        self.allowReserved = allow_reserved
+        self.allow_reserved = allow_reserved
         self.schema = schema
         self.content = None
 
@@ -65,6 +71,10 @@ class Parameter(SwaggerBase):
         d["allowEmptyValue"] = self.allow_empty_value
         d["style"] = self.style.value if self.style else None
         d["explode"] = self.explode
+        d["allowReserved"] = self.allow_reserved
+        d["schema"] = self.schema.as_dict() if self.schema else None
+        d["example"] = None
+        d["examples"] = {}
         d["content"] = self.content.as_dict() if self.content else None
         d.update(super(Parameter, self).as_dict())
         return d
@@ -100,6 +110,22 @@ class CookieParameter(Parameter):
     @property
     def style(self):
         return self._style or Style.FORM
+
+
+class RequestBody(SwaggerBase):
+    """ Describes a single request body. """
+
+    def __init__(self, content, description=None, required=False):
+        super(RequestBody, self).__init__()
+        self.required = required
+        self.description = description
+        self.content = content
+
+    def as_dict(self):
+        d = SwaggerDict()
+        d["description"] = self.description
+        d["content"] = self.content.as_dict() if self.content else None
+        d["required"] = self.required
 
 
 if __name__ == '__main__':
