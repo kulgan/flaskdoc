@@ -8,14 +8,20 @@ blp = flaskdoc.Blueprint("Dummy", __name__)
 
 
 @blp.route("/echo",
+           ref="Simplistic",
            description="Test API Summary",
            methods=GET(summary="TEST",
-                       tags=[Tag("Pets")],
+                       tags=["Pets", "Snakes"],
                        description="Howdy API Test"))
 def get():
+    """
+    Sample GET request
+    Returns:
+
+    """
     return "Echo"
 
 
-@blp.route("/post", description="Howdy for post", methods=["POST"])
+@blp.route("/post", ref="Sponsors Cove", description="Howdy for post", methods=["GET"])
 def post():
     return flask.jsonify(dict(a="Test", message="Success")), 200

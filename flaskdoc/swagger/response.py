@@ -25,7 +25,7 @@ class ResponsesObject(SwaggerBase):
         d["default"] = self.default.as_dict() if self.default else None
         for code, response in self.responses.items():
             d[code] = response.as_dict() if response else None
-        d.update(super(ResponsesObject, self).as_dict())
+        # d.update(super(ResponsesObject, self).as_dict())
 
         return d
 

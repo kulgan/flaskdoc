@@ -30,9 +30,31 @@ class Operation(SwaggerBase):
 
     @staticmethod
     def from_op(http_method):
+        """
+        Factory for creating instances of Http Operations
+        Args:
+            http_method (str): http method string
+
+        Returns:
+            Operation:
+        """
+        http_method = paths.HttpMethod(http_method)
         if http_method == paths.HttpMethod.GET:
             return GET()
-        return None
+        elif http_method == paths.HttpMethod.POST:
+            return POST()
+        elif http_method == paths.HttpMethod.PUT:
+            return PUT()
+        elif http_method == paths.HttpMethod.DELETE:
+            return DELETE()
+        elif http_method == paths.HttpMethod.OPTIONS:
+            return OPTIONS()
+        elif http_method == paths.HttpMethod.TRACE:
+            return TRACE()
+        elif http_method == paths.HttpMethod.PATCH:
+            return PATCH()
+        elif http_method == paths.HttpMethod.HEAD:
+            return HEAD()
 
 
 class GET(Operation):
@@ -82,3 +104,10 @@ class TRACE(Operation):
     @property
     def http_method(self):
         return paths.HttpMethod.TRACE
+
+
+class DELETE(Operation):
+
+    @property
+    def http_method(self):
+        return paths.HttpMethod.DELETE

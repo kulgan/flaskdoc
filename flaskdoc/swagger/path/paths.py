@@ -24,18 +24,29 @@ class Paths(SwaggerBase):
 
     def __init__(self):
         super(Paths, self).__init__()
-        self.items = None
+        self.items = SwaggerDict()
+
+    def __iter__(self):
+        for relative_url in self.items:
+            yield relative_url
 
     def add_path_item(self, relative_url, path_item):
         """
         Adds a path item
         Args:
           relative_url (str): path url name, eg `/echo`
-          path_item (PathItem) : PathItem instance describing the path
+          path_item (PathItem|SwaggerDict) : PathItem instance describing the path
         """
+
+        if isinstance(path_item, PathItem):
+            path_item = path_item.as_dict()
+
         if not self.items:
             self.items = SwaggerDict()
-        self.items[relative_url] = path_item.as_dict()
+        self.items[relative_url] = path_item
+
+    def path_item(self, relative_url):
+        return self.items.get(relative_url)
 
     def as_dict(self):
         return self.items or {}
@@ -88,6 +99,27 @@ class PathItem(SwaggerBase):
     def add_parameter(self, parameter):
         self.parameters.add(parameter)
 
+    def merge_path_item(self, path_item):
+        """
+        Merges another path item into this on
+        Args:
+            path_item (PathItem): PathItem instance to merge
+        """
+        for server in path_item.servers:
+            self.add_server(server)
+
+        for param in path_item.parameters:
+            self.add_parameter(param)
+
+        self.get = path_item.get or self.get
+        self.post = path_item.post or self.post
+        self.put = path_item.put or self.put
+        self.delete = path_item.delete or self.delete
+        self.head = path_item.head or self.head
+        self.trace = path_item.trace or self.trace
+        self.patch = path_item.patch or self.patch
+        self.options = path_item.options or self.options
+
 
 class Callback(PathItem):
     """
@@ -110,4 +142,7 @@ if __name__ == '__main__':
     pi.get = get
     ps = Paths()
     ps.add_path_item("/echo", pi)
-    print(ps)
+    # print(ps)
+
+    h = HttpMethod("GETs")
+    print(h)

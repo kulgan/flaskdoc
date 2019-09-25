@@ -1,7 +1,7 @@
 import collections
 import six
 
-from flaskdoc.swagger import Operation, Tag
+from flaskdoc.swagger import Operation, Paths, Tag
 
 
 class SwaggerMixin(object):
@@ -9,7 +9,7 @@ class SwaggerMixin(object):
     def __init__(self):
         # collection of path items, param is here as a placeholder
         # child classes will have their own version of this variable
-        self.api_paths = collections.OrderedDict()  # type -> dict[str, path.PathItem]
+        self._paths = Paths()
 
     def add_path(self, relative_path, path_item):
         """
@@ -19,10 +19,11 @@ class SwaggerMixin(object):
           path_item (swagger.PathItem):
         """
         relative_path = self.extract_path(relative_path)
-        item = self.api_paths.get(relative_path)
-        if not item:
-            self.api_paths[relative_path] = path_item
-        # item.append_path_item(path_item)
+        recorded_path_item = self._paths.path_item(relative_path)
+        if recorded_path_item:
+            recorded_path_item.merge(path_item)
+        else:
+            self._paths.add_path_item(relative_path, path_item)
 
     @staticmethod
     def extract_path(path):
@@ -54,8 +55,12 @@ class SwaggerMixin(object):
           tuple list[swagger.Operations], list[str]: swagger operations and flask methods
         """
         if isinstance(methods, Operation):
-            return [methods], [methods.http_method]
+            return [methods], [methods.http_method.value]
         methods = [Operation.from_op(m) if isinstance(m, six.string_types) else m for m in
                    methods]
-        flask_methods = [m.http_method for m in methods]
+        flask_methods = [m.http_method.value for m in methods]
         return methods, flask_methods
+
+    @property
+    def paths(self):
+        return self._paths

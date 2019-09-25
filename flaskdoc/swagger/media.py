@@ -26,10 +26,10 @@ class MediaType(SwaggerBase):
         self.examples = {}
         self.encoding = {}
 
-    def add_exmple(self, name, example):
+    def add_example(self, name, example):
         self.examples[name] = example
 
-    def add_eencoding(self, name, encoding):
+    def add_encoding(self, name, encoding):
         self.encoding[name] = encoding
 
 
@@ -85,20 +85,7 @@ class Header(SwaggerBase):
 
     @property
     def style(self):
-        return self._style
-
-    def as_dict(self):
-        d = SwaggerDict()
-        d["description"] = self.description
-        d["required"] = self.required
-        d["deprecated"] = self.deprecated
-        d["allowEmptyValue"] = self.allow_empty_value
-        d["style"] = self.style.value if self.style else None
-        d["explode"] = self.explode
-        d["allowReserved"] = self.allow_reserved
-        d["content"] = self.content.as_dict() if self.content else None
-        d.update(super(Header, self).as_dict())
-        return d
+        return self._style.value
 
 
 class ExternalDocumentation(SwaggerBase):

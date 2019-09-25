@@ -48,7 +48,6 @@ class SwaggerBase(object):
     def as_dict(self):
         d = SwaggerDict()
         for key, val in vars(self).items():
-
             # skip extensions
             if key == "_extensions":
                 continue
@@ -90,7 +89,7 @@ class OpenApi(SwaggerBase):
         """
         super(OpenApi, self).__init__()
 
-        self.open_api = open_api_version
+        self.openapi = open_api_version
         self.info = info
 
         # TODO disallow duplicates
@@ -114,19 +113,17 @@ class OpenApi(SwaggerBase):
     def add_server(self, server):
         self.servers.add(server)
 
-    def as_dict(self):
-        d = SwaggerDict()
-        d["openapi"] = self.open_api
-        d["info"] = self.info.as_dict()
-        d["servers"] = [s.as_dict() for s in self.servers] if self.servers else None
-        d["paths"] = self.paths.as_dict()
-        d["components"] = self.components
-        d["security"] = [s.as_dict() for s in self.security] if self.security else None
-        d["tags"] = [tag.as_dict() for tag in self.tags] if self.tags else None
-        d["externalDocs"] = self.external_docs
+    def add_paths(self, paths):
+        """
+        Updates paths to include all paths in `paths`
+        Args:
+            paths:
 
-        d.update(super(OpenApi, self).as_dict())
-        return d
+        Returns:
+
+        """
+        for r_url in paths:
+            self.paths.add_path_item(r_url, paths.path_item(r_url))
 
 
 class SwaggerDict(OrderedDict):
