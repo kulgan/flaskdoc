@@ -1,6 +1,8 @@
 import enum
-
+import operations
 from flaskdoc.swagger.core import SwaggerBase, SwaggerDict
+from flaskdoc.swagger.parameters import QueryParameter
+from flaskdoc.swagger.server import Server
 
 
 class HttpMethod(enum.Enum):
@@ -20,9 +22,9 @@ class Paths(SwaggerBase):
     from the Server Object in order to construct the full URL. The Paths MAY be empty, due to ACL constraints.
     """
 
-    def __init__(self, path_items=None):
+    def __init__(self):
         super(Paths, self).__init__()
-        self._items = path_items
+        self.items = None
 
     def add_path_item(self, relative_url, path_item):
         """
@@ -31,16 +33,12 @@ class Paths(SwaggerBase):
           relative_url (str): path url name, eg `/echo`
           path_item (PathItem) : PathItem instance describing the path
         """
-        if not self._items:
-            self._items = SwaggerDict()
-        self._items[relative_url] = path_item
+        if not self.items:
+            self.items = SwaggerDict()
+        self.items[relative_url] = path_item.as_dict()
 
     def as_dict(self):
-        d = SwaggerDict()
-        for k, v in self._items.items():
-            d[k] = v.as_dict()
-        d.update(super(Paths, self).as_dict())
-        return d
+        return self.items or {}
 
 
 class PathItem(SwaggerBase):
@@ -73,37 +71,43 @@ class PathItem(SwaggerBase):
         """
         Adds an operation
         Args:
-          operation (swagger.paths.Operation): operation to add
+          operation (swagger.path.operations.Operation): operation to add
         """
         http_method = operation.http_method.value.lower()
         setattr(self, http_method, operation)
 
     def add_server(self, server):
+        """
+        Adds an alternative server to service all operations in this path.
+
+        Args:
+            server (swagger.server.Serverr): alternative server to add
+        """
         self.servers.add(server)
 
-    def as_dict(self):
-        d = SwaggerDict()
-        d["$ref"] = self.ref
-        d["summary"] = self.summary
-        d["description"] = self.description
-
-        d["get"] = self.get.as_dict() if self.get else None
-        d["put"] = self.put.as_dict() if self.put else None
-        d["post"] = self.post.as_dict() if self.post else None
-        d["delete"] = self.delete.as_dict() if self.delete else None
-        d["options"] = self.options.as_dict() if self.options else None
-        d["head"] = self.head.as_dict() if self.head else None
-        d["patch"] = self.patch.as_dict() if self.patch else None
-        d["trace"] = self.trace.as_dict() if self.trace else None
-
-        d["servers"] = [s.as_dict() for s in self.servers] if self.servers else None
-
-        # TODO
-        d["parameters"] = []
-
-        d.update(super(PathItem, self).as_dict())
-        return d
+    def add_parameter(self, parameter):
+        self.parameters.add(parameter)
 
 
 class Callback(PathItem):
-    pass
+    """
+    A map of possible out-of band callbacks related to the parent operation. Each value in the map is a Path Item
+    Object that describes a set of requests that may be initiated by the API provider and the expected responses. The
+    key value used to identify the callback object is an expression, evaluated at runtime, that identifies a URL to
+    use for the callback operation.
+    """
+
+
+if __name__ == '__main__':
+    pi = PathItem(ref="hello", summary="Summarixe this")
+    s1 = Server(description="Server Man", url="https://dd.web.com")
+    pi.add_server(s1)
+
+    get = operations.GET(tags=["test"], summary="Yinyi de no sou", description="Kemi mi")
+    get.operation_id = "getByExample"
+    pr = QueryParameter(name="age", description="Just some shit")
+    get.add_parameter(pr)
+    pi.get = get
+    ps = Paths()
+    ps.add_path_item("/echo", pi)
+    print(ps)

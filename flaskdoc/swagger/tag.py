@@ -1,5 +1,5 @@
 from flaskdoc.swagger.core import SwaggerBase, SwaggerDict
-from flaskdoc.swagger.external import ExternalDocumentation
+from flaskdoc.swagger.media import ExternalDocumentation
 
 
 class Tag(SwaggerBase):

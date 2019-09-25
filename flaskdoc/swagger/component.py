@@ -20,17 +20,8 @@ class Component(SwaggerBase):
         self.links = {}
         self.callbacks = {}
 
-    def as_dict(self):
-        d = SwaggerDict()
-        d["schemas"] = self.schemas
-        d["responses"] = self.responses
-        d["parameters"] = self.parameters
-        d["examples"] = self.examples
-        d["requestBodies"] = self.request_bodies
-        d["headers"] = self.headers
-        d["securitySchemes"] = self.security_schemes
-        d["links"] = self.links
-        d["callbacks"] = self.callbacks
+    def add_schema(self, schema_name, schema):
+        self.schemas[schema_name] = schema.as_dict()
 
-        d.update(super(Component, self).as_dict())
-        return d
+    def add_response(self, response_name, response):
+        self.responses[response_name] = response.as_dict()

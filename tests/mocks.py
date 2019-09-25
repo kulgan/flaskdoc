@@ -1,6 +1,6 @@
 import flask
-from swagger.path import GET
-from swagger.tag import Tag
+from swagger import GET
+from swagger import Tag
 
 import flaskdoc
 
@@ -16,6 +16,6 @@ def get():
     return "Echo"
 
 
-@blp.route("/post", tags=["post", "message"], description="Howdy for post", methods=["POST"])
+@blp.route("/post", description="Howdy for post", methods=["POST"])
 def post():
     return flask.jsonify(dict(a="Test", message="Success")), 200

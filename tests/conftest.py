@@ -13,7 +13,7 @@ class AppConfig(object):
     API_CONTACT_URL = "http://www.example.com/rogwa"
 
 
-@pytest.fixture(params=[AppConfig])
+# @pytest.fixture(params=[AppConfig])
 def app(request):
     _app = flaskdoc.Flask("Test API", version="1.0")
     _app.config.from_config(request.param)

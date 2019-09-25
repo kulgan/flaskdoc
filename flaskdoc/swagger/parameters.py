@@ -39,7 +39,7 @@ class Parameter(SwaggerBase):
                  schema=None):
         super(Parameter, self).__init__()
         self.name = name
-        self.location = ParameterLocation(location)
+        self._location = ParameterLocation(location)
         self.description = description
         self.deprecated = deprecated
 
@@ -52,6 +52,9 @@ class Parameter(SwaggerBase):
         self._required = required
         self._style = style if isinstance(style, Style) else Style(style)
 
+        self.example = None
+        self.examples = None
+
     @property
     def required(self):
         return self._required
@@ -60,24 +63,9 @@ class Parameter(SwaggerBase):
     def style(self):
         return self._style
 
-    def as_dict(self):
-        d = SwaggerDict()
-        d["name"] = self.name
-        d["in"] = self.location.value if self.location else None
-
-        d["description"] = self.description
-        d["required"] = self.required
-        d["deprecated"] = self.deprecated
-        d["allowEmptyValue"] = self.allow_empty_value
-        d["style"] = self.style.value if self.style else None
-        d["explode"] = self.explode
-        d["allowReserved"] = self.allow_reserved
-        d["schema"] = self.schema.as_dict() if self.schema else None
-        d["example"] = None
-        d["examples"] = {}
-        d["content"] = self.content.as_dict() if self.content else None
-        d.update(super(Parameter, self).as_dict())
-        return d
+    @property
+    def location(self):
+        return self._location.value
 
 
 class PathParameter(Parameter):
@@ -88,28 +76,28 @@ class PathParameter(Parameter):
 
     @property
     def style(self):
-        return self._style or Style.SIMPLE
+        return self._style.value or Style.SIMPLE.value
 
 
 class QueryParameter(Parameter):
 
     @property
     def style(self):
-        return self._style or Style.FORM
+        return self._style.valaue or Style.FORM.value
 
 
 class HeaderParameter(Parameter):
 
     @property
     def style(self):
-        return self._style or Style.SIMPLE
+        return self._style.value or Style.SIMPLE.value
 
 
 class CookieParameter(Parameter):
 
     @property
     def style(self):
-        return self._style or Style.FORM
+        return self._style.value or Style.FORM.value
 
 
 class RequestBody(SwaggerBase):
@@ -120,13 +108,3 @@ class RequestBody(SwaggerBase):
         self.required = required
         self.description = description
         self.content = content
-
-    def as_dict(self):
-        d = SwaggerDict()
-        d["description"] = self.description
-        d["content"] = self.content.as_dict() if self.content else None
-        d["required"] = self.required
-
-
-if __name__ == '__main__':
-    print(ParameterLocation("query"))

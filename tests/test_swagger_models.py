@@ -20,5 +20,4 @@ if __name__ == '__main__':
     path.add_path_item("/echo", item)
     api = swagger.OpenApi("3.0.2", _info, None)
     api.paths = path
-    api.add_tag(swagger.Tag(name="test", description="test tag"))
     print(api)

@@ -1,4 +1,5 @@
 from flaskdoc.swagger.core import SwaggerBase, SwaggerDict
+from flaskdoc.swagger.media import Content
 
 
 class ResponsesObject(SwaggerBase):
@@ -41,3 +42,14 @@ class ResponseObject(SwaggerBase):
         self.headers = {}
         self.content = None
         self.links = None
+
+    def add_header(self, name, header):
+        self.headers[name] = header
+
+    def add_content(self, media_type, content):
+        if not self.content:
+            self.content = Content()
+        self.content.add_media_type(media_type, content)
+
+    def add_linik(self, link_name, link):
+        pass

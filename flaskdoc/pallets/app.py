@@ -33,7 +33,7 @@ class Flask(flask.Flask, SwaggerMixin):
             contact_block = swagger.Contact(name=self.config["API_CONTACT_NAME"]). \
                 email(self.config.get("API_CONTACT_EMAIL")).url(self.config.get("API_CONTACT_URL"))
             info_block.contact = contact_block
-        self.open_api = swagger.OpenApi(open_api_version=self.open_api_version, info=info_block, servers=None)
+        self.open_api = swagger.OpenApi(open_api_version=self.open_api_version, info=info_block)
 
     def register_path(self):
         pass

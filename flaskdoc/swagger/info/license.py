@@ -1,4 +1,4 @@
-from flaskdoc.swagger.core import SwaggerBase, SwaggerDict
+from flaskdoc.swagger.core import SwaggerBase
 
 
 class License(SwaggerBase):
@@ -8,13 +8,6 @@ class License(SwaggerBase):
         super(License, self).__init__()
         self.url = url
         self.name = name
-
-    def as_dict(self):
-        d = SwaggerDict()
-        d["name"] = self.name
-        d["url"] = self.url
-        d.update(super(License, self).as_dict())
-        return d
 
     def __eq__(self, other):
         if not isinstance(other, License):

@@ -1,4 +1,4 @@
-from flaskdoc.swagger.core import SwaggerBase, SwaggerDict
+from flaskdoc.swagger.core import SwaggerBase
 
 
 class Info(SwaggerBase):
@@ -27,19 +27,6 @@ class Info(SwaggerBase):
         self.contact = contact
         self.license = license
         self.version = version
-
-    def as_dict(self):
-        d = SwaggerDict()
-        d["title"] = self.title
-        d["description"] = self.description
-        d["termsOfService"] = self.terms_of_service
-        if self.contact:
-            d["contact"] = self.contact.as_dict()
-        if self.license:
-            d["license"] = self.license.as_dict()
-        d["version"] = self.version
-        d.update(super(Info, self).as_dict())
-        return d
 
     def __eq__(self, other):
         if not isinstance(other, Info):

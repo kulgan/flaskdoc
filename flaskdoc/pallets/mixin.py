@@ -22,7 +22,7 @@ class SwaggerMixin(object):
         item = self.api_paths.get(relative_path)
         if not item:
             self.api_paths[relative_path] = path_item
-        item.appen_path_item(path_item)
+        # item.append_path_item(path_item)
 
     @staticmethod
     def extract_path(path):

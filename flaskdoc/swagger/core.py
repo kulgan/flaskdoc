@@ -40,8 +40,38 @@ class SwaggerBase(object):
         if not (name and name.startswith("x-")):
             raise ValueError("Custom extension must start with x-")
 
+    @staticmethod
+    def camel_case(snake_case):
+        cpnts = snake_case.split("_")
+        return cpnts[0] + ''.join(x.title() for x in cpnts[1:])
+
     def as_dict(self):
-        return self._extensions or {}
+        d = SwaggerDict()
+        for key, val in vars(self).items():
+
+            # skip extensions
+            if key == "_extensions":
+                continue
+
+            if key.startswith("_"):
+                key = key[1:]
+                val = getattr(self, key, None)
+
+            # map ref
+            if key == "ref":
+                key = "$ref"
+
+            if isinstance(val, SwaggerBase):
+                val = val.as_dict()
+
+            if isinstance(val, (set, list)):
+                val = [v.as_dict() if isinstance(v, SwaggerBase) else v for v in val]
+
+            d[self.camel_case(key)] = val
+
+        if self._extensions:
+            d.update(self._extensions)
+        return d
 
     def __repr__(self):
         return json.dumps(self.as_dict(), indent=2)
