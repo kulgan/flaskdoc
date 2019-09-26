@@ -14,16 +14,23 @@ class Blueprint(flask.Blueprint, mixin.SwaggerMixin):
                                         url_prefix=url_prefix, subdomain=subdomain, url_defaults=url_defaults)
         self._paths = swagger.Paths()
 
-    def route(self, rule, ref=None, description=None, summary=None, **options):
-        """ Extends flask blueprint route """
-        path_item = swagger.PathItem(ref=ref, description=description, summary=summary)
-        methods = options.pop("methods", ["GET"])
-        operations, methods = self.extract_operations(methods)
-        for operation in operations:
-            path_item.add_operation(operation=operation)
+    def route(self, rule, ref=None, description=None, summary=None, servers=None, parameters=None, **options):
+        """
+        Extends flask blueprint route
+        Args:
+            rule (str): rule name
+            ref (str): Allows for an external definition of this path item.
+            description (str): An optional, string description, intended to apply to all operations in this path.
+            summary (str): An optional, string summary, intended to apply to all operations in this path.
+            servers (List[swagger.Server]): server list
+            parameters (List[swagger.Parameter]): list of parameters
+            **options:
 
-        self.add_path(rule, path_item)
-        options.update({"methods": methods})
+        Returns:
+            callback:
+        """
+
+        options = self.parse_route(rule, ref, description, summary, **options)
 
         def decorator(f):
 
@@ -32,3 +39,4 @@ class Blueprint(flask.Blueprint, mixin.SwaggerMixin):
             return f
 
         return decorator
+

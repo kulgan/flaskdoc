@@ -59,15 +59,15 @@ class PathItem(SwaggerBase):
     are available.
     """
 
-    def __init__(self, ref=None, summary=None, description=None):
+    def __init__(self, ref=None, summary=None, description=None, parameters=None, servers=None):
         super(PathItem, self).__init__()
 
         self.ref = ref
         self.summary = summary
         self.description = description
 
-        self.servers = set()
-        self.parameters = set()
+        self.servers = servers
+        self.parameters = parameters
 
         self.get = None  # type -> Operation
         self.delete = None  # type -> Operation

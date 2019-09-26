@@ -6,14 +6,14 @@ class Operation(SwaggerBase):
     """ Describes a single API operation on a path. """
 
     def __init__(self, tags=None, summary=None,
-                 description=None, operations_id=None):
+                 description=None, operations_id=None, parameters=None):
         super(Operation, self).__init__()
         self.tags = tags or []  # type -> List[str]
         self.summary = summary
         self.description = description
         self.external_docs = None
         self.operation_id = operations_id
-        self.parameters = []
+        self.parameters = parameters
         self.request_body = None
         self.responses = None
         self.callbacks = {}

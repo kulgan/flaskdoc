@@ -22,17 +22,17 @@ class Flask(flask.Flask, SwaggerMixin):
         self.api_title = api_title
         self.api_version = version
 
-    def swagger_init(self):
+    def init_swagger(self):
         # only initialize once
         if self._doc:
             return
 
         info_block = swagger.Info(title=self.api_title, version=self.api_version)
-        if self.config["API_LICENSE_NAME"]:
+        if "API_LICENSE_NAME" in self.config:
             license_block = swagger.License(name=self.config["API_LICENSE_NAME"],
                                             url=self.config.get("API_LICENSE_URL"))
             info_block.license = license_block
-        if self.config["API_CONTACT_NAME"]:
+        if "API_CONTACT_NAME" in self.config:
             contact_block = swagger.Contact(name=self.config["API_CONTACT_NAME"])
             contact_block.email = self.config.get("API_CONTACT_EMAIL")
             contact_block.url = self.config.get("API_CONTACT_URL")
@@ -49,12 +49,20 @@ class Flask(flask.Flask, SwaggerMixin):
         fk = json.dumps(self._doc.as_dict())
         return flask.Response(yaml.safe_dump(json.loads(fk)), mimetype="application/yaml")
 
-    def route(self, rule, **options):
-        self.swagger_init()
-        return super(Flask, self).route(rule, **options)
+    def route(self, rule, ref=None, description=None, summary=None, **options):
+        self.init_swagger()
+
+        options = self.parse_route(rule, ref, description, summary, **options)
+
+        def decorator(f):
+            endpoint = options.pop("endpoint", None)
+            self.add_url_rule(rule, endpoint, f, **options)
+            return f
+
+        return decorator
 
     def register_blueprint(self, blueprint, **options):
-        self.swagger_init()
+        self.init_swagger()
         if isinstance(blueprint, Blueprint):
             # custom swaggered blueprint
             self._doc.add_paths(blueprint.paths)

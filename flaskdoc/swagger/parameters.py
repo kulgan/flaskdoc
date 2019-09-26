@@ -28,7 +28,7 @@ class Parameter(SwaggerBase):
     A unique parameter is defined by a combination of a name and location.
     """
 
-    def __init__(self, name, location="query",
+    def __init__(self, name,
                  required=False,
                  description=None,
                  deprecated=False,
@@ -39,7 +39,7 @@ class Parameter(SwaggerBase):
                  schema=None):
         super(Parameter, self).__init__()
         self.name = name
-        self._location = ParameterLocation(location)
+        self._location = ParameterLocation("query")
         self.description = description
         self.deprecated = deprecated
 
@@ -77,6 +77,10 @@ class PathParameter(Parameter):
     @property
     def style(self):
         return self._style.value or Style.SIMPLE.value
+
+    @property
+    def location(self):
+        return ParameterLocation.PATH.value
 
 
 class QueryParameter(Parameter):

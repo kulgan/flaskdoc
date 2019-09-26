@@ -4,12 +4,12 @@ from flaskdoc.swagger.core import SwaggerBase, SwaggerDict
 class Server(SwaggerBase):
     """ An object representing a Server. """
 
-    def __init__(self, url, description=None):
+    def __init__(self, url, description=None, variables=None):
         super(Server, self).__init__()
 
         self.url = url
         self.description = description
-        self.variables = {}
+        self.variables = variables or {}
 
     def add_variable(self, name, variable):
         """

@@ -1,7 +1,6 @@
-import collections
 import six
 
-from flaskdoc.swagger import Operation, Paths, Tag
+from flaskdoc.swagger import Operation, Paths, PathItem, Tag
 
 
 class SwaggerMixin(object):
@@ -64,3 +63,14 @@ class SwaggerMixin(object):
     @property
     def paths(self):
         return self._paths
+
+    def parse_route(self, rule, ref=None, description=None, summary=None, **options):
+        path_item = PathItem(ref=ref, description=description, summary=summary)
+        methods = options.pop("methods", ["GET"])
+        operations, methods = self.extract_operations(methods)
+        for operation in operations:
+            path_item.add_operation(operation=operation)
+
+        self.add_path(rule, path_item)
+        options.update({"methods": methods})
+        return options
