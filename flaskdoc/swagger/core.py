@@ -113,17 +113,21 @@ class OpenApi(SwaggerBase):
     def add_server(self, server):
         self.servers.add(server)
 
-    def add_paths(self, paths):
+    def add_paths(self, paths, url_prefix=None, blp_prefix=None):
         """
         Updates paths to include all paths in `paths`
         Args:
             paths:
-
+            url_prefix (str): prefix
+            blp_prefix (str): blueprint url prefix
         Returns:
 
         """
+        url_prefix = url_prefix or ""
+        blp_prefix = blp_prefix or ""
         for r_url in paths:
-            self.paths.add_path_item(r_url, paths.path_item(r_url))
+            path_url = "{}{}{}".format(url_prefix, blp_prefix, r_url)
+            self.paths.add_path_item(path_url, paths.path_item(r_url))
 
 
 class SwaggerDict(OrderedDict):

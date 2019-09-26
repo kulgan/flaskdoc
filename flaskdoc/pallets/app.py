@@ -61,9 +61,10 @@ class Flask(flask.Flask, SwaggerMixin):
 
         return decorator
 
-    def register_blueprint(self, blueprint, **options):
+    def register_blueprint(self, blueprint, url_prefix=None, **options):
         self.init_swagger()
+
         if isinstance(blueprint, Blueprint):
             # custom swaggered blueprint
-            self._doc.add_paths(blueprint.paths)
+            self._doc.add_paths(blueprint.paths, url_prefix, blueprint.url_prefix)
         return super(Flask, self).register_blueprint(blueprint, **options)

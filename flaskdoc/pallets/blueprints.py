@@ -14,7 +14,8 @@ class Blueprint(flask.Blueprint, mixin.SwaggerMixin):
                                         url_prefix=url_prefix, subdomain=subdomain, url_defaults=url_defaults)
         self._paths = swagger.Paths()
 
-    def route(self, rule, ref=None, description=None, summary=None, servers=None, parameters=None, **options):
+    def route(self, rule, ref=None, description=None,
+              summary=None, servers=None, parameters=None, **options):
         """
         Extends flask blueprint route
         Args:
@@ -30,13 +31,5 @@ class Blueprint(flask.Blueprint, mixin.SwaggerMixin):
             callback:
         """
 
-        options = self.parse_route(rule, ref, description, summary, **options)
-
-        def decorator(f):
-
-            endpoint = options.pop("endpoint", f.__name__)
-            self.add_url_rule(rule, endpoint, f, **options)
-            return f
-
-        return decorator
-
+        options = self.parse_route(rule, ref, description, summary, servers, parameters, **options)
+        return super(Blueprint, self).route(rule, **options)

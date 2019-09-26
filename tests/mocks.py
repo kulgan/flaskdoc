@@ -1,22 +1,31 @@
 import flask
 import flaskdoc
-from swagger import GET, PathParameter, Server, ServerVariable
+from swagger import GET, PathParameter, QueryParameter, Server, ServerVariable
 
-blp = flaskdoc.Blueprint("Dummy", __name__)
+blp = flaskdoc.Blueprint("Dummy", __name__, url_prefix="/v1")
+
+simple_get = GET(
+    summary="Simplistic Get",
+    tags=["test", "user", "sample"],
+    description="Proof of concept",
+    parameters=[
+        PathParameter(
+            name="id",
+            description="root id",
+            allow_empty_value=True
+        ),
+        QueryParameter(
+            name="age",
+            description="age of user"
+        )
+    ]
+)
 
 
-@blp.route("/echo/<sample>",
+@blp.route("/echo",
            ref="Simplistic",
            description="Test API Summary",
-           methods=GET(
-               summary="TEST",
-               tags=["Pets", "Snakes"],
-               description="Howdy API Test",
-               parameters=[
-                   PathParameter(name="sample",
-                                 description="Useless parameter")
-               ]
-           ),
+           methods=simple_get,
            servers=[
                Server(url="https://{sample}.sample/com",
                       description="Test Suite",
@@ -32,7 +41,7 @@ def get(sample):
     Returns:
 
     """
-    return "Echo"
+    return "Echo" + sample
 
 
 @blp.route("/post", ref="Sponsors Cove", description="Howdy for post", methods=["GET"])

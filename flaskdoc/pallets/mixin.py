@@ -64,7 +64,8 @@ class SwaggerMixin(object):
     def paths(self):
         return self._paths
 
-    def parse_route(self, rule, ref=None, description=None, summary=None, **options):
+    def parse_route(self, rule, ref=None, description=None, summary=None,
+                    servers=None, parameters=None, **options):
         path_item = PathItem(ref=ref, description=description, summary=summary)
         methods = options.pop("methods", ["GET"])
         operations, methods = self.extract_operations(methods)
