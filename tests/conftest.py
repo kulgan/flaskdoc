@@ -16,15 +16,15 @@ class AppConfig(object):
 @pytest.fixture(params=[AppConfig])
 def app(request):
     _app = flaskdoc.Flask("Test API", version="1.0")
-    _app.config.from_config(request.param)
+    _app.config.from_object(request.param)
     _app.register_blueprint(mocks.blp, url_prefix="/mocks")
 
     return _app
 
 
 if __name__ == '__main__':
-    _app = flaskdoc.Flask("Test API", version="1.0")
-    _app.config.from_object(AppConfig)
-    _app.register_blueprint(mocks.blp, url_prefix="/mocks")
+    _s_app = flaskdoc.Flask("Test API", version="1.0")
+    _s_app.config.from_object(AppConfig)
+    _s_app.register_blueprint(mocks.blp, url_prefix="/mocks")
 
-    _app.run(port=4444)
+    _s_app.run(port=4444)

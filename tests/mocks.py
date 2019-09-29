@@ -1,4 +1,5 @@
 import flask
+
 import flaskdoc
 from swagger import GET, PathParameter, QueryParameter, Server, ServerVariable
 
@@ -21,19 +22,21 @@ simple_get = GET(
     ]
 )
 
+servers = [
+    Server(url="https://{sample}.sample/com",
+           description="Test Suite",
+           variables=dict(
+               sample=ServerVariable(default_val="api",
+                                     enum_values=["api", "api2", "api3"])
+           ))
+]
+
 
 @blp.route("/echo",
            ref="Simplistic",
            description="Test API Summary",
            methods=simple_get,
-           servers=[
-               Server(url="https://{sample}.sample/com",
-                      description="Test Suite",
-                      variables=dict(
-                          sample=ServerVariable(default_val="api",
-                                                enum_values=["api", "api2", "api3"])
-                      ))
-           ]
+           servers=servers,
            )
 def get(sample):
     """

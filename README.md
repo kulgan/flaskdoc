@@ -1,13 +1,23 @@
-# Introduction
-FlaskDoc is your regular Flask API with builtin support for Swagger documentation. The idea is to have documentation
-as close to code as much as possible.
+# Flaskdoc
+FlaskDoc is an extension of the regular Flask API and adds support for Swagger/OpenAPI documentation. 
 
-Requirements
+## Requirements
 
 * Python 2.7+, 3.5+
-* Sits on top of Flask
 
-Installation
+## Installation
+```bash
+$ pip install flaskdoc
+```
 
-pip install flaskdoc
+## Usage Examples
+
+## Release History
+
+## Meta
+Distributed under Apache 2.0 License
+
+## Contributing
+* Fork it
+
 

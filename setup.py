@@ -2,7 +2,7 @@ import pathlib2
 from setuptools import find_packages
 from setuptools import setup
 
-version = "0.0.1"
+version = "0.0.1-alpha"
 
 # The directory containing this file
 HERE = pathlib2.Path(__file__).parent
@@ -22,7 +22,7 @@ setup(
     license="Apache 2.0",
     url="https://github.com/kulgan/flaskdoc",
     classifiers=[
-        "Development Status :: 2 - Pre-Alpha",
+        "Development Status :: 2 - Alpha",
         "Framework :: Flask",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: Apache Software License",
