@@ -32,21 +32,22 @@ servers = [
 ]
 
 
-@blp.route("/echo",
+@blp.route("/echo/<string:sample>",
            ref="Simplistic",
            description="Test API Summary",
            methods=simple_get,
            servers=servers,
            )
-def get(sample):
+def echo(sample):
     """
     Sample GET request
-    Returns:
+    Returns: Echos back whatever was sent
 
     """
-    return "Echo" + sample
+    return sample
 
 
-@blp.route("/post", ref="Sponsors Cove", description="Howdy for post", methods=["GET"])
+@blp.route("/echo", ref="Sponsors Cove", description="Howdy for post", methods=["POST"])
 def post():
-    return flask.jsonify(dict(a="Test", message="Success")), 200
+    req = flask.request.get_json(force=True)
+    return flask.jsonify(req), 200
