@@ -6,11 +6,27 @@ FlaskDoc is an extension of the regular Flask API and adds support for Swagger/O
 * Python 2.7+, 3.5+
 
 ## Installation
+Project is still in active development. The goal is to be able to install it like this
 ```bash
 $ pip install flaskdoc
 ```
 
 ## Usage Examples
+```python
+import flaskdoc
+from flaskdoc import swagger
+
+blp = flaskdoc.Blueprint("sample", __name__)
+
+@blp.route("/echo/<string:sample>", 
+    description="Simple Echo", 
+    methods=[
+        swagger.GET(tags=["sample"])
+    ]
+)
+def echo(sample):
+    return sample
+```
 
 ## Release History
 
