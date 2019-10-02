@@ -1,0 +1,23 @@
+language: generic
+
+sudo: false
+
+before_install:
+  - unset PYENV_ROOT
+  - rm -rf ~/.pyenv
+  - curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
+  - export PATH="$HOME/.pyenv/bin:$PATH"
+  - pyenv install 2.7.16
+#  - pyenv install 3.5.7
+
+before_script:
+  - virtualenv venv
+  - source venv/bin/activate
+  - pip install tox-travis tox-pyenv
+
+script:
+  - pyenv local 2.7.16
+  - tox -e py27
+
+after_script:
+  - tox -e coverage
