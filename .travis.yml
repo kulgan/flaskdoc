@@ -1,3 +1,4 @@
+dist: xenial
 language: generic
 
 sudo: false
@@ -15,8 +16,8 @@ before_script:
   - pip install tox-travis tox-pyenv
 
 script:
-  - pyenv local 2.7.16
-  - tox -e py27
+  - pyenv local 3.5.7
+  - tox -e py27,py35,py36
 
 after_script:
   - tox -e coverage
