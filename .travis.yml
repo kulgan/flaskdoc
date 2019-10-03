@@ -17,7 +17,7 @@ before_script:
 
 script:
   - pyenv local 3.5.7
-  - tox -e py27,py35,py36
+  - tox -e py27,py35
 
 after_script:
   - tox -e coverage
