@@ -7,8 +7,7 @@ before_install:
   - rm -rf ~/.pyenv
   - curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
   - export PATH="$HOME/.pyenv/bin:$PATH"
-  - pyenv install 2.7.16
-#  - pyenv install 3.5.7
+  - pyenv install 3.5.7
 
 before_script:
   - virtualenv venv
