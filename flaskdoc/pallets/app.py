@@ -3,9 +3,9 @@ import json
 import flask
 import yaml
 
-from blueprints import Blueprint
 from flaskdoc import swagger
-from mixin import SwaggerMixin
+from flaskdoc.pallets.blueprints import Blueprint
+from flaskdoc.pallets.mixin import SwaggerMixin
 
 
 class Flask(flask.Flask, SwaggerMixin):

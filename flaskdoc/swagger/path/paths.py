@@ -1,19 +1,7 @@
-import enum
-import operations
 from flaskdoc.swagger.core import SwaggerBase, SwaggerDict
 from flaskdoc.swagger.parameters import QueryParameter
 from flaskdoc.swagger.server import Server
-
-
-class HttpMethod(enum.Enum):
-    DELETE = "DELETE"
-    HEAD = "HEAD"
-    GET = "GET"
-    OPTIONS = "OPTIONS"
-    PATCH = "patch"
-    POST = "POST"
-    PUT = "PUT"
-    TRACE = "TRACE"
+from flaskdoc.swagger.path import operations
 
 
 class Paths(SwaggerBase):
@@ -156,5 +144,5 @@ if __name__ == '__main__':
     ps.add_path_item("/echo", pi)
     # print(ps)
 
-    h = HttpMethod("GETs")
+    h = operations.HttpMethod("GETs")
     print(h)

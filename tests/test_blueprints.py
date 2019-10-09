@@ -8,7 +8,7 @@ def test_route_decorator(client, sample):
     """ Tests extension registers routes as expected """
     resp = client.get("/mocks/echo/{}".format(sample))
     assert resp.status_code == 200
-    assert resp.data == sample
+    assert resp.get_data(as_text=True) == sample
 
     post_body = dict(sample=sample, message="Almighty")
     resp = client.post("/mocks/echo", data=json.dumps(post_body))
