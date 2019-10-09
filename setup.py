@@ -4,7 +4,7 @@ from setuptools import setup
 version = "0.0.1-alpha"
 
 setup(
-    name="FlaskDoc",
+    name="flaskdoc",
     version=version,
     author="Rowland Ogwara",
     author_email="r.ogwara@gmail.com",
