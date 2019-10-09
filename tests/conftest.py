@@ -1,7 +1,8 @@
 import pytest
 
 import flaskdoc
-import mocks
+
+from tests import mocks
 
 
 class AppConfig(object):

@@ -1,7 +1,7 @@
 import flask
 
-import mixin
 from flaskdoc import swagger
+from flaskdoc.pallets import mixin
 
 
 class Blueprint(flask.Blueprint, mixin.SwaggerMixin):

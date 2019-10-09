@@ -14,7 +14,9 @@ class Contact(SwaggerBase):
     def __eq__(self, other):
         if not isinstance(other, Contact):
             return False
-        return self.name == other.name and self.url == other.url and self.email == other.email and \
+        return self.name == other.name and \
+               self.url == other.url and \
+               self.email == other.email and \
                self._extensions == other._extensions
 
     def __hash__(self):

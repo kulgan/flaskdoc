@@ -1,5 +1,6 @@
-from flaskdoc.swagger.core import SwaggerBase, SwaggerDict
-from flaskdoc.swagger.path import paths
+import enum
+
+from flaskdoc.swagger.core import SwaggerBase
 
 
 class Operation(SwaggerBase):
@@ -38,22 +39,22 @@ class Operation(SwaggerBase):
         Returns:
             Operation:
         """
-        http_method = paths.HttpMethod(http_method)
-        if http_method == paths.HttpMethod.GET:
+        http_method = HttpMethod(http_method)
+        if http_method == HttpMethod.GET:
             return GET()
-        elif http_method == paths.HttpMethod.POST:
+        elif http_method == HttpMethod.POST:
             return POST()
-        elif http_method == paths.HttpMethod.PUT:
+        elif http_method == HttpMethod.PUT:
             return PUT()
-        elif http_method == paths.HttpMethod.DELETE:
+        elif http_method == HttpMethod.DELETE:
             return DELETE()
-        elif http_method == paths.HttpMethod.OPTIONS:
+        elif http_method == HttpMethod.OPTIONS:
             return OPTIONS()
-        elif http_method == paths.HttpMethod.TRACE:
+        elif http_method == HttpMethod.TRACE:
             return TRACE()
-        elif http_method == paths.HttpMethod.PATCH:
+        elif http_method == HttpMethod.PATCH:
             return PATCH()
-        elif http_method == paths.HttpMethod.HEAD:
+        elif http_method == HttpMethod.HEAD:
             return HEAD()
 
 
@@ -61,53 +62,64 @@ class GET(Operation):
 
     @property
     def http_method(self):
-        return paths.HttpMethod.GET
+        return HttpMethod.GET
 
 
 class POST(Operation):
 
     @property
     def http_method(self):
-        return paths.HttpMethod.POST
+        return HttpMethod.POST
 
 
 class PUT(Operation):
 
     @property
     def http_method(self):
-        return paths.HttpMethod.PUT
+        return HttpMethod.PUT
 
 
 class HEAD(Operation):
 
     @property
     def http_method(self):
-        return paths.HttpMethod.HEAD
+        return HttpMethod.HEAD
 
 
 class OPTIONS(Operation):
 
     @property
     def http_method(self):
-        return paths.HttpMethod.OPTIONS
+        return HttpMethod.OPTIONS
 
 
 class PATCH(Operation):
 
     @property
     def http_method(self):
-        return paths.HttpMethod.PATCH
+        return HttpMethod.PATCH
 
 
 class TRACE(Operation):
 
     @property
     def http_method(self):
-        return paths.HttpMethod.TRACE
+        return HttpMethod.TRACE
 
 
 class DELETE(Operation):
 
     @property
     def http_method(self):
-        return paths.HttpMethod.DELETE
+        return HttpMethod.DELETE
+
+
+class HttpMethod(enum.Enum):
+    DELETE = "DELETE"
+    HEAD = "HEAD"
+    GET = "GET"
+    OPTIONS = "OPTIONS"
+    PATCH = "patch"
+    POST = "POST"
+    PUT = "PUT"
+    TRACE = "TRACE"

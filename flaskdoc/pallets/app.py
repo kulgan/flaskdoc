@@ -3,9 +3,9 @@ import json
 import flask
 import yaml
 
-from blueprints import Blueprint
 from flaskdoc import swagger
-from mixin import SwaggerMixin
+from flaskdoc.pallets.blueprints import Blueprint
+from flaskdoc.pallets.mixin import SwaggerMixin
 
 
 class Flask(flask.Flask, SwaggerMixin):
@@ -53,19 +53,13 @@ class Flask(flask.Flask, SwaggerMixin):
         self.init_swagger()
 
         options = self.parse_route(rule, ref, description, summary, **options)
-
-        def decorator(f):
-            endpoint = options.pop("endpoint", None)
-            self.add_url_rule(rule, endpoint, f, **options)
-            return f
-
-        return decorator
+        return super(Flask, self).route(rule, **options)
 
     def register_blueprint(self, blueprint, **options):
         self.init_swagger()
 
-        url_prefix = options.get("url_prefix") or ""
+        url_prefix = options.get("url_prefix")
         if isinstance(blueprint, Blueprint):
             # custom swaggered blueprint
-            self._doc.add_paths(blueprint.paths, url_prefix, blueprint.url_prefix)
+            self._doc.add_paths(blueprint.paths, url_prefix or blueprint.url_prefix)
         return super(Flask, self).register_blueprint(blueprint, **options)

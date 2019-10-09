@@ -1,19 +1,7 @@
-import enum
-import operations
 from flaskdoc.swagger.core import SwaggerBase, SwaggerDict
 from flaskdoc.swagger.parameters import QueryParameter
 from flaskdoc.swagger.server import Server
-
-
-class HttpMethod(enum.Enum):
-    DELETE = "DELETE"
-    HEAD = "HEAD"
-    GET = "GET"
-    OPTIONS = "OPTIONS"
-    PATCH = "patch"
-    POST = "POST"
-    PUT = "PUT"
-    TRACE = "TRACE"
+from flaskdoc.swagger.path import operations
 
 
 class Paths(SwaggerBase):
@@ -59,7 +47,19 @@ class PathItem(SwaggerBase):
     are available.
     """
 
-    def __init__(self, ref=None, summary=None, description=None, parameters=None, servers=None):
+    def __init__(self, ref=None,
+                 summary=None,
+                 description=None,
+                 parameters=None,
+                 servers=None,
+                 get=None,
+                 delete=None,
+                 head=None,
+                 options=None,
+                 patch=None,
+                 post=None,
+                 put=None,
+                 trace=None):
         super(PathItem, self).__init__()
 
         self.ref = ref
@@ -69,14 +69,14 @@ class PathItem(SwaggerBase):
         self.servers = servers
         self.parameters = parameters
 
-        self.get = None  # type -> Operation
-        self.delete = None  # type -> Operation
-        self.head = None  # type -> Operation
-        self.options = None  # type -> Operation
-        self.patch = None  # type -> Operation
-        self.post = None  # type -> Operation
-        self.put = None  # type -> Operation
-        self.trace = None  # type -> Operation
+        self.get = get  # type -> Operation
+        self.delete = delete  # type -> Operation
+        self.head = head  # type -> Operation
+        self.options = options  # type -> Operation
+        self.patch = patch  # type -> Operation
+        self.post = post  # type -> Operation
+        self.put = put  # type -> Operation
+        self.trace = trace  # type -> Operation
 
     def add_operation(self, operation):
         """
@@ -144,5 +144,5 @@ if __name__ == '__main__':
     ps.add_path_item("/echo", pi)
     # print(ps)
 
-    h = HttpMethod("GETs")
+    h = operations.HttpMethod("GETs")
     print(h)
