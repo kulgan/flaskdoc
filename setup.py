@@ -1,14 +1,7 @@
-import pathlib2
 from setuptools import find_packages
 from setuptools import setup
 
 version = "0.0.1-alpha"
-
-# The directory containing this file
-HERE = pathlib2.Path(__file__).parent
-
-# The text of the README file
-README = (HERE / "README.md").read_text()
 
 setup(
     name="FlaskDoc",
@@ -17,7 +10,7 @@ setup(
     author_email="r.ogwara@gmail.com",
     keywords="swagger, openapi, flask, rest, api",
     description="",
-    long_description=README,
+    long_description="README",
     long_description_content_type="text/markdown",
     license="Apache 2.0",
     url="https://github.com/kulgan/flaskdoc",
