@@ -1,7 +1,7 @@
 import pytest
 
 import flaskdoc
-
+from flaskdoc import swagger
 from tests import mocks
 
 
@@ -21,6 +21,23 @@ def app(request):
     _app.register_blueprint(mocks.blp, url_prefix="/mocks")
 
     return _app
+
+
+@pytest.fixture()
+def info_block():
+    _info = swagger.Info(
+        title="Test",
+        version="1.2.2",
+        contact=swagger.Contact(
+            name="Rowland",
+            email="r.ogwara@gmail.com",
+            url="https://github.com/kulgan"
+        ),
+        license=swagger.License(
+            name="Apache 2.0", url="https://www.example.com/license"
+        )
+    )
+    return _info
 
 
 if __name__ == '__main__':

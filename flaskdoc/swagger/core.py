@@ -54,7 +54,7 @@ class SwaggerBase(object):
 
             if key.startswith("_"):
                 key = key[1:]
-                val = getattr(self, key, None)
+                val = getattr(self, "q_" + key, None)
 
             # map ref
             if key == "ref":

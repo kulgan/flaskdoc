@@ -39,7 +39,7 @@ class Parameter(SwaggerBase):
                  schema=None):
         super(Parameter, self).__init__()
         self.name = name
-        self._location = ParameterLocation("query")
+        self._in = ParameterLocation("query")
         self.description = description
         self.deprecated = deprecated
 
@@ -56,51 +56,51 @@ class Parameter(SwaggerBase):
         self.examples = None
 
     @property
-    def required(self):
+    def q_required(self):
         return self._required
 
     @property
-    def style(self):
+    def q_style(self):
         return self._style
 
     @property
-    def location(self):
-        return self._location.value
+    def q_in(self):
+        return self._in.value
 
 
 class PathParameter(Parameter):
 
     @property
-    def required(self):
+    def q_required(self):
         return True
 
     @property
-    def style(self):
+    def q_style(self):
         return self._style.value or Style.SIMPLE.value
 
     @property
-    def location(self):
+    def q_in(self):
         return ParameterLocation.PATH.value
 
 
 class QueryParameter(Parameter):
 
     @property
-    def style(self):
+    def q_style(self):
         return self._style.valaue or Style.FORM.value
 
 
 class HeaderParameter(Parameter):
 
     @property
-    def style(self):
+    def q_style(self):
         return self._style.value or Style.SIMPLE.value
 
 
 class CookieParameter(Parameter):
 
     @property
-    def style(self):
+    def q_style(self):
         return self._style.value or Style.FORM.value
 
 

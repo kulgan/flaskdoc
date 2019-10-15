@@ -50,3 +50,26 @@ def test_server():
 
     d = s1.as_dict()
     assert d["variables"]
+
+
+def test_path_items():
+    get_op = swagger.GET(
+        operations_id="testGetExample",
+        description="Get Example",
+        tags=["example"],
+        parameters=[
+            swagger.QueryParameter(name="p1", description="page")
+        ]
+    )
+    post_op = swagger.POST(operations_id="testPostExample", description="POST Example")
+    path_item = swagger.PathItem(
+        parameters=[
+            swagger.PathParameter(name="v1")
+        ],
+        get=get_op,
+        post=post_op
+    )
+
+    swag = path_item.as_dict()
+    assert swag["parameters"][0]["name"] == "v1"
+    assert swag["get"]["parameters"][0]["name"] == "p1"
