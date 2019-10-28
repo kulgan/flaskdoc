@@ -17,6 +17,7 @@ $ pip install flaskdoc
 
 ## Usage Examples
 ```python
+import swagger.models
 import flaskdoc
 from flaskdoc import swagger
 
@@ -25,7 +26,7 @@ blp = flaskdoc.Blueprint("sample", __name__)
 @blp.route("/echo/<string:sample>", 
     description="Simple Echo", 
     methods=[
-        swagger.GET(tags=["sample"])
+        swagger.models.GET(tags=["sample"])
     ]
 )
 def echo(sample):

@@ -2,3 +2,4 @@ flask>=1.0.0
 six
 enum34
 PyYaml
+typing

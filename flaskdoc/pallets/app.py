@@ -3,6 +3,8 @@ import json
 import flask
 import yaml
 
+import swagger.core
+import swagger.models
 from flaskdoc import swagger
 from flaskdoc.pallets.blueprints import Blueprint
 from flaskdoc.pallets.mixin import SwaggerMixin
@@ -27,26 +29,26 @@ class Flask(flask.Flask, SwaggerMixin):
         if self._doc:
             return
 
-        info_block = swagger.Info(title=self.api_title, version=self.api_version)
+        info_block = swagger.models.Info(title=self.api_title, version=self.api_version)
         if "API_LICENSE_NAME" in self.config:
-            license_block = swagger.License(name=self.config["API_LICENSE_NAME"],
-                                            url=self.config.get("API_LICENSE_URL"))
+            license_block = swagger.models.License(name=self.config["API_LICENSE_NAME"],
+                                                   url=self.config.get("API_LICENSE_URL"))
             info_block.license = license_block
         if "API_CONTACT_NAME" in self.config:
-            contact_block = swagger.Contact(name=self.config["API_CONTACT_NAME"])
+            contact_block = swagger.models.Contact(name=self.config["API_CONTACT_NAME"])
             contact_block.email = self.config.get("API_CONTACT_EMAIL")
             contact_block.url = self.config.get("API_CONTACT_URL")
             info_block.contact = contact_block
 
-        self._doc = swagger.OpenApi(open_api_version=self.open_api_version, info=info_block, paths=swagger.Paths())
+        self._doc = swagger.core.OpenApi(open_api_version=self.open_api_version, info=info_block, paths=swagger.models.Paths())
         self.add_url_rule("/openapi.json", view_func=self.register_json_path, methods=["GET"])
         self.add_url_rule("/openapi.yaml", view_func=self.register_yaml_path, methods=["GET"])
 
     def register_json_path(self):
-        return flask.jsonify(self._doc.as_dict()), 200
+        return flask.jsonify(self._doc.dict()), 200
 
     def register_yaml_path(self):
-        fk = json.dumps(self._doc.as_dict())
+        fk = json.dumps(self._doc.dict())
         return flask.Response(yaml.safe_dump(json.loads(fk)), mimetype="application/yaml")
 
     def route(self, rule, ref=None, description=None, summary=None, **options):

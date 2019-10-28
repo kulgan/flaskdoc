@@ -1,6 +1,6 @@
 import six
 
-from flaskdoc.swagger import Operation, Paths, PathItem, Tag
+from swagger import Paths, PathItem, Operation, Tag
 
 
 class SwaggerMixin(object):
@@ -22,7 +22,7 @@ class SwaggerMixin(object):
         if recorded_path_item:
             recorded_path_item.merge(path_item)
         else:
-            self._paths.add_path_item(relative_path, path_item)
+            self._paths.add(relative_path, path_item)
 
     @staticmethod
     def extract_path(path):

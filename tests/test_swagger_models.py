@@ -1,23 +1,25 @@
 from __future__ import print_function
 
+import swagger.core
+import swagger.models
 from flaskdoc import swagger
 
 
 def test_sample_swagger(info_block):
 
-    paths = swagger.Paths()
-    item = swagger.PathItem(summary="Nonsense Path",
-                            get=swagger.GET(summary="Sample GET request",
-                                            description="Test",
-                                            tags=["sample", "rest"],
-                                            parameters=[
-                                                swagger.QueryParameter(name="search", required=True,
-                                                                       description="Search Param")
+    paths = swagger.models.Paths()
+    item = swagger.models.PathItem(summary="Nonsense Path",
+                                   get=swagger.models.GET(summary="Sample GET request",
+                                                          description="Test",
+                                                          tags=["sample", "rest"],
+                                                          parameters=[
+                                                swagger.models.QueryParameter(name="search", required=True,
+                                                                              description="Search Param")
                                             ]))
 
-    paths.add_path_item("/echo", item)
-    api = swagger.OpenApi(info_block, paths)
+    paths.add("/echo", item)
+    api = swagger.core.OpenApi(info_block, paths)
 
-    swagger_json = api.as_dict()
+    swagger_json = api.dict()
     print(api)
     assert swagger_json

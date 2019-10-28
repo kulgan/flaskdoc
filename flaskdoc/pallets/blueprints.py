@@ -1,5 +1,6 @@
 import flask
 
+import swagger.models
 from flaskdoc import swagger
 from flaskdoc.pallets import mixin
 
@@ -12,7 +13,7 @@ class Blueprint(flask.Blueprint, mixin.SwaggerMixin):
         super(Blueprint, self).__init__(name, import_name, static_folder=static_folder,
                                         static_url_path=static_url_path, template_folder=template_folder,
                                         url_prefix=url_prefix, subdomain=subdomain, url_defaults=url_defaults)
-        self._paths = swagger.Paths()
+        self._paths = swagger.models.Paths()
 
     def route(self, rule, ref=None, description=None,
               summary=None, servers=None, parameters=None, **options):

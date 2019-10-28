@@ -1,6 +1,7 @@
 import pytest
 
 import flaskdoc
+import swagger.models
 from flaskdoc import swagger
 from tests import mocks
 
@@ -25,7 +26,7 @@ def app(request):
 
 @pytest.fixture()
 def info_block():
-    _info = swagger.Info(
+    _info = swagger.models.Info(
         title="Test",
         version="1.2.2",
         contact=swagger.Contact(
@@ -33,7 +34,7 @@ def info_block():
             email="r.ogwara@gmail.com",
             url="https://github.com/kulgan"
         ),
-        license=swagger.License(
+        license=swagger.models.License(
             name="Apache 2.0", url="https://www.example.com/license"
         )
     )
