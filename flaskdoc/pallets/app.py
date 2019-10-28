@@ -3,8 +3,6 @@ import json
 import flask
 import yaml
 
-import swagger.core
-import swagger.models
 from flaskdoc import swagger
 from flaskdoc.pallets.blueprints import Blueprint
 from flaskdoc.pallets.mixin import SwaggerMixin

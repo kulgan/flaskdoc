@@ -6,8 +6,6 @@ from collections import OrderedDict
 import enum
 from enum import Enum
 
-from swagger.media import Content
-
 logger = logging.getLogger(__name__)
 
 
@@ -115,6 +113,7 @@ class ExtensionModel(BaseModel):
         di = super(ExtensionModel, self).dict()
         if self._extensions:
             di.update(self._extensions)
+        return di
 
 
 class ContainerModel(object):
@@ -725,8 +724,8 @@ class ResponseObject(ExtensionModel):
 
     def add_content(self, media_type, content):
         if not self.content:
-            self.content = Content()
-        self.content.add_media_type(media_type, content)
+            self.content = SwaggerDict()
+        self.content[media_type] = content
 
     def add_link(self, link_name, link):
         pass
@@ -820,4 +819,44 @@ class ReferenceObject(BaseModel):
 
 # TODO
 class Schema(object):
-    pass
+
+    def __init__(self, type, format, ref=None):
+        self.ref = ref  # type: str
+        self.title = None
+        self.multiple_of = None
+        self.maximum = None
+        self.exclusive_maximum = None
+        self.minimum = None
+        self.exclusive_minimum = None
+        self.max_length = None  # type: int
+        self.min_length = None  # type: int
+        self.pattern = None
+        self.max_items = None  # type: ignore
+        self.min_items = None  # type: ignore
+        self.unique_item = None
+        self.max_properties = None  # type: ignore
+        self.min_properties = None  # type: ignore
+        self.required = None
+        self.enum = None
+        self.type = type
+        self.all_of = None
+        self.one_of = None
+        self.any_of = None
+        self._not = None  # type: ignore
+        self.items = None
+        self.properties = None
+        self.additional_properties = None
+        self.description = None
+        self.format = format
+        self.default = None
+        self.nullable = None
+        self.discriminator = None
+        self.read_only = None
+        self.write_only = None
+        self.xml = None
+        self.external_docs = None
+        self.example = None
+        self.deprecated = None
+
+    def q_not(self):
+        return self._not

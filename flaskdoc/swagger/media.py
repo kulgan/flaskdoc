@@ -1,8 +1,7 @@
 from swagger.models import SwaggerDict
-from swagger import BaseModel, Style
 
 
-class Content(BaseModel):
+class Content(object):
 
     def __init__(self):
         super(Content, self).__init__()
