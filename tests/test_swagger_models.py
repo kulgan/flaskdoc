@@ -1,6 +1,3 @@
-from __future__ import print_function
-
-import swagger.core
 import swagger.models
 from flaskdoc import swagger
 
@@ -18,8 +15,7 @@ def test_sample_swagger(info_block):
                                             ]))
 
     paths.add("/echo", item)
-    api = swagger.core.OpenApi(info_block, paths)
+    api = swagger.models.OpenApi(info_block, paths)
 
     swagger_json = api.dict()
-    print(api)
     assert swagger_json

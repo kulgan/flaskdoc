@@ -27,18 +27,18 @@ class Flask(flask.Flask, SwaggerMixin):
         if self._doc:
             return
 
-        info_block = swagger.models.Info(title=self.api_title, version=self.api_version)
+        info_block = swagger.Info(title=self.api_title, version=self.api_version)
         if "API_LICENSE_NAME" in self.config:
-            license_block = swagger.models.License(name=self.config["API_LICENSE_NAME"],
-                                                   url=self.config.get("API_LICENSE_URL"))
+            license_block = swagger.License(name=self.config["API_LICENSE_NAME"],
+                                            url=self.config.get("API_LICENSE_URL"))
             info_block.license = license_block
         if "API_CONTACT_NAME" in self.config:
-            contact_block = swagger.models.Contact(name=self.config["API_CONTACT_NAME"])
+            contact_block = swagger.Contact(name=self.config["API_CONTACT_NAME"])
             contact_block.email = self.config.get("API_CONTACT_EMAIL")
             contact_block.url = self.config.get("API_CONTACT_URL")
             info_block.contact = contact_block
 
-        self._doc = swagger.core.OpenApi(open_api_version=self.open_api_version, info=info_block, paths=swagger.models.Paths())
+        self._doc = swagger.OpenApi(open_api_version=self.open_api_version, info=info_block, paths=swagger.Paths())
         self.add_url_rule("/openapi.json", view_func=self.register_json_path, methods=["GET"])
         self.add_url_rule("/openapi.yaml", view_func=self.register_yaml_path, methods=["GET"])
 

@@ -130,6 +130,9 @@ class ContainerModel(object):
         """
         self.items[key] = item
 
+    def get(self, key):
+        return self.items.get(key)
+
     def __iter__(self):
         for item in self.items:
             yield item
@@ -334,7 +337,7 @@ class PathItem(BaseModel):
         self.summary = summary  # type: str
         self.description = description  # type: str
 
-        self.servers = servers  # type: list[Server]
+        self.servers = servers or []  # type: list[Server]
         self.parameters = parameters
 
         self.get = get  # type -> Operation
@@ -350,7 +353,7 @@ class PathItem(BaseModel):
         """
         Adds an operation
         Args:
-          operation (swagger.Operation): operation to add
+          operation (Operation): operation to add
         """
         http_method = operation.http_method.value.lower()
         setattr(self, http_method, operation)
@@ -360,9 +363,9 @@ class PathItem(BaseModel):
         Adds an alternative server to service all operations in this path.
 
         Args:
-            server (swagger.server.Serverr): alternative server to add
+            server (Server): alternative server to add
         """
-        self.servers.add(server)
+        self.servers.append(server)
 
     def add_parameter(self, parameter):
         self.parameters.add(parameter)
@@ -404,7 +407,7 @@ class Operation(ExtensionModel):
         self.description = description  # type: str
         self.external_docs = None
         self.operation_id = operations_id  # type: str
-        self.parameters = parameters
+        self.parameters = parameters or []  # type: list[Parameter]
         self.request_body = None
         self.responses = None
         self.callbacks = {}
@@ -820,7 +823,7 @@ class ReferenceObject(BaseModel):
 # TODO
 class Schema(object):
 
-    def __init__(self, type, format, ref=None):
+    def __init__(self, schema_type, schema_format, ref=None):
         self.ref = ref  # type: str
         self.title = None
         self.multiple_of = None
@@ -838,7 +841,7 @@ class Schema(object):
         self.min_properties = None  # type: ignore
         self.required = None
         self.enum = None
-        self.type = type
+        self.type = schema_type
         self.all_of = None
         self.one_of = None
         self.any_of = None
@@ -847,7 +850,7 @@ class Schema(object):
         self.properties = None
         self.additional_properties = None
         self.description = None
-        self.format = format
+        self.format = schema_format
         self.default = None
         self.nullable = None
         self.discriminator = None
@@ -860,3 +863,153 @@ class Schema(object):
 
     def q_not(self):
         return self._not
+
+
+class Discriminator(BaseModel):
+    """ When request bodies or response payloads may be one of a number of different schemas, a discriminator object
+    can be used to aid in serialization, deserialization, and validation. The discriminator is a specific object in a
+    schema which is used to inform the consumer of the specification of an alternative schema based on the value
+    associated with it. """
+
+    def __init__(self, property_name, mapping=None):
+        self.property_name = property_name
+        self.mapping = mapping  # type: dict
+
+
+class XML(ExtensionModel):
+    """ A metadata object that allows for more fine-tuned XML model definitions. When using arrays, XML element names
+    are not inferred (for singular/plural forms) and the name property SHOULD be used to add that information. See
+    examples for expected behavior.
+    """
+
+    def __init__(self,
+                 name,
+                 namespace=None,
+                 prefix=None,
+                 attribute=None,
+                 wrapped=None):
+        super(XML, self).__init__()
+
+        self.name = name
+        self.namespace = namespace
+        self.prefix = prefix
+        self.attribute = attribute
+        self.wrapped = wrapped
+
+
+class SecuritySchemeType(Enum):
+
+    API_KEY = "apiKey"
+    HTTP = "http"
+    OAUTH2 = "oauth2"
+    OPEN_ID_CONNECT = "openIdConnect"
+
+
+class SecurityScheme(ExtensionModel):
+    """ Defines a security scheme that can be used by the operations. Supported schemes are HTTP authentication,
+    an API key (either as a header or as a query parameter), OAuth2's common flows (implicit, password, application
+    and access code) as defined in RFC6749, and OpenID Connect Discovery. """
+    
+    def __init__(self,
+                 scheme_type,
+                 name,
+                 description=None,
+                 scheme=None,
+                 bearer_format=None,
+                 flows=None,
+                 open_id_connect_url=None):
+        super(SecurityScheme, self).__init__()
+
+        self.type = SecuritySchemeType(scheme_type) if isinstance(scheme_type, str) else scheme_type
+        self.name = name  # type: str
+        self.description = description  # type: str
+        self.scheme = scheme  # type: str
+        self.bearer_format = bearer_format  # type: str
+        self.flows = flows
+        self.open_id_connect_url = open_id_connect_url
+
+
+class OAuthFlows(ExtensionModel):
+    """ Allows configuration of the supported OAuth Flows. """
+
+    def __init__(self,
+                 implicit=None,
+                 password=None,
+                 client_credentials=None,
+                 authorization_code=None):
+        super(OAuthFlows, self).__init__()
+
+        self.implicit = implicit  # type: OAuthFlow
+        self.password = password  # type: OAuthFlow
+        self.client_credentials = client_credentials  # type: OAuthFlow
+        self.authorization_code = authorization_code  # type: OAuthFlow
+
+
+class OAuthFlow(ExtensionModel):
+    """ Configuration details for a supported OAuth Flow """
+
+    def __init__(self,
+                 authorization_url=None,
+                 token_url=None,
+                 refresh_url=None,
+                 scopes=None):
+        super(OAuthFlow, self).__init__()
+
+        self.authorization_url = authorization_url  # type: str
+        self.token_url = token_url  # type: str
+        self.refresh_url = refresh_url  # type: str
+        self.scopes = scopes  # type: dict
+
+
+class OpenApi(BaseModel):
+    """ This is the root document object of the OpenAPI document. """
+
+    def __init__(self, info, paths, open_api_version="3.0.2"):
+        """
+        OpenApi specs tree, contains the overall specs for the API
+        Args:
+            open_api_version (str): Open API version used by API
+            info (flaskdoc.swagger.info.Info): open api info object
+            paths (flaskdoc.swagger.path.Paths): Paths definitions
+        """
+        super(OpenApi, self).__init__()
+
+        self.openapi = open_api_version
+        self.info = info
+
+        # TODO disallow duplicates
+        self.tags = []  # type -> swagger.tag.Tag
+        self.paths = paths  # type -> swagger.path.Paths
+        self.servers = set()
+
+        self.components = None
+        self.security = []
+
+        self.external_docs = None
+
+    def add_tag(self, tag):
+        """
+        Adds a tag to the top level spec
+        Args:
+            tag (swagger.Tag): tag to add
+        """
+        self.tags.append(tag)
+
+    def add_server(self, server):
+        self.servers.add(server)
+
+    def add_paths(self, paths, url_prefix=None, blp_prefix=None):
+        """
+        Updates paths to include all paths in `paths`
+        Args:
+            paths:
+            url_prefix (str): prefix
+            blp_prefix (str): blueprint url prefix
+        Returns:
+
+        """
+        url_prefix = url_prefix or ""
+        blp_prefix = blp_prefix or ""
+        for r_url in paths:
+            path_url = "{}{}{}".format(url_prefix, blp_prefix, r_url)
+            self.paths.add(path_url, paths.get(r_url))

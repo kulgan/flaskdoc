@@ -1,14 +1,14 @@
-from flaskdoc.swagger.models import License, Contact
+from flaskdoc import swagger
 
 
 def test_license_model():
-    li = License(name="Smith L.")
+    li = swagger.License(name="Smith L.")
     d = li.dict()
 
     assert "name" in d
     assert "description" not in d
 
-    li = License(name="Smith L.", url="https://www.example.com/license")
+    li = swagger.License(name="Smith L.", url="https://www.example.com/license")
     d = li.dict()
 
     assert d["name"] == "Smith L."
@@ -18,7 +18,7 @@ def test_license_model():
 def test_contact_model():
 
     # assert
-    c1 = Contact()
+    c1 = swagger.Contact()
 
     d = c1.dict()
     assert d == {}

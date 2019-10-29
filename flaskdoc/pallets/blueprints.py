@@ -1,6 +1,5 @@
 import flask
 
-import swagger.models
 from flaskdoc import swagger
 from flaskdoc.pallets import mixin
 

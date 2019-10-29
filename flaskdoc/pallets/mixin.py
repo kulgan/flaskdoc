@@ -18,7 +18,7 @@ class SwaggerMixin(object):
           path_item (swagger.PathItem):
         """
         relative_path = self.extract_path(relative_path)
-        recorded_path_item = self._paths.path_item(relative_path)
+        recorded_path_item = self._paths.get(relative_path)
         if recorded_path_item:
             recorded_path_item.merge(path_item)
         else:
