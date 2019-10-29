@@ -43,10 +43,10 @@ class Flask(flask.Flask, SwaggerMixin):
         self.add_url_rule("/openapi.yaml", view_func=self.register_yaml_path, methods=["GET"])
 
     def register_json_path(self):
-        return flask.jsonify(self._doc.as_dict()), 200
+        return flask.jsonify(self._doc.dict()), 200
 
     def register_yaml_path(self):
-        fk = json.dumps(self._doc.as_dict())
+        fk = json.dumps(self._doc.dict())
         return flask.Response(yaml.safe_dump(json.loads(fk)), mimetype="application/yaml")
 
     def route(self, rule, ref=None, description=None, summary=None, **options):

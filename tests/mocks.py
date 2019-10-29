@@ -1,21 +1,21 @@
 import flask
 
 import flaskdoc
-from swagger import GET, PathParameter, QueryParameter, Server, ServerVariable
+from flaskdoc import swagger
 
 blp = flaskdoc.Blueprint("Dummy", __name__, url_prefix="/v1")
 
-simple_get = GET(
+simple_get = swagger.GET(
     summary="Simplistic Get",
     tags=["test", "user", "sample"],
     description="Proof of concept",
     parameters=[
-        PathParameter(
+        swagger.PathParameter(
             name="id",
             description="root id",
             allow_empty_value=True
         ),
-        QueryParameter(
+        swagger.QueryParameter(
             name="age",
             description="age of user"
         )
@@ -23,12 +23,12 @@ simple_get = GET(
 )
 
 servers = [
-    Server(url="https://{sample}.sample/com",
-           description="Test Suite",
-           variables=dict(
-               sample=ServerVariable(default_val="api",
-                                     enum_values=["api", "api2", "api3"])
-           ))
+    swagger.Server(url="https://{sample}.sample/com",
+                   description="Test Suite",
+                   variables=dict(
+                       sample=swagger.ServerVariable(default_val="api",
+                                                     enum_values=["api", "api2", "api3"])
+                   ))
 ]
 
 

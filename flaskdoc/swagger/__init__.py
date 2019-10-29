@@ -1,12 +1,45 @@
-from flaskdoc.swagger.component import Component
-from flaskdoc.swagger.core import SwaggerDict, SwaggerBase, OpenApi
-from flaskdoc.swagger.info.contact import Contact
-from flaskdoc.swagger.info.info import Info
-from flaskdoc.swagger.info.license import License
-from flaskdoc.swagger.parameters import CookieParameter, HeaderParameter, Parameter, ParameterLocation, PathParameter, \
-    Style, QueryParameter
-from flaskdoc.swagger.path.operations import HttpMethod, Operation
-from flaskdoc.swagger.path.operations import GET, HEAD, OPTIONS, PATCH, POST, PUT, TRACE
-from flaskdoc.swagger.path.paths import PathItem, Paths
-from flaskdoc.swagger.server import Server, ServerVariable
-from flaskdoc.swagger.tag import Tag
+from flaskdoc.swagger.models import (
+    License,
+    Contact,
+    Info,
+    Server,
+    ServerVariable,
+    Component,
+    Paths,
+    PathItem,
+    Operation,
+    GET,
+    POST,
+    PUT,
+    HEAD,
+    OPTIONS,
+    PATCH,
+    TRACE,
+    HttpMethod,
+    ParameterLocation,
+    Style,
+    Parameter,
+    PathParameter,
+    QueryParameter,
+    HeaderParameter,
+    CookieParameter,
+    Tag,
+    OpenApi)
+
+
+if __name__ == '__main__':
+    pi = PathItem(ref="hello", summary="Summarixe this")
+    s1 = Server(description="Server Man", url="https://dd.web.com")
+    pi.add_server(s1)
+
+    get = GET(tags=["test"], summary="Yinyi de no sou", description="Kemi mi")
+    get.operation_id = "getByExample"
+    pr = QueryParameter(name="age", description="Just some shit")
+    get.add_parameter(pr)
+    pi.get = get
+    ps = Paths()
+    ps.add("/echo", pi)
+    print(ps)
+
+    h = HttpMethod("GET")
+    print(h)
