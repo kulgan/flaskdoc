@@ -26,7 +26,7 @@ blp = flaskdoc.Blueprint("sample", __name__)
 @blp.route("/echo/<string:sample>", 
     description="Simple Echo", 
     methods=[
-        swagger.models.GET(tags=["sample"])
+        swagger.GET(tags=["sample"])
     ]
 )
 def echo(sample):

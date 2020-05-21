@@ -24,11 +24,19 @@ from flaskdoc.swagger.models import (
     HeaderParameter,
     CookieParameter,
     Tag,
+    ReferenceObject,
+    Schema,
+    Discriminator,
+    XML,
+    SecuritySchemeType,
+    SecurityScheme,
+    OAuthFlows,
+    OAuthFlow,
     OpenApi)
 
 
 if __name__ == '__main__':
-    pi = PathItem(ref="hello", summary="Summarixe this")
+    pi = PathItem(ref="hello", summary="Summarize this")
     s1 = Server(description="Server Man", url="https://dd.web.com")
     pi.add_server(s1)
 

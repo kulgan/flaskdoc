@@ -1,6 +1,6 @@
 import six
 
-from swagger import Paths, PathItem, Operation, Tag
+from flaskdoc import swagger
 
 
 class SwaggerMixin(object):
@@ -8,7 +8,7 @@ class SwaggerMixin(object):
     def __init__(self):
         # collection of path items, param is here as a placeholder
         # child classes will have their own version of this variable
-        self._paths = Paths()
+        self._paths = swagger.Paths()
 
     def add_path(self, relative_path, path_item):
         """
@@ -39,8 +39,8 @@ class SwaggerMixin(object):
           list[swagger.Tag]: list of tags
         """
         if isinstance(tags, six.string_types):
-            return [Tag(name=tags)]
-        tags = [Tag(name=t) if isinstance(t, six.string_types) else t for t in tags]
+            return [swagger.Tag(name=tags)]
+        tags = [swagger.Tag(name=t) if isinstance(t, six.string_types) else t for t in tags]
         return tags
 
     @staticmethod
@@ -53,9 +53,9 @@ class SwaggerMixin(object):
         Returns:
           tuple list[swagger.Operations], list[str]: swagger operations and flask methods
         """
-        if isinstance(methods, Operation):
+        if isinstance(methods, swagger.Operation):
             return [methods], [methods.http_method.value]
-        methods = [Operation.from_op(m) if isinstance(m, six.string_types) else m for m in
+        methods = [swagger.Operation.from_op(m) if isinstance(m, six.string_types) else m for m in
                    methods]
         flask_methods = [m.http_method.value for m in methods]
         return methods, flask_methods
@@ -66,7 +66,11 @@ class SwaggerMixin(object):
 
     def parse_route(self, rule, ref=None, description=None, summary=None,
                     servers=None, parameters=None, **options):
-        path_item = PathItem(ref=ref, description=description, summary=summary)
+        path_item = swagger.PathItem(ref=ref,
+                                     description=description,
+                                     summary=summary,
+                                     servers=servers,
+                                     parameters=parameters)
         methods = options.pop("methods", ["GET"])
         operations, methods = self.extract_operations(methods)
         for operation in operations:

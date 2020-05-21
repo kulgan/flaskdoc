@@ -338,7 +338,7 @@ class PathItem(BaseModel):
         self.description = description  # type: str
 
         self.servers = servers or []  # type: list[Server]
-        self.parameters = parameters
+        self.parameters = parameters or []  # type: list[Parameter]
 
         self.get = get  # type -> Operation
         self.delete = delete  # type -> Operation
@@ -368,7 +368,7 @@ class PathItem(BaseModel):
         self.servers.append(server)
 
     def add_parameter(self, parameter):
-        self.parameters.add(parameter)
+        self.parameters.append(parameter)
 
     def merge_path_item(self, path_item):
         """
@@ -574,7 +574,7 @@ class Parameter(BaseModel):
         self.allow_empty_value = allow_empty_value  # type: bool
         self.allow_reserved = allow_reserved
         self.schema = schema
-        self.content = content
+        self.content = content  # type: dict
 
         self.explode = explode
         self._style = style if isinstance(style, Style) else Style(style)

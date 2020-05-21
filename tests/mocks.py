@@ -13,7 +13,8 @@ simple_get = swagger.GET(
         swagger.PathParameter(
             name="id",
             description="root id",
-            allow_empty_value=True
+            allow_empty_value=True,
+            schema=swagger.Schema(schema_type="string", schema_format="email")
         ),
         swagger.QueryParameter(
             name="age",
