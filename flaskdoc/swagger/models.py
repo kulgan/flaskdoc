@@ -4,7 +4,9 @@ import logging
 from collections import OrderedDict
 
 import enum
+from dataclasses import dataclass
 from enum import Enum
+from typing import List
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +19,8 @@ class SwaggerDict(OrderedDict):
         super(SwaggerDict, self).__setitem__(key, value)
 
 
-class BaseModel(object):
+class ModelMixin(object):
+    """ Model mixin that provides common functionalities like to dict and to json """
 
     @staticmethod
     def camel_case(snake_case):
@@ -39,11 +42,11 @@ class BaseModel(object):
             if key == "ref":
                 key = "$ref"
 
-            if isinstance(val, BaseModel):
+            if isinstance(val, ModelMixin):
                 val = val.dict()
 
             if isinstance(val, (set, list)):
-                val = [v.dict() if isinstance(v, BaseModel) else v for v in val]
+                val = [v.dict() if isinstance(v, ModelMixin) else v for v in val]
 
             d[self.camel_case(key)] = val
 
@@ -67,15 +70,9 @@ class BaseModel(object):
         return hash((val for _, val in vars(self).items()))
 
 
-class ExtensionModel(BaseModel):
+class ExtensionMixin(ModelMixin):
 
-    def __init__(self):
-        super(ExtensionModel, self).__init__()
-
-        self._extensions = None
-
-    def extensions(self):
-        return self._extensions
+    extensions = None  # type: dict
 
     def add_extension(self, name, value):
         """
@@ -85,16 +82,16 @@ class ExtensionModel(BaseModel):
             name (str): custom extension name, must begin with x-
             value (Any): value, can be None, any object or list
         Returns:
-            BaseModel: for chaining
+            ModelMixin: for chaining
         Raises:
             ValueError: if key name is invalid
         """
 
         self.validate_extension_name(name)
 
-        if not self._extensions:
-            self._extensions = SwaggerDict()
-        self._extensions[name] = value
+        if not self.extensions:
+            self.extensions = SwaggerDict()
+        self.extensions[name] = value
         return self
 
     @staticmethod
@@ -110,27 +107,29 @@ class ExtensionModel(BaseModel):
             raise ValueError("Custom extension must start with x-")
 
     def dict(self):
-        di = super(ExtensionModel, self).dict()
-        if self._extensions:
-            di.update(self._extensions)
+        di = super(ExtensionMixin, self).dict()
+        if self.extensions:
+            di.update(self.extensions)
         return di
 
 
 class ContainerModel(object):
 
-    def __init__(self):
-        self.items = SwaggerDict()
+    items = None
 
     def add(self, key, item):
-        """
-        Adds an item
+        """ Adds an item
         Args:
             key (str): item key
             item (dict): item
         """
+        if self.items is None:
+            self.items = SwaggerDict()
         self.items[key] = item
 
     def get(self, key):
+        if self.items is None:
+            self.items = SwaggerDict()
         return self.items.get(key)
 
     def __iter__(self):
@@ -147,64 +146,44 @@ class ContainerModel(object):
         return self.json(indent=2)
 
 
-class License(ExtensionModel):
+@dataclass
+class License(ExtensionMixin):
     """ License information for the exposed API. """
 
-    def __init__(self, name, url=None):
-        super(License, self).__init__()
-
-        self.url = url
-        self.name = name
+    name: str
+    url: str = None
 
 
-class Contact(ExtensionModel):
+@dataclass
+class Contact(ExtensionMixin):
     """ Contact information for the exposed API. """
 
-    def __init__(self, name=None, url=None, email=None):
-        super(Contact, self).__init__()
-
-        self.name = name
-        self.email = email
-        self.url = url
+    name: str = None
+    email: str = None
+    url: str = None
 
 
-class Info(ExtensionModel):
+@dataclass
+class Info(ExtensionMixin):
     """
     The object provides metadata about the API. The metadata MAY be used by the clients if needed, and MAY be
     presented in editing or documentation generation tools for convenience.
     """
-
-    def __init__(self, title, version, description=None, terms_of_service=None,
-                 contact=None, license=None):
-        """
-        API metadata object
-        Args:
-            title (str): the title of the application (required)
-            version (str): API version (required)
-            description (str): short description of the application
-            terms_of_service (str): API terms of service
-            contact (flaskdoc.swagger.info.Contact): API contact information
-            license (flaskdoc.swagger.info.License): API license information
-        """
-        super(Info, self).__init__()
-
-        self.title = title
-        self.description = description
-        self.terms_of_service = terms_of_service
-        self.contact = contact
-        self.license = license
-        self.version = version
+    title: str
+    version: str
+    description: str = None
+    terms_of_service: str = None
+    contact: Contact = None
+    license: License = None
 
 
-class Server(ExtensionModel):
+@dataclass
+class Server(ExtensionMixin):
     """ An object representing a Server. """
 
-    def __init__(self, url, description=None, variables=None):
-        super(Server, self).__init__()
-
-        self.url = url
-        self.description = description
-        self.variables = variables or SwaggerDict()
+    url: str
+    description: str = None
+    variables: dict = None
 
     def add_variable(self, name, variable):
         """
@@ -213,33 +192,31 @@ class Server(ExtensionModel):
             name (str): variable name
             variable (ServerVariable|dict): Server variable instance
         """
+        if self.variables is None:
+            self.variables = SwaggerDict()
         self.variables[name] = variable.dict()
 
 
-class ServerVariable(ExtensionModel):
-    """ An object representing a Server Variable for server URL template substitution. """
-
-    def __init__(self, default_val, enum_values=None, description=None):
-        """
+@dataclass
+class ServerVariable(ExtensionMixin):
+    """ An object representing a Server Variable for server URL template substitution.
         An object representing a server variable
-        Args:
-            default_val (str): REQUIRED. The default value to use for substitution, which SHALL be sent if an alternate
+        Fields:
+            default (str): REQUIRED. The default value to use for substitution, which SHALL be sent if an alternate
                                 value is not supplied. Note this behavior is different than the Schema Object's
                                 treatment of default values, because in those cases parameter values are optional.
-            enum_values (str|List[str]): An enumeration of string values to be used if the substitution options are
+            enum (List[str]): An enumeration of string values to be used if the substitution options are
                                 from a limited set
             description (str): An optional description for the server variable. CommonMark syntax MAY
                                 be used for rich text representation.
         """
-        super(ServerVariable, self).__init__()
 
-        enum_values = [enum_values] if isinstance(enum_values, str) else enum_values
-        self.default = default_val
-        self.enum = enum_values or []
-        self.description = description
+    default: str
+    enum: List[str] = None
+    description: str = None
 
 
-class Component(ExtensionModel):
+class Component(ExtensionMixin):
     """
     Holds a set of reusable objects for different aspects of the OAS. All objects defined within the components
     object will have no effect on the API unless they are explicitly referenced from properties outside the
@@ -311,7 +288,7 @@ class Paths(ContainerModel):
         super(Paths, self).add(relative_url, path_item)
 
 
-class PathItem(BaseModel):
+class PathItem(ModelMixin):
     """
     Describes the operations available on a single path. A Path Item MAY be empty, due to ACL constraints. The
     path itself is still exposed to the documentation viewer but they will not know which operations and parameters
@@ -392,7 +369,7 @@ class PathItem(BaseModel):
         self.options = path_item.options or self.options
 
 
-class Operation(ExtensionModel):
+class Operation(ExtensionMixin):
     """ Describes a single API operation on a path. """
 
     def __init__(self,
@@ -518,7 +495,7 @@ class HttpMethod(enum.Enum):
     TRACE = "TRACE"
 
 
-class ExternalDocumentation(ExtensionModel):
+class ExternalDocumentation(ExtensionMixin):
     """ Allows referencing an external resource for extended documentation. """
 
     def __init__(self, url, description=None):
@@ -547,7 +524,7 @@ class Style(Enum):
     DEEP_OBJECT = "deepObject"
 
 
-class Parameter(BaseModel):
+class Parameter(ModelMixin):
     """
     Describes a single operation parameter.
     A unique parameter is defined by a combination of a name and location.
@@ -631,7 +608,7 @@ class CookieParameter(Parameter):
         return self._style.value or Style.FORM.value
 
 
-class RequestBody(ExtensionModel):
+class RequestBody(ExtensionMixin):
 
     def __init__(self,
                  content,
@@ -644,7 +621,7 @@ class RequestBody(ExtensionModel):
         self.required = required  # type: bool
 
 
-class MediaType(BaseModel):
+class MediaType(ModelMixin):
     """ Each Media Type Object provides schema and examples for the media type identified by its key. """
 
     def __init__(self,
@@ -666,7 +643,7 @@ class MediaType(BaseModel):
         self.encoding[name] = encoding
 
 
-class Encoding(ExtensionModel):
+class Encoding(ExtensionMixin):
     """ A single encoding definition applied to a single schema property. """
 
     def __init__(self,
@@ -690,7 +667,7 @@ class Encoding(ExtensionModel):
         self.headers[name] = header
 
 
-class ResponsesObject(ExtensionModel):
+class ResponsesObject(ExtensionMixin):
     """
     A container for the expected responses of an operation. The container maps a HTTP response code to the
     expected response. The documentation is not necessarily expected to cover all possible HTTP response codes
@@ -709,7 +686,7 @@ class ResponsesObject(ExtensionModel):
         self.responses[status_code] = response
 
 
-class ResponseObject(ExtensionModel):
+class ResponseObject(ExtensionMixin):
     """
     Describes a single response from an API Operation, including design-time, static links to operations based on
     the response.
@@ -734,7 +711,7 @@ class ResponseObject(ExtensionModel):
         pass
 
 
-class Callback(BaseModel):
+class Callback(ModelMixin):
     """
     A map of possible out-of band callbacks related to the parent operation. Each value in the map is a Path Item
     Object that describes a set of requests that may be initiated by the API provider and the expected responses. The
@@ -746,7 +723,7 @@ class Callback(BaseModel):
         self.expression = expression  # type: PathItem
 
 
-class Example(ExtensionModel):
+class Example(ExtensionMixin):
 
     def __init__(self,
                  summary=None,
@@ -772,7 +749,7 @@ class Header(HeaderParameter):
         return self._style.value
 
 
-class Link(ExtensionModel):
+class Link(ExtensionMixin):
     """
     The Link object represents a possible design-time link for a response. The presence of a link does not guarantee
     the caller's ability to successfully invoke it, rather it provides a known relationship and traversal mechanism
@@ -799,7 +776,7 @@ class Link(ExtensionModel):
         self.server = server  # type: Server
 
 
-class Tag(BaseModel):
+class Tag(ModelMixin):
 
     def __init__(self,
                  name,
@@ -814,7 +791,7 @@ class Tag(BaseModel):
         self._external_docs = ExternalDocumentation(url=url, description=description)
 
 
-class ReferenceObject(BaseModel):
+class ReferenceObject(ModelMixin):
 
     def __init__(self, ref):
         self.ref = ref
@@ -865,7 +842,7 @@ class Schema(object):
         return self._not
 
 
-class Discriminator(BaseModel):
+class Discriminator(ModelMixin):
     """ When request bodies or response payloads may be one of a number of different schemas, a discriminator object
     can be used to aid in serialization, deserialization, and validation. The discriminator is a specific object in a
     schema which is used to inform the consumer of the specification of an alternative schema based on the value
@@ -876,7 +853,7 @@ class Discriminator(BaseModel):
         self.mapping = mapping  # type: dict
 
 
-class XML(ExtensionModel):
+class XML(ExtensionMixin):
     """ A metadata object that allows for more fine-tuned XML model definitions. When using arrays, XML element names
     are not inferred (for singular/plural forms) and the name property SHOULD be used to add that information. See
     examples for expected behavior.
@@ -905,7 +882,7 @@ class SecuritySchemeType(Enum):
     OPEN_ID_CONNECT = "openIdConnect"
 
 
-class SecurityScheme(ExtensionModel):
+class SecurityScheme(ExtensionMixin):
     """ Defines a security scheme that can be used by the operations. Supported schemes are HTTP authentication,
     an API key (either as a header or as a query parameter), OAuth2's common flows (implicit, password, application
     and access code) as defined in RFC6749, and OpenID Connect Discovery. """
@@ -929,7 +906,7 @@ class SecurityScheme(ExtensionModel):
         self.open_id_connect_url = open_id_connect_url
 
 
-class OAuthFlows(ExtensionModel):
+class OAuthFlows(ExtensionMixin):
     """ Allows configuration of the supported OAuth Flows. """
 
     def __init__(self,
@@ -945,7 +922,7 @@ class OAuthFlows(ExtensionModel):
         self.authorization_code = authorization_code  # type: OAuthFlow
 
 
-class OAuthFlow(ExtensionModel):
+class OAuthFlow(ExtensionMixin):
     """ Configuration details for a supported OAuth Flow """
 
     def __init__(self,
@@ -961,7 +938,7 @@ class OAuthFlow(ExtensionModel):
         self.scopes = scopes  # type: dict
 
 
-class OpenApi(BaseModel):
+class OpenApi(ModelMixin):
     """ This is the root document object of the OpenAPI document. """
 
     def __init__(self, info, paths, open_api_version="3.0.2"):

@@ -27,8 +27,8 @@ servers = [
     swagger.Server(url="https://{sample}.sample/com",
                    description="Test Suite",
                    variables=dict(
-                       sample=swagger.ServerVariable(default_val="api",
-                                                     enum_values=["api", "api2", "api3"])
+                       sample=swagger.ServerVariable(default="api",
+                                                     enum=["api", "api2", "api3"])
                    ))
 ]
 

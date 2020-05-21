@@ -19,10 +19,8 @@ setup(
         "Framework :: Flask",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: Apache Software License",
-        "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
         "Topic :: Documentation"
     ],
     longdescription="",
@@ -31,7 +29,6 @@ setup(
     package_dir={"": "flaskdoc"},
     install_requires=[
         "flask",
-        "six",
         "PyYaml"
     ]
 )
