@@ -1,7 +1,6 @@
 import pytest
 
 import flaskdoc
-import swagger.models
 from flaskdoc import swagger
 from tests import mocks
 
