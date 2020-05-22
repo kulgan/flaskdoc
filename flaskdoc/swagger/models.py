@@ -178,26 +178,6 @@ class Info(ExtensionMixin):
 
 
 @dataclass
-class Server(ExtensionMixin):
-    """ An object representing a Server. """
-
-    url: str
-    description: str = None
-    variables: dict = None
-
-    def add_variable(self, name, variable):
-        """
-        Adds a server variable
-        Args:
-            name (str): variable name
-            variable (ServerVariable|dict): Server variable instance
-        """
-        if self.variables is None:
-            self.variables = SwaggerDict()
-        self.variables[name] = variable.dict()
-
-
-@dataclass
 class ServerVariable(ExtensionMixin):
     """ An object representing a Server Variable for server URL template substitution.
         An object representing a server variable
@@ -214,6 +194,26 @@ class ServerVariable(ExtensionMixin):
     default: str
     enum: List[str] = None
     description: str = None
+
+
+@dataclass
+class Server(ExtensionMixin):
+    """ An object representing a Server. """
+
+    url: str
+    description: str = None
+    variables: Dict[str, ServerVariable] = None
+
+    def add_variable(self, name, variable):
+        """
+        Adds a server variable
+        Args:
+            name (str): variable name
+            variable (ServerVariable|dict): Server variable instance
+        """
+        if self.variables is None:
+            self.variables = SwaggerDict()
+        self.variables[name] = variable.dict()
 
 
 class Style(Enum):
