@@ -53,14 +53,15 @@ def test_server():
 
 def test_path_items():
     get_op = swagger.GET(
-        operations_id="testGetExample",
+        operation_id="testGetExample",
         description="Get Example",
         tags=["example"],
         parameters=[
             swagger.QueryParameter(name="p1", description="page")
-        ]
+        ],
+        responses=None
     )
-    post_op = swagger.POST(operations_id="testPostExample", description="POST Example")
+    post_op = swagger.POST(operation_id="testPostExample", description="POST Example", responses=None)
     path_item = swagger.PathItem(
         parameters=[
             swagger.PathParameter(name="v1")

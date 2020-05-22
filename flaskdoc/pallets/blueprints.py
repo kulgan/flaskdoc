@@ -15,7 +15,7 @@ class Blueprint(flask.Blueprint, mixin.SwaggerMixin):
         self._paths = swagger.Paths()
 
     def route(self, rule, ref=None, description=None,
-              summary=None, servers=None, parameters=None, **options):
+              summary=None, servers=None, parameters=None, responses=None, **options):
         """
         Extends flask blueprint route
         Args:
@@ -25,11 +25,12 @@ class Blueprint(flask.Blueprint, mixin.SwaggerMixin):
             summary (str): An optional, string summary, intended to apply to all operations in this path.
             servers (List[swagger.Server]): server list
             parameters (List[swagger.Parameter]): list of parameters
+            responses (swagger.ResponsesObject):
             **options:
 
         Returns:
             callback:
         """
 
-        options = self.parse_route(rule, ref, description, summary, servers, parameters, **options)
+        options = self.parse_route(rule, ref, description, summary, servers, parameters, responses, **options)
         return super(Blueprint, self).route(rule, **options)

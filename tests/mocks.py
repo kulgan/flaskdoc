@@ -14,13 +14,14 @@ simple_get = swagger.GET(
             name="id",
             description="root id",
             allow_empty_value=True,
-            schema=swagger.Schema(schema_type="string", schema_format="email")
+            schema=swagger.Schema(type="string", format="email")
         ),
         swagger.QueryParameter(
             name="age",
             description="age of user"
         )
-    ]
+    ],
+    responses=swagger.ResponsesObject()
 )
 
 servers = [

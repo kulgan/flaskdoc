@@ -6,7 +6,7 @@ from collections import OrderedDict
 import enum
 from dataclasses import dataclass
 from enum import Enum
-from typing import List
+from typing import List, Any, Set, Union, Dict
 
 logger = logging.getLogger(__name__)
 
@@ -216,6 +216,171 @@ class ServerVariable(ExtensionMixin):
     description: str = None
 
 
+class Style(Enum):
+    """ Style values defined to aid serializing different simple parameters """
+
+    FORM = "form"
+    LABEL = "label"
+    MATRIX = "matrix"
+    SIMPLE = "simple"
+    SPACE_DELIMITED = "spaceDelimited"
+    PIPE_DELIMITED = "pipeDelimited"
+    DEEP_OBJECT = "deepObject"
+
+    def __repr__(self):
+        return self.value
+
+
+@dataclass
+class ReferenceObject(ModelMixin):
+
+    ref: str
+
+
+@dataclass
+class Discriminator(ModelMixin):
+    """ When request bodies or response payloads may be one of a number of different schemas, a discriminator object
+    can be used to aid in serialization, deserialization, and validation. The discriminator is a specific object in a
+    schema which is used to inform the consumer of the specification of an alternative schema based on the value
+    associated with it. """
+
+    property_name: str
+    mapping: Dict[str, str] = None
+
+
+@dataclass
+class XML(ExtensionMixin):
+    """ A metadata object that allows for more fine-tuned XML model definitions. When using arrays, XML element names
+    are not inferred (for singular/plural forms) and the name property SHOULD be used to add that information. See
+    examples for expected behavior.
+    """
+
+    name: str = None
+    namespace: str = None
+    prefix: str = None
+    attribute: bool = False
+    wrapped: bool = False
+
+
+@dataclass
+class ExternalDocumentation(ExtensionMixin):
+    """ Allows referencing an external resource for extended documentation. """
+
+    url: str
+    description: str = None
+
+
+@dataclass
+class Encoding(ExtensionMixin):
+    """ A single encoding definition applied to a single schema property. """
+
+    content_type: str
+    headers: Dict[str, Union[ReferenceObject]] = None
+    style: Style = None
+    explode: bool = True
+    allow_reserved: bool = False
+
+    def add_header(self, name, header):
+        if not self.headers:
+            self.headers = SwaggerDict()
+        self.headers[name] = header
+
+
+@dataclass
+class Example(ExtensionMixin):
+
+    summary: str = None
+    description: str = None
+    value: Any = None
+    external_value: str = None
+
+
+@dataclass
+class Schema(object):
+
+    ref: str = None
+    title: str = None
+    multiple_of = None
+    maximum = None
+    exclusive_maximum = None
+    minimum = None
+    exclusive_minimum = None
+    max_length = None  # type: int
+    min_length = None  # type: int
+    pattern = None
+    max_items = None  # type: ignore
+    min_items = None  # type: ignore
+    unique_item = None
+    max_properties = None  # type: ignore
+    min_properties = None  # type: ignore
+    required = None
+    enum = None
+    type: str = None
+    all_of = None
+    one_of = None
+    any_of = None
+    _not = None  # type: ignore
+    items = None
+    properties = None
+    additional_properties = None
+    description = None
+    format: str = None
+    default = None
+    nullable = None
+    discriminator = None
+    read_only = None
+    write_only = None
+    xml = None
+    external_docs = None
+    example = None
+    deprecated = None
+
+    def q_not(self):
+        return self._not
+
+
+@dataclass
+class MediaType(ModelMixin):
+    """ Each Media Type Object provides schema and examples for the media type identified by its key. """
+
+    schema: Union[ReferenceObject, Schema] = None
+    example: Any = None
+    examples: Dict[str, Union[Example, ReferenceObject]] = None
+    encoding: Dict[str, Encoding] = None
+
+    def add_example(self, name: str, example: Union[Example, ReferenceObject]):
+        if self.examples is None:
+            self.examples = SwaggerDict()
+        self.examples[name] = example
+
+    def add_encoding(self, name: str, encoding: Encoding):
+        if self.encoding is None:
+            self.encoding = SwaggerDict()
+        self.encoding[name] = encoding
+
+
+class Content(object):
+
+    def __init__(self):
+        super(Content, self).__init__()
+        self.contents = SwaggerDict()
+
+    def add_media_type(self, name: str, media_type: MediaType):
+        self.contents[name] = media_type.dict()
+
+    def dict(self):
+        return self.contents
+
+
+@dataclass
+class RequestBody(ExtensionMixin):
+
+    # FIXME: reuse Content Class ?
+    content: Dict[str, MediaType]
+    description: str = None
+    required: bool = False
+
+
 class Component(ExtensionMixin):
     """
     Holds a set of reusable objects for different aspects of the OAS. All objects defined within the components
@@ -269,25 +434,205 @@ class RelativePath(object):
                 self.params[i] = path.replace("{", "").replace("}", "")
 
 
-class Paths(ContainerModel):
+
+
+
+class ParameterLocation(Enum):
+    COOKIE = "cookie"
+    HEADER = "header"
+    PATH = "path"
+    QUERY = "query"
+
+    def __repr__(self):
+        return self.value
+
+
+@dataclass
+class Parameter(ModelMixin):
     """
-    Holds the relative paths to the individual endpoints and their operations. The path is appended to the URL
-    from the Server Object in order to construct the full URL. The Paths MAY be empty, due to ACL constraints.
+    Describes a single operation parameter.
+    A unique parameter is defined by a combination of a name and location.
     """
 
-    def add(self, relative_url, path_item):
-        """
-        Adds a path item
-        Args:
-          relative_url (str): path url name, eg `/echo`
-          path_item (PathItem|SwaggerDict) : PathItem instance describing the path
-        """
+    name: str
+    _in: ParameterLocation = None
+    required: bool = False
+    description: str = None
+    deprecated: bool = False
 
-        if isinstance(path_item, PathItem):
-            path_item = path_item.dict()
-        super(Paths, self).add(relative_url, path_item)
+    allow_empty_value: bool = False
+    allow_reserved: bool = False
+    schema: Union[Schema, ReferenceObject] = None
+    content: Dict[str, MediaType] = None
+
+    explode: bool = False
+    style: Style = None
+
+    example: Any = None
+    examples: Dict[str, Union[Example, ReferenceObject]] = None
+
+    @property
+    def q_in(self):
+        return self._in.value
 
 
+@dataclass
+class PathParameter(Parameter):
+
+    _in = ParameterLocation.PATH
+    required: bool = True
+    style = Style.SIMPLE
+
+
+@dataclass
+class QueryParameter(Parameter):
+
+    _in = ParameterLocation.QUERY
+    style = Style.FORM
+
+
+@dataclass
+class HeaderParameter(Parameter):
+
+    _in = ParameterLocation.HEADER
+    style = Style.SIMPLE
+
+
+@dataclass
+class CookieParameter(Parameter):
+
+    _in = ParameterLocation.COOKIE
+    style = Style.FORM
+
+
+@dataclass
+class Link(ExtensionMixin):
+    """
+    The Link object represents a possible design-time link for a response. The presence of a link does not guarantee
+    the caller's ability to successfully invoke it, rather it provides a known relationship and traversal mechanism
+    between responses and other operations. Unlike dynamic links (i.e. links provided in the response payload),
+    the OAS linking mechanism does not require link information in the runtime response. For computing links,
+    and providing instructions to execute them, a runtime expression is used for accessing values in an operation and
+    using them as parameters while invoking the linked operation.
+    """
+
+    operation_ref: str = None
+    operation_id: str = None
+    description: str = None
+    parameters: Dict[str, Any] = None
+    request_body: Any = None
+    server: Server = None
+
+
+@dataclass
+class ResponseObject(ExtensionMixin):
+    """
+    Describes a single response from an API Operation, including design-time, static links to operations based on
+    the response.
+    """
+
+    description: str
+    content: Dict[str, MediaType] = None
+    headers: Dict[str, Union[ReferenceObject, HeaderParameter]] = None
+    links: Dict[str, Union[Link, ReferenceObject]] = None
+
+    def add_header(self, name: str, header: Union[ReferenceObject, HeaderParameter]):
+        if self.headers is None:
+            self.headers = SwaggerDict()
+        self.headers[name] = header
+
+    def add_content(self, media_type: str, content: MediaType):
+        if not self.content:
+            self.content = SwaggerDict()
+        self.content[media_type] = content
+
+    def add_link(self, link_name: str, link: Union[Link, ReferenceObject]):
+        if self.links is None:
+            self.links = SwaggerDict()
+        self.links[link_name] = link
+
+
+@dataclass
+class ResponsesObject(ExtensionMixin):
+    """
+    A container for the expected responses of an operation. The container maps a HTTP response code to the
+    expected response. The documentation is not necessarily expected to cover all possible HTTP response codes
+    because they may not be known in advance. However, documentation is expected to cover a successful operation
+    response and any known errors. The default MAY be used as a default response object for all HTTP codes that are
+    not covered individually by the specification. The Responses Object MUST contain at least one response code,
+    and it SHOULD be the response for a successful operation call.
+    """
+
+    default: ResponseObject = None
+    responses: Dict[str, ResponseObject] = None
+
+    def add_response(self, status_code: str, response: ResponseObject):
+        if self.responses is None:
+            self.responses = SwaggerDict()
+        self.responses[status_code] = response
+
+
+@dataclass
+class Tag(ModelMixin):
+
+    name: str
+    description: str = None
+    external_docs: ExternalDocumentation = None
+
+    def external_doc(self, url, description=None):
+        self.external_docs = ExternalDocumentation(url=url, description=description)
+
+
+@dataclass
+class Operation(ExtensionMixin):
+    """ Describes a single API operation on a path. """
+
+    responses: ResponsesObject
+    tags: List[str] = None
+    summary: str = None
+    description: str = None
+    external_docs: ExternalDocumentation = None
+    operation_id: str = None
+    parameters: List[Union[ReferenceObject, Parameter]] = None
+    request_body: Union[RequestBody, ReferenceObject] = None
+    callbacks: Dict[str, ReferenceObject] = None
+    deprecated = False
+    security: List[Dict[str, Any]] = None
+    servers: Set[Server] = None
+
+    @property
+    def http_method(self):
+        return None
+
+    def add_parameter(self, parameter: Union[Parameter, ReferenceObject]):
+        if self.parameters is None:
+            self.parameters = []
+        self.parameters.append(parameter)
+
+    @staticmethod
+    def from_op(http_method: str, responses: ResponsesObject):
+        """ Factory for creating instances of Http Operations """
+
+        http_method = HttpMethod(http_method)
+        if http_method == HttpMethod.GET:
+            return GET(responses=responses)
+        elif http_method == HttpMethod.POST:
+            return POST(responses=responses)
+        elif http_method == HttpMethod.PUT:
+            return PUT(responses=responses)
+        elif http_method == HttpMethod.DELETE:
+            return DELETE(responses=responses)
+        elif http_method == HttpMethod.OPTIONS:
+            return OPTIONS(responses=responses)
+        elif http_method == HttpMethod.TRACE:
+            return TRACE(responses=responses)
+        elif http_method == HttpMethod.PATCH:
+            return PATCH(responses=responses)
+        elif http_method == HttpMethod.HEAD:
+            return HEAD(responses=responses)
+
+
+@dataclass
 class PathItem(ModelMixin):
     """
     Describes the operations available on a single path. A Path Item MAY be empty, due to ACL constraints. The
@@ -295,36 +640,21 @@ class PathItem(ModelMixin):
     are available.
     """
 
-    def __init__(self, ref=None,
-                 summary=None,
-                 description=None,
-                 parameters=None,
-                 servers=None,
-                 get=None,
-                 delete=None,
-                 head=None,
-                 options=None,
-                 patch=None,
-                 post=None,
-                 put=None,
-                 trace=None):
-        super(PathItem, self).__init__()
+    ref: str = None
+    summary: str = None
+    description: str = None
 
-        self.ref = ref  # type: str
-        self.summary = summary  # type: str
-        self.description = description  # type: str
+    servers: Set[Server] = None
+    parameters: List[Union[Parameter, ReferenceObject]] = None
 
-        self.servers = servers or []  # type: list[Server]
-        self.parameters = parameters or []  # type: list[Parameter]
-
-        self.get = get  # type -> Operation
-        self.delete = delete  # type -> Operation
-        self.head = head  # type -> Operation
-        self.options = options  # type -> Operation
-        self.patch = patch  # type -> Operation
-        self.post = post  # type -> Operation
-        self.put = put  # type -> Operation
-        self.trace = trace  # type -> Operation
+    get: Operation = None
+    delete: Operation = None
+    head: Operation = None
+    options: Operation = None
+    patch: Operation = None
+    post: Operation = None
+    put: Operation = None
+    trace: Operation = None
 
     def add_operation(self, operation):
         """
@@ -369,65 +699,26 @@ class PathItem(ModelMixin):
         self.options = path_item.options or self.options
 
 
-class Operation(ExtensionMixin):
-    """ Describes a single API operation on a path. """
+class Paths(ContainerModel):
+    """
+    Holds the relative paths to the individual endpoints and their operations. The path is appended to the URL
+    from the Server Object in order to construct the full URL. The Paths MAY be empty, due to ACL constraints.
+    """
 
-    def __init__(self,
-                 tags=None,
-                 summary=None,
-                 description=None,
-                 operations_id=None,
-                 parameters=None):
-        super(Operation, self).__init__()
-        self.tags = tags  # type: list[str]
-        self.summary = summary  # type: str
-        self.description = description  # type: str
-        self.external_docs = None
-        self.operation_id = operations_id  # type: str
-        self.parameters = parameters or []  # type: list[Parameter]
-        self.request_body = None
-        self.responses = None
-        self.callbacks = {}
-        self.deprecated = False
-        self.security = []
-        self.servers = set()
-
-    @property
-    def http_method(self):
-        return None
-
-    def add_parameter(self, parameter):
-        self.parameters.append(parameter)
-
-    @staticmethod
-    def from_op(http_method):
+    def add(self, relative_url: str, path_item: Union[PathItem, SwaggerDict]):
         """
-        Factory for creating instances of Http Operations
+        Adds a path item
         Args:
-            http_method (str): http method string
-
-        Returns:
-            Operation:
+          relative_url (str): path url name, eg `/echo`
+          path_item (PathItem|SwaggerDict) : PathItem instance describing the path
         """
-        http_method = HttpMethod(http_method)
-        if http_method == HttpMethod.GET:
-            return GET()
-        elif http_method == HttpMethod.POST:
-            return POST()
-        elif http_method == HttpMethod.PUT:
-            return PUT()
-        elif http_method == HttpMethod.DELETE:
-            return DELETE()
-        elif http_method == HttpMethod.OPTIONS:
-            return OPTIONS()
-        elif http_method == HttpMethod.TRACE:
-            return TRACE()
-        elif http_method == HttpMethod.PATCH:
-            return PATCH()
-        elif http_method == HttpMethod.HEAD:
-            return HEAD()
+
+        if isinstance(path_item, PathItem):
+            path_item = path_item.dict()
+        super(Paths, self).add(relative_url, path_item)
 
 
+@dataclass
 class GET(Operation):
 
     @property
@@ -435,6 +726,7 @@ class GET(Operation):
         return HttpMethod.GET
 
 
+@dataclass
 class POST(Operation):
 
     @property
@@ -495,222 +787,7 @@ class HttpMethod(enum.Enum):
     TRACE = "TRACE"
 
 
-class ExternalDocumentation(ExtensionMixin):
-    """ Allows referencing an external resource for extended documentation. """
-
-    def __init__(self, url, description=None):
-        super(ExternalDocumentation, self).__init__()
-
-        self.url = url
-        self.description = description
-
-
-class ParameterLocation(Enum):
-    COOKIE = "cookie"
-    HEADER = "header"
-    PATH = "path"
-    QUERY = "query"
-
-
-class Style(Enum):
-    """ Style values defined to aid serializing different simple parameters """
-
-    FORM = "form"
-    LABEL = "label"
-    MATRIX = "matrix"
-    SIMPLE = "simple"
-    SPACE_DELIMITED = "spaceDelimited"
-    PIPE_DELIMITED = "pipeDelimited"
-    DEEP_OBJECT = "deepObject"
-
-
-class Parameter(ModelMixin):
-    """
-    Describes a single operation parameter.
-    A unique parameter is defined by a combination of a name and location.
-    """
-
-    def __init__(self,
-                 name,
-                 required=False,
-                 description=None,
-                 deprecated=False,
-                 style="form",
-                 allow_empty_value=False,
-                 explode=False,
-                 allow_reserved=False,
-                 schema=None,
-                 content=None):
-        super(Parameter, self).__init__()
-        self.name = name  # type: str
-        self._in = ParameterLocation("query")
-        self.description = description  # type: str
-        self.deprecated = deprecated  # type: bool
-        self._required = required  # type: bool
-
-        self.allow_empty_value = allow_empty_value  # type: bool
-        self.allow_reserved = allow_reserved
-        self.schema = schema
-        self.content = content  # type: dict
-
-        self.explode = explode
-        self._style = style if isinstance(style, Style) else Style(style)
-
-        self.example = None
-        self.examples = None
-
-    @property
-    def q_required(self):
-        return self._required
-
-    @property
-    def q_style(self):
-        return self._style
-
-    @property
-    def q_in(self):
-        return self._in.value
-
-
-class PathParameter(Parameter):
-
-    @property
-    def q_required(self):
-        return True
-
-    @property
-    def q_style(self):
-        return self._style.value or Style.SIMPLE.value
-
-    @property
-    def q_in(self):
-        return ParameterLocation.PATH.value
-
-
-class QueryParameter(Parameter):
-
-    @property
-    def q_style(self):
-        return self._style.valaue or Style.FORM.value
-
-
-class HeaderParameter(Parameter):
-
-    @property
-    def q_style(self):
-        return self._style.value or Style.SIMPLE.value
-
-
-class CookieParameter(Parameter):
-
-    @property
-    def q_style(self):
-        return self._style.value or Style.FORM.value
-
-
-class RequestBody(ExtensionMixin):
-
-    def __init__(self,
-                 content,
-                 description=None,
-                 required=None):
-        super(RequestBody, self).__init__()
-
-        self.content = content
-        self.description = description  # type: str
-        self.required = required  # type: bool
-
-
-class MediaType(ModelMixin):
-    """ Each Media Type Object provides schema and examples for the media type identified by its key. """
-
-    def __init__(self,
-                 schema=None,
-                 example=None,
-                 examples=None,
-                 encoding=None):
-        super(MediaType, self).__init__()
-
-        self.schema = schema
-        self.example = example
-        self.examples = examples
-        self.encoding = encoding
-
-    def add_example(self, name, example):
-        self.examples[name] = example
-
-    def add_encoding(self, name, encoding):
-        self.encoding[name] = encoding
-
-
-class Encoding(ExtensionMixin):
-    """ A single encoding definition applied to a single schema property. """
-
-    def __init__(self,
-                 content_type,
-                 headers=None,
-                 style=None,
-                 explode=None,
-                 allow_reserved=False):
-        super(Encoding, self).__init__()
-        self.content_type = content_type  # type: str
-        self.headers = headers
-        self._style = style if isinstance(style, Style) else Style(style)
-        self.explode = explode  # type: bool
-        self.allow_reserved = allow_reserved  # type: bool
-
-    @property
-    def style(self):
-        return self._style.value
-
-    def add_header(self, name, header):
-        self.headers[name] = header
-
-
-class ResponsesObject(ExtensionMixin):
-    """
-    A container for the expected responses of an operation. The container maps a HTTP response code to the
-    expected response. The documentation is not necessarily expected to cover all possible HTTP response codes
-    because they may not be known in advance. However, documentation is expected to cover a successful operation
-    response and any known errors. The default MAY be used as a default response object for all HTTP codes that are
-    not covered individually by the specification. The Responses Object MUST contain at least one response code,
-    and it SHOULD be the response for a successful operation call.
-    """
-
-    def __init__(self, default=None):
-        super(ResponsesObject, self).__init__()
-        self.default = default  # type: ResponseObject
-        self.responses = {}  # type: dict[str, ResponseObject]
-
-    def add_response(self, status_code, response):
-        self.responses[status_code] = response
-
-
-class ResponseObject(ExtensionMixin):
-    """
-    Describes a single response from an API Operation, including design-time, static links to operations based on
-    the response.
-    """
-
-    def __init__(self, description, headers=None, content=None, links=None):
-        super(ResponseObject, self).__init__()
-        self.description = description  # type: str
-        self.headers = headers  # type: dict[str, Header]
-        self.content = content  # type: dict[str, MediaType]
-        self.links = links
-
-    def add_header(self, name, header):
-        self.headers[name] = header
-
-    def add_content(self, media_type, content):
-        if not self.content:
-            self.content = SwaggerDict()
-        self.content[media_type] = content
-
-    def add_link(self, link_name, link):
-        pass
-
-
+@dataclass
 class Callback(ModelMixin):
     """
     A map of possible out-of band callbacks related to the parent operation. Each value in the map is a Path Item
@@ -719,159 +796,7 @@ class Callback(ModelMixin):
     use for the callback operation.
     """
 
-    def __init__(self, expression):
-        self.expression = expression  # type: PathItem
-
-
-class Example(ExtensionMixin):
-
-    def __init__(self,
-                 summary=None,
-                 description=None,
-                 value=None,
-                 external_value=None):
-        super(Example, self).__init__()
-
-        self.summary = summary  # type: str
-        self.description = description  # type: str
-        self.value = value  # type: object
-        self.external_value = external_value  # type: str
-
-
-class Header(HeaderParameter):
-
-    @property
-    def required(self):
-        return self._required
-
-    @property
-    def style(self):
-        return self._style.value
-
-
-class Link(ExtensionMixin):
-    """
-    The Link object represents a possible design-time link for a response. The presence of a link does not guarantee
-    the caller's ability to successfully invoke it, rather it provides a known relationship and traversal mechanism
-    between responses and other operations. Unlike dynamic links (i.e. links provided in the response payload),
-    the OAS linking mechanism does not require link information in the runtime response. For computing links,
-    and providing instructions to execute them, a runtime expression is used for accessing values in an operation and
-    using them as parameters while invoking the linked operation.
-    """
-
-    def __init__(self,
-                 operation_ref=None,
-                 operation_id=None,
-                 description=None,
-                 parameters=None,
-                 request_body=None,
-                 server=None):
-        super(Link, self).__init__()
-        self.operation_ref = operation_ref  # type: str
-        self.operation_id = operation_id  # type: str
-        self.description = description  # type: str
-
-        self.parameters = parameters  # type: dict[str, Parameter]
-        self.request_body = request_body  # type: object
-        self.server = server  # type: Server
-
-
-class Tag(ModelMixin):
-
-    def __init__(self,
-                 name,
-                 description=None,
-                 external_doc=None):
-        super(Tag, self).__init__()
-        self.name = name  # type: str
-        self.description = description  # type: str
-        self._external_docs = external_doc  # type ExternalDocumentation
-
-    def external_docs(self, url, description=None):
-        self._external_docs = ExternalDocumentation(url=url, description=description)
-
-
-class ReferenceObject(ModelMixin):
-
-    def __init__(self, ref):
-        self.ref = ref
-
-
-# TODO
-class Schema(object):
-
-    def __init__(self, schema_type, schema_format, ref=None):
-        self.ref = ref  # type: str
-        self.title = None
-        self.multiple_of = None
-        self.maximum = None
-        self.exclusive_maximum = None
-        self.minimum = None
-        self.exclusive_minimum = None
-        self.max_length = None  # type: int
-        self.min_length = None  # type: int
-        self.pattern = None
-        self.max_items = None  # type: ignore
-        self.min_items = None  # type: ignore
-        self.unique_item = None
-        self.max_properties = None  # type: ignore
-        self.min_properties = None  # type: ignore
-        self.required = None
-        self.enum = None
-        self.type = schema_type
-        self.all_of = None
-        self.one_of = None
-        self.any_of = None
-        self._not = None  # type: ignore
-        self.items = None
-        self.properties = None
-        self.additional_properties = None
-        self.description = None
-        self.format = schema_format
-        self.default = None
-        self.nullable = None
-        self.discriminator = None
-        self.read_only = None
-        self.write_only = None
-        self.xml = None
-        self.external_docs = None
-        self.example = None
-        self.deprecated = None
-
-    def q_not(self):
-        return self._not
-
-
-class Discriminator(ModelMixin):
-    """ When request bodies or response payloads may be one of a number of different schemas, a discriminator object
-    can be used to aid in serialization, deserialization, and validation. The discriminator is a specific object in a
-    schema which is used to inform the consumer of the specification of an alternative schema based on the value
-    associated with it. """
-
-    def __init__(self, property_name, mapping=None):
-        self.property_name = property_name
-        self.mapping = mapping  # type: dict
-
-
-class XML(ExtensionMixin):
-    """ A metadata object that allows for more fine-tuned XML model definitions. When using arrays, XML element names
-    are not inferred (for singular/plural forms) and the name property SHOULD be used to add that information. See
-    examples for expected behavior.
-    """
-
-    def __init__(self,
-                 name,
-                 namespace=None,
-                 prefix=None,
-                 attribute=None,
-                 wrapped=None):
-        super(XML, self).__init__()
-
-        self.name = name
-        self.namespace = namespace
-        self.prefix = prefix
-        self.attribute = attribute
-        self.wrapped = wrapped
+    expression: PathItem
 
 
 class SecuritySchemeType(Enum):
@@ -886,7 +811,7 @@ class SecurityScheme(ExtensionMixin):
     """ Defines a security scheme that can be used by the operations. Supported schemes are HTTP authentication,
     an API key (either as a header or as a query parameter), OAuth2's common flows (implicit, password, application
     and access code) as defined in RFC6749, and OpenID Connect Discovery. """
-    
+
     def __init__(self,
                  scheme_type,
                  name,

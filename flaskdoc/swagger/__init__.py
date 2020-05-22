@@ -21,6 +21,8 @@ from flaskdoc.swagger.models import (
     Parameter,
     PathParameter,
     QueryParameter,
+    ResponseObject,
+    ResponsesObject,
     HeaderParameter,
     CookieParameter,
     Tag,
@@ -32,7 +34,8 @@ from flaskdoc.swagger.models import (
     SecurityScheme,
     OAuthFlows,
     OAuthFlow,
-    OpenApi)
+    OpenApi,
+)
 
 
 if __name__ == '__main__':
