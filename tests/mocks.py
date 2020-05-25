@@ -1,7 +1,7 @@
 import flask
 
+import flaskdoc
 from flaskdoc import swagger
-from pallets.app import get_api_docs
 
 blp = flask.Blueprint("Dummy", __name__, url_prefix="/v1")
 
@@ -50,8 +50,29 @@ servers = [
 
 
 @swagger.Tag(name="getEcho", description="Retrieve echos wit Get")
-@swagger.GET(tags=["YgetEcho"], operation_id="getEcho", parameters=[swagger.PathParameter(name="sample")],
-             description="Retrieve echos wit Get", responses=swagger.ResponsesObject())
+@swagger.GET(
+    tags=["getEcho"],
+    operation_id="getEcho",
+    parameters=[
+        swagger.PathParameter(
+            name="sample",
+            schema=flaskdoc.String()
+        )
+    ],
+    description="Retrieve echos wit Get",
+    responses=swagger.ResponsesObject(
+        responses={
+            "200": swagger.ResponseObject(
+                description="Success",
+                content={
+                    "text/plain": swagger.MediaType(
+                        schema=flaskdoc.Email()
+                    )
+                }
+            )
+        }
+    ),
+)
 @blp.route("/echo/<string:sample>", methods=["GET"])
 def echo(sample: str):
     """

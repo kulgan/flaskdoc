@@ -115,8 +115,7 @@ def get_api_docs(app: flask.Flask):
         docs = inspect.getdoc(fn)
         rule = get_api_rule(fn, app)
         if rule:
-            print(rule, fn.__name__)
-            pi = parse_specs(rule, spec)
+            pi = parse_specs(rule, spec, api)
             pi.description = docs
             api.paths.add(extract_args(rule.rule), pi)
     return 1
@@ -131,7 +130,7 @@ def get_api_rule(fn, app):
     return None
 
 
-def parse_specs(rule: Rule, spec: List):
+def parse_specs(rule: Rule, spec: List, api: swagger.OpenApi):
 
     pi = swagger.PathItem()
     for arg in rule.arguments:
@@ -148,6 +147,8 @@ def parse_specs(rule: Rule, spec: List):
             pi.add_parameter(model)
         elif isinstance(model, swagger.Operation):
             pi.add_operation(model)
+        elif isinstance(model, swagger.Tag):
+            api.add_tag(model)
     return pi
 
 

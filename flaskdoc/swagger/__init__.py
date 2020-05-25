@@ -8,6 +8,7 @@ from flaskdoc.swagger.models import (
     Paths,
     PathItem,
     Operation,
+    MediaType,
     GET,
     POST,
     PUT,
