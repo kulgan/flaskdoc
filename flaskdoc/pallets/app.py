@@ -1,16 +1,32 @@
+import functools
+import inspect
 import json
+from typing import List
 
 import flask
+import pkg_resources
 import yaml
+from werkzeug.routing import Rule
 
 from flaskdoc import swagger
 from flaskdoc.pallets.blueprints import Blueprint
 from flaskdoc.pallets.mixin import SwaggerMixin
+from flaskdoc.pallets.plugins import get_docs
+
+API_DOCS = {}
+static_ui = pkg_resources.resource_filename("flaskdoc", "static")
+static_templates = pkg_resources.resource_filename("flaskdoc", "templates")
+ui = flask.Blueprint(
+    "swagger-ui",
+    __name__,
+    static_folder=static_ui,
+    template_folder=static_templates,
+)
 
 
 class Flask(flask.Flask, SwaggerMixin):
 
-    def __init__(self, import_name, version, static_url_path=None, static_folder="static",
+    def __init__(self, import_name, version, static_url_path=None, static_folder="templates",
                  template_folder="templates", instance_path=None, instance_relative_config=False,
                  open_api_version="3.0.2", api_title=None):
         super(Flask, self).__init__(import_name, static_url_path=static_url_path, static_folder=static_folder,
@@ -63,3 +79,110 @@ class Flask(flask.Flask, SwaggerMixin):
             # custom swaggered blueprint
             self._doc.add_paths(blueprint.paths, url_prefix or blueprint.url_prefix)
         return super(Flask, self).register_blueprint(blueprint, **options)
+
+
+def register_json_path():
+    get_api_docs(flask.current_app)
+    return flask.jsonify(flask.current_app.openapi.dict()), 200
+
+
+def register_yaml_path():
+    get_api_docs(flask.current_app)
+    fk = json.dumps(flask.current_app.openapi.dict())
+    return flask.Response(yaml.safe_dump(json.loads(fk)), mimetype="application/yaml")
+
+
+@ui.route("/")
+@ui.route("/<path:path>")
+def register_swagger_ui(path="index.html"):
+    if path == "index.html":
+        return flask.render_template(path)
+    return flask.send_from_directory(static_ui, path)
+
+
+def register_openapi(app: flask.Flask, info: swagger.Info, openapi_verion="3.0.3"):
+    app.add_url_rule("/openapi.json", view_func=register_json_path, methods=["GET"])
+    app.add_url_rule("/openapi.yaml", view_func=register_yaml_path, methods=["GET"])
+    app.register_blueprint(ui, url_prefix="/swagger-ui")
+    app.openapi = swagger.OpenApi(info=info, paths=swagger.Paths(), open_api_version=openapi_verion)
+
+
+@functools.lru_cache(maxsize=10)
+def get_api_docs(app: flask.Flask):
+
+    api = app.openapi  # type: swagger.OpenApi
+    for fn, spec in get_docs():
+        docs = inspect.getdoc(fn)
+        rule = get_api_rule(fn, app)
+        if rule:
+            print(rule, fn.__name__)
+            pi = parse_specs(rule, spec)
+            pi.description = docs
+            api.paths.add(extract_args(rule.rule), pi)
+    return 1
+
+
+def get_api_rule(fn, app):
+    for endpoint, func in app.view_functions.items():
+        if func == fn:
+            for rule in app.url_map._rules:
+                if rule.endpoint == endpoint:
+                    return rule
+    return None
+
+
+def parse_specs(rule: Rule, spec: List):
+
+    pi = swagger.PathItem()
+    for arg in rule.arguments:
+        par = swagger.PathParameter(name=arg)
+        pi.add_parameter(par)
+
+    for op in rule.methods:
+        operation = swagger.Operation.from_op(op, swagger.ResponsesObject())
+        pi.add_operation(operation)
+    for model in spec:
+        if isinstance(model, swagger.PathItem):
+            pi.merge_path_item(model)
+        elif isinstance(model, swagger.Parameter):
+            pi.add_parameter(model)
+        elif isinstance(model, swagger.Operation):
+            pi.add_operation(model)
+    return pi
+
+
+def extract_args(rule: str):
+
+    parsed_rule = []
+    index = -1
+
+    while index < len(rule):
+
+        index += 1
+        if index > len(rule) - 1:
+            break
+        char = rule[index]
+
+        if char != "<":
+            parsed_rule.append(char)
+            continue
+
+        # skip '<'
+        # only interested in variable name after ':'
+        variable_name = ["{"]
+        index += 1
+        cs = False  # colon seen flag
+        char = rule[index]
+
+        while char != ">":
+            if cs:
+                variable_name.append(char)
+            elif char == ":":
+                cs = True
+            index += 1
+            char = rule[index]
+
+        variable_name.append("}")
+        parsed_rule += variable_name
+
+    return "".join(parsed_rule)

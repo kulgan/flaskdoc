@@ -1,3 +1,5 @@
+import functools
+import inspect
 import json
 import logging
 
@@ -8,6 +10,8 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import List, Any, Set, Union, Dict
 
+from flaskdoc.pallets.plugins import register_spec
+
 logger = logging.getLogger(__name__)
 
 
@@ -17,6 +21,14 @@ class SwaggerDict(OrderedDict):
         if value not in [False, True] and not value:
             return
         super(SwaggerDict, self).__setitem__(key, value)
+
+
+class ApiDecoratorMixin(object):
+    """ Makes a model a decorator that registers itself """
+
+    def __call__(self, func):
+        register_spec(func, self)
+        return func
 
 
 class ModelMixin(object):
@@ -31,7 +43,7 @@ class ModelMixin(object):
         d = SwaggerDict()
         for key, val in vars(self).items():
             # skip extensions
-            if key == "_extensions":
+            if key == "extensions":
                 continue
 
             if key.startswith("_"):
@@ -72,7 +84,7 @@ class ModelMixin(object):
 
 class ExtensionMixin(ModelMixin):
 
-    extensions = None  # type: dict
+    extensions: Dict[str, Any] = None
 
     def add_extension(self, name, value):
         """
@@ -113,7 +125,7 @@ class ExtensionMixin(ModelMixin):
         return di
 
 
-class ContainerModel(object):
+class ContainerModel(ModelMixin):
 
     items = None
 
@@ -181,7 +193,8 @@ class Info(ExtensionMixin):
 class ServerVariable(ExtensionMixin):
     """ An object representing a Server Variable for server URL template substitution.
         An object representing a server variable
-        Fields:
+
+        Attributes:
             default (str): REQUIRED. The default value to use for substitution, which SHALL be sent if an alternate
                                 value is not supplied. Note this behavior is different than the Schema Object's
                                 treatment of default values, because in those cases parameter values are optional.
@@ -228,6 +241,9 @@ class Style(Enum):
     DEEP_OBJECT = "deepObject"
 
     def __repr__(self):
+        return self.value
+
+    def __str__(self):
         return self.value
 
 
@@ -434,9 +450,6 @@ class RelativePath(object):
                 self.params[i] = path.replace("{", "").replace("}", "")
 
 
-
-
-
 class ParameterLocation(Enum):
     COOKIE = "cookie"
     HEADER = "header"
@@ -448,7 +461,7 @@ class ParameterLocation(Enum):
 
 
 @dataclass
-class Parameter(ModelMixin):
+class Parameter(ModelMixin, ApiDecoratorMixin):
     """
     Describes a single operation parameter.
     A unique parameter is defined by a combination of a name and location.
@@ -466,7 +479,7 @@ class Parameter(ModelMixin):
     content: Dict[str, MediaType] = None
 
     explode: bool = False
-    style: Style = None
+    _style: Style = None
 
     example: Any = None
     examples: Dict[str, Union[Example, ReferenceObject]] = None
@@ -475,34 +488,38 @@ class Parameter(ModelMixin):
     def q_in(self):
         return self._in.value
 
+    @property
+    def q_style(self):
+        return self._style.value
+
 
 @dataclass
 class PathParameter(Parameter):
 
-    _in = ParameterLocation.PATH
+    _in: ParameterLocation = ParameterLocation.PATH
     required: bool = True
-    style = Style.SIMPLE
+    _style: Style = Style.SIMPLE
 
 
 @dataclass
 class QueryParameter(Parameter):
 
     _in = ParameterLocation.QUERY
-    style = Style.FORM
+    _style = Style.FORM
 
 
 @dataclass
 class HeaderParameter(Parameter):
 
     _in = ParameterLocation.HEADER
-    style = Style.SIMPLE
+    _style = Style.SIMPLE
 
 
 @dataclass
 class CookieParameter(Parameter):
 
     _in = ParameterLocation.COOKIE
-    style = Style.FORM
+    _style = Style.FORM
 
 
 @dataclass
@@ -573,7 +590,7 @@ class ResponsesObject(ExtensionMixin):
 
 
 @dataclass
-class Tag(ModelMixin):
+class Tag(ModelMixin, ApiDecoratorMixin):
 
     name: str
     description: str = None
@@ -584,7 +601,7 @@ class Tag(ModelMixin):
 
 
 @dataclass
-class Operation(ExtensionMixin):
+class Operation(ExtensionMixin, ApiDecoratorMixin):
     """ Describes a single API operation on a path. """
 
     responses: ResponsesObject
@@ -644,7 +661,7 @@ class PathItem(ModelMixin):
     summary: str = None
     description: str = None
 
-    servers: Set[Server] = None
+    servers: List[Server] = None
     parameters: List[Union[Parameter, ReferenceObject]] = None
 
     get: Operation = None
@@ -675,6 +692,8 @@ class PathItem(ModelMixin):
         self.servers.append(server)
 
     def add_parameter(self, parameter):
+        if not self.parameters:
+            self.parameters = []
         self.parameters.append(parameter)
 
     def merge_path_item(self, path_item):
@@ -915,3 +934,8 @@ class OpenApi(ModelMixin):
         for r_url in paths:
             path_url = "{}{}{}".format(url_prefix, blp_prefix, r_url)
             self.paths.add(path_url, paths.get(r_url))
+
+
+if __name__ == '__main__':
+    paths = Paths()
+    paths.add("test", None)

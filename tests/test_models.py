@@ -9,6 +9,7 @@ def test_license_model():
     assert "description" not in d
 
     li = swagger.License(name="Smith L.", url="https://www.example.com/license")
+    li.add_extension("x-d", 1)
     d = li.dict()
 
     assert d["name"] == "Smith L."

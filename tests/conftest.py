@@ -1,5 +1,6 @@
 import pytest
 
+import flask
 import flaskdoc
 from flaskdoc import swagger
 from tests import mocks
@@ -23,7 +24,7 @@ def app(request):
     return _app
 
 
-@pytest.fixture()
+# @pytest.fixture()
 def info_block():
     _info = swagger.models.Info(
         title="Test",
@@ -41,8 +42,9 @@ def info_block():
 
 
 if __name__ == '__main__':
-    _s_app = flaskdoc.Flask("Test API", version="1.0")
+    _s_app = flask.Flask("Test API")
     _s_app.config.from_object(AppConfig)
     _s_app.register_blueprint(mocks.blp, url_prefix="/mocks")
 
+    flaskdoc.register_openapi(_s_app, info=info_block())
     _s_app.run(port=4444)

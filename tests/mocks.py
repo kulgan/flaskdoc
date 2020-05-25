@@ -1,9 +1,9 @@
 import flask
 
-import flaskdoc
 from flaskdoc import swagger
+from pallets.app import get_api_docs
 
-blp = flaskdoc.Blueprint("Dummy", __name__, url_prefix="/v1")
+blp = flask.Blueprint("Dummy", __name__, url_prefix="/v1")
 
 simple_get = swagger.GET(
     summary="Simplistic Get",
@@ -49,14 +49,11 @@ servers = [
 ]
 
 
-@blp.route(
-    "/echo/<string:sample>",
-    ref="Simplistic",
-    description="Test API Summary",
-    methods=simple_get,
-    servers=servers,
-)
-def echo(sample):
+@swagger.Tag(name="getEcho", description="Retrieve echos wit Get")
+@swagger.GET(tags=["YgetEcho"], operation_id="getEcho", parameters=[swagger.PathParameter(name="sample")],
+             description="Retrieve echos wit Get", responses=swagger.ResponsesObject())
+@blp.route("/echo/<string:sample>", methods=["GET"])
+def echo(sample: str):
     """
     Sample GET request
     Returns: Echos back whatever was sent
@@ -65,11 +62,21 @@ def echo(sample):
     return sample
 
 
-@blp.route(
-    "/echo",
-    ref="Sponsors Cove",
-    description="Howdy for post",
-    methods=["POST"])
+@swagger.Tag(name="postEcho", description="Posts an Echo")
+@swagger.POST(tags=["postEcho"], description="Posts an Echo", responses=swagger.ResponsesObject())
+@blp.route("/echo", methods=["POST"])
 def post():
     req = flask.request.get_json(force=True)
     return flask.jsonify(req), 200
+
+
+# @swagger.Tag(name="first")
+# @swagger.Tag(name="second")
+# @swagger.Tag(name="third")
+def pest(ar):
+    print(ar)
+
+
+if __name__ == '__main__':
+    pest(ar=34)
+    pest(ar=134)
