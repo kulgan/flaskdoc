@@ -1,7 +1,7 @@
 from setuptools import find_packages
 from setuptools import setup
 
-version = "0.0.1-alpha"
+version = "0.0.1a0"
 
 setup(
     name="flaskdoc",
@@ -24,11 +24,21 @@ setup(
         "Topic :: Documentation"
     ],
     longdescription="",
-    packages=find_packages("flaskdoc", exclude="tests"),
+    packages=find_packages(exclude="tests"),
     include_package_data=True,
-    package_dir={"": "flaskdoc"},
     install_requires=[
         "flask",
         "PyYaml"
-    ]
+    ],
+    package_data={
+        "flaskdoc": [
+            "LICENSE",
+            "README.md",
+            "static/*.css",
+            "static/*.html",
+            "static/*.js",
+            "static/*.png",
+            "templates/*.html",
+        ]
+    }
 )
