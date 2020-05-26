@@ -1,11 +1,7 @@
-import functools
-import inspect
+import enum
 import json
 import logging
-
 from collections import OrderedDict
-
-import enum
 from dataclasses import dataclass
 from enum import Enum
 from typing import List, Any, Set, Union, Dict
@@ -54,11 +50,14 @@ class ModelMixin(object):
             if key == "ref":
                 key = "$ref"
 
-            if isinstance(val, ModelMixin):
+            if isinstance(val, ModelMixin) or hasattr(val, "dict"):
                 val = val.dict()
 
             if isinstance(val, (set, list)):
                 val = [v.dict() if isinstance(v, ModelMixin) else v for v in val]
+
+            if isinstance(val, dict):
+                val = {k: v.dict() if isinstance(v, ModelMixin) else v for k, v in val.items()}
 
             d[self.camel_case(key)] = val
 
@@ -312,7 +311,7 @@ class Example(ExtensionMixin):
 
 
 @dataclass
-class Schema(object):
+class Schema(ModelMixin):
 
     ref: str = None
     title: str = None
@@ -504,22 +503,22 @@ class PathParameter(Parameter):
 @dataclass
 class QueryParameter(Parameter):
 
-    _in = ParameterLocation.QUERY
-    _style = Style.FORM
+    _in: ParameterLocation = ParameterLocation.QUERY
+    _style: Style = Style.FORM
 
 
 @dataclass
 class HeaderParameter(Parameter):
 
-    _in = ParameterLocation.HEADER
-    _style = Style.SIMPLE
+    _in: ParameterLocation = ParameterLocation.HEADER
+    _style: Style = Style.SIMPLE
 
 
 @dataclass
 class CookieParameter(Parameter):
 
-    _in = ParameterLocation.COOKIE
-    _style = Style.FORM
+    _in: ParameterLocation = ParameterLocation.COOKIE
+    _style: Style = Style.FORM
 
 
 @dataclass

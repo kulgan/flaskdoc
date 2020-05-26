@@ -16,15 +16,15 @@ class AppConfig(object):
 
 
 @pytest.fixture(params=[AppConfig])
-def app(request):
-    _app = flaskdoc.Flask("Test API", version="1.0")
-    _app.config.from_object(request.param)
+def app(request, info_block):
+    _app = flask.Flask("Test API")
     _app.register_blueprint(mocks.blp, url_prefix="/mocks")
 
+    flaskdoc.register_openapi(_app, info=info_block, openapi_verion="3.0.3")
     return _app
 
 
-# @pytest.fixture()
+@pytest.fixture()
 def info_block():
     _info = swagger.models.Info(
         title="Test",

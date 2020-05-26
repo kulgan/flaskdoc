@@ -11,7 +11,7 @@ from werkzeug.routing import Rule
 from flaskdoc import swagger
 from flaskdoc.pallets.blueprints import Blueprint
 from flaskdoc.pallets.mixin import SwaggerMixin
-from flaskdoc.pallets.plugins import get_docs
+from flaskdoc.pallets import plugins
 
 API_DOCS = {}
 static_ui = pkg_resources.resource_filename("flaskdoc", "static")
@@ -111,13 +111,13 @@ def register_openapi(app: flask.Flask, info: swagger.Info, openapi_verion="3.0.3
 def get_api_docs(app: flask.Flask):
 
     api = app.openapi  # type: swagger.OpenApi
-    for fn, spec in get_docs():
+    for fn, spec in plugins.get_docs():
         docs = inspect.getdoc(fn)
         rule = get_api_rule(fn, app)
         if rule:
             pi = parse_specs(rule, spec, api)
             pi.description = docs
-            api.paths.add(extract_args(rule.rule), pi)
+            api.paths.add(plugins.parse_flask_rule(rule.rule), pi)
     return 1
 
 
@@ -150,40 +150,3 @@ def parse_specs(rule: Rule, spec: List, api: swagger.OpenApi):
         elif isinstance(model, swagger.Tag):
             api.add_tag(model)
     return pi
-
-
-def extract_args(rule: str):
-
-    parsed_rule = []
-    index = -1
-
-    while index < len(rule):
-
-        index += 1
-        if index > len(rule) - 1:
-            break
-        char = rule[index]
-
-        if char != "<":
-            parsed_rule.append(char)
-            continue
-
-        # skip '<'
-        # only interested in variable name after ':'
-        variable_name = ["{"]
-        index += 1
-        cs = False  # colon seen flag
-        char = rule[index]
-
-        while char != ">":
-            if cs:
-                variable_name.append(char)
-            elif char == ":":
-                cs = True
-            index += 1
-            char = rule[index]
-
-        variable_name.append("}")
-        parsed_rule += variable_name
-
-    return "".join(parsed_rule)
