@@ -1,5 +1,0 @@
-pytest
-pytest-flask
-coverage
-pytest-cov
-codacy-coverage

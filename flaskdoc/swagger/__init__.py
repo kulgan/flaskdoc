@@ -39,19 +39,4 @@ from flaskdoc.swagger.models import (
 )
 
 
-if __name__ == '__main__':
-    pi = PathItem(ref="hello", summary="Summarize this")
-    s1 = Server(description="Server Man", url="https://dd.web.com")
-    pi.add_server(s1)
-
-    get = GET(tags=["test"], summary="Yinyi de no sou", description="Kemi mi")
-    get.operation_id = "getByExample"
-    pr = QueryParameter(name="age", description="Just some shit")
-    get.add_parameter(pr)
-    pi.get = get
-    ps = Paths()
-    ps.add("/echo", pi)
-    print(ps)
-
-    h = HttpMethod("GET")
-    print(h)
+__all__ = []

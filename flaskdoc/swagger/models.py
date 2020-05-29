@@ -676,7 +676,9 @@ class PathItem(ModelMixin):
         """
         Adds an operation
         Args:
-          operation (Operation): operation to add
+          op
+          ration (Operation): operation to add
+          https://docs.google.com/document/d/1TYZMZnqVeBF0VVIkvGHdf0zVYYiJynue98psff_R9ys/edit?usp=sharinghttps://docs.google.com/document/d/1TYZMZnqVeBF0VVIkvGHdf0zVYYiJynue98psff_R9ys/edit?usp=sharing   tggr
         """
         http_method = operation.http_method.value.lower()
         setattr(self, http_method, operation)
@@ -688,6 +690,8 @@ class PathItem(ModelMixin):
         Args:
             server (Server): alternative server to add
         """
+        if not self.servers:
+            self.servers = []
         self.servers.append(server)
 
     def add_parameter(self, parameter):
@@ -700,7 +704,9 @@ class PathItem(ModelMixin):
         Merges another path item into this on
         Args:
             path_item (PathItem): PathItem instance to merge
-        """
+
+
+                    """
         for server in path_item.servers:
             self.add_server(server)
 

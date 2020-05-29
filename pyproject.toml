@@ -1,0 +1,42 @@
+[build-system]
+# minimum build requirements
+requires = ["flit_core >=2,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.metadata]
+module = "flaskdoc"
+author = "Rowland Ogwara"
+author-email = "r.ogwara@gmail.com"
+home-page = "https://github.com/kulgan/flaskdoc"
+license = "Apache 2.0"
+keywords = "swagger, openapi, flask, swagger-ui, api"
+requires-python = ">=3.6"
+requires = [
+    "flask",
+    "PyYaml",
+    "dataclassess; python_version == '3.6'"
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Framework :: Flask",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Topic :: Documentation"
+]
+description-file = "README.md"
+
+[tool.flit.metadata.requires-extra]
+test = [
+    "pytest",
+    "pytest-cov",
+    "pytest_flask"
+]
+doc = ["sphinx"]
+
+[tool.flit.sdist]
+include = [
+    "static/",
+    "templates/"
+]
