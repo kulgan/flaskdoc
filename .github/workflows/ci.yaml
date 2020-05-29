@@ -29,4 +29,3 @@ jobs:
         env:
           FLIT_USERNAME: ${{ secrets.PYPI_USER }}
           FLIT_PASSWORD: ${{ secrets.PYPI_PASS }}
-  
