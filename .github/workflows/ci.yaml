@@ -25,7 +25,7 @@ jobs:
         run: python -m pytest -lvvv --cov=flaskdoc
       - name: publish
         run: flit publish
-        if: github.ref == "master"
+        if: github.ref == 'master'
         env:
           FLIT_USERNAME: ${{ secrets.PYPI_USER }}
           FLIT_PASSWORD: ${{ secrets.PYPI_PASS }}
