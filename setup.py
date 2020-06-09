@@ -14,6 +14,7 @@ setup(
     long_description_content_type="text/markdown",
     license="Apache 2.0",
     url="https://github.com/kulgan/flaskdoc",
+    python_requires=">=3.6",
     classifiers=[
         "Development Status :: 2 - Alpha",
         "Framework :: Flask",
@@ -27,8 +28,9 @@ setup(
     packages=find_packages(exclude="tests"),
     include_package_data=True,
     install_requires=[
-        "flask",
-        "PyYaml"
+        "flask~=1.0",
+        "PyYaml~=5.3",
+        "dataclasses~=0.7; python_version == '3.6'"
     ],
     package_data={
         "flaskdoc": [

@@ -5,13 +5,16 @@ from collections import OrderedDict
 from dataclasses import dataclass
 from enum import Enum
 from typing import List, Any, Set, Union, Dict
+from urllib import parse
 
 from flaskdoc.pallets.plugins import register_spec
+from flaskdoc.swagger import validators
 
 logger = logging.getLogger(__name__)
 
 
 class SwaggerDict(OrderedDict):
+    """ Used to filter out properties that are not set """
 
     def __setitem__(self, key, value):
         if value not in [False, True] and not value:
@@ -28,7 +31,7 @@ class ApiDecoratorMixin(object):
 
 
 class ModelMixin(object):
-    """ Model mixin that provides common functionalities like to dict and to json """
+    """ Model mixin that provides common methods like to dict and to json """
 
     @staticmethod
     def camel_case(snake_case):
@@ -67,7 +70,7 @@ class ModelMixin(object):
         return json.dumps(self.dict(), indent=indent)
 
     def __repr__(self):
-        return self.json(indent=2)
+        return self.json()
 
     def __eq__(self, other):
         if not isinstance(other, self.__class__):
@@ -79,6 +82,12 @@ class ModelMixin(object):
 
     def __hash__(self):
         return hash((val for _, val in vars(self).items()))
+
+    def validate(self):
+        pass
+
+    def __post_init__(self):
+        self.validate()
 
 
 class ExtensionMixin(ModelMixin):
@@ -159,26 +168,55 @@ class ContainerModel(ModelMixin):
 
 @dataclass
 class License(ExtensionMixin):
-    """ License information for the exposed API. """
+    """ License information for the exposed API.
+
+    Attributes:
+        name: REQUIRED. The license name used for the API.
+        url: A URL to the license used for the API. MUST be in the format of a URL.
+    """
 
     name: str
     url: str = None
 
+    def validate(self):
+        if self.url:
+            validators.validate_url(self.url, "License.url")
+
 
 @dataclass
 class Contact(ExtensionMixin):
-    """ Contact information for the exposed API. """
+    """ Contact information for the exposed API. 
+
+    Attributes:
+          name: The identifying name of the contact person/organization.  
+          email: The email address of the contact person/organization. MUST be in the format of an email address.
+          url: The URL pointing to the contact information. MUST be in the format of a URL.
+    """
 
     name: str = None
     email: str = None
     url: str = None
 
+    def validate(self):
+        if self.url
+            validators.validate_url(self.url, "Contact.url")
+
 
 @dataclass
 class Info(ExtensionMixin):
-    """
-    The object provides metadata about the API. The metadata MAY be used by the clients if needed, and MAY be
-    presented in editing or documentation generation tools for convenience.
+    """ The object provides metadata about the API.
+
+    The metadata MAY be used by the clients if needed, and MAY be presented in editing or documentation generation
+    tools for convenience.
+
+    Attributes:
+        title: REQUIRED. The title of the API.
+        version: REQUIRED. The version of the OpenAPI document (which is distinct from the OpenAPI Specification
+                version or the API implementation version).
+        description: A short description of the API. CommonMark syntax MAY be used for rich text representation.
+        terms_of_service: A URL to the Terms of Service for the API. MUST be in the format of a URL.
+        contact: The contact information for the exposed API.
+        license: The license information for the exposed API.
     """
     title: str
     version: str
@@ -676,9 +714,7 @@ class PathItem(ModelMixin):
         """
         Adds an operation
         Args:
-          op
-          ration (Operation): operation to add
-          https://docs.google.com/document/d/1TYZMZnqVeBF0VVIkvGHdf0zVYYiJynue98psff_R9ys/edit?usp=sharinghttps://docs.google.com/document/d/1TYZMZnqVeBF0VVIkvGHdf0zVYYiJynue98psff_R9ys/edit?usp=sharing   tggr
+          operation (Operation): operation to add
         """
         http_method = operation.http_method.value.lower()
         setattr(self, http_method, operation)
