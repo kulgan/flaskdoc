@@ -169,6 +169,8 @@ class ContainerModel(ModelMixin):
 @dataclass
 class License(ExtensionMixin):
     """ License information for the exposed API.
+    
+    This object MAY be extended with Specification Extensions.
 
     Attributes:
         name: REQUIRED. The license name used for the API.
@@ -186,6 +188,8 @@ class License(ExtensionMixin):
 @dataclass
 class Contact(ExtensionMixin):
     """ Contact information for the exposed API. 
+    
+    This object MAY be extended with Specification Extensions.
 
     Attributes:
           name: The identifying name of the contact person/organization.  
@@ -207,7 +211,7 @@ class Info(ExtensionMixin):
     """ The object provides metadata about the API.
 
     The metadata MAY be used by the clients if needed, and MAY be presented in editing or documentation generation
-    tools for convenience.
+    tools for convenience. This object MAY be extended with Specification Extensions.
 
     Attributes:
         title: REQUIRED. The title of the API.
@@ -229,17 +233,18 @@ class Info(ExtensionMixin):
 @dataclass
 class ServerVariable(ExtensionMixin):
     """ An object representing a Server Variable for server URL template substitution.
-        An object representing a server variable
 
-        Attributes:
-            default (str): REQUIRED. The default value to use for substitution, which SHALL be sent if an alternate
-                                value is not supplied. Note this behavior is different than the Schema Object's
-                                treatment of default values, because in those cases parameter values are optional.
-            enum (List[str]): An enumeration of string values to be used if the substitution options are
-                                from a limited set
-            description (str): An optional description for the server variable. CommonMark syntax MAY
-                                be used for rich text representation.
-        """
+    This object MAY be extended with Specification Extensions.
+    
+    Attributes:
+        default: REQUIRED. The default value to use for substitution, which SHALL be sent if an alternate
+                value is not supplied. Note this behavior is different than the Schema Object's treatment of default
+                values, because in those cases parameter values are optional.
+        enum: An enumeration of string values to be used if the substitution options are from a limited set
+        description: An optional description for the server variable. CommonMark syntax MAY be used for rich text
+                    representation.
+        
+    """
 
     default: str
     enum: List[str] = None
@@ -248,18 +253,30 @@ class ServerVariable(ExtensionMixin):
 
 @dataclass
 class Server(ExtensionMixin):
-    """ An object representing a Server. """
+    """ An object representing a Server.
+    
+    This object MAY be extended with Specification Extensions.
+
+    Attributes:
+        url: REQUIRED. A URL to the target host. This URL supports Server Variables and MAY be relative, to indicate
+            that the host location is relative to the location where the OpenAPI document is being served. Variable
+            substitutions will be made when a variable is named in {brackets}.
+        description: An optional string describing the host designated by the URL. CommonMark syntax MAY be used for
+                     rich text representation.
+        variables: A map between a variable name and its value. The value is used for substitution in the server's
+                   URL template.
+    """
 
     url: str
     description: str = None
-    variables: Dict[str, ServerVariable] = None
+    variables: SwaggerDict[str, SwaggerDict] = None
 
-    def add_variable(self, name, variable):
+    def add_variable(self, name: str, variable: ServerVariable):
         """
         Adds a server variable
         Args:
-            name (str): variable name
-            variable (ServerVariable|dict): Server variable instance
+            name: variable name
+            variable: Server variable instance
         """
         if self.variables is None:
             self.variables = SwaggerDict()

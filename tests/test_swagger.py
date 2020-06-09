@@ -41,4 +41,4 @@ def test_to_camel_case():
 def test_url_property_validation():
 
     with pytest.raises(ValueError, match="License.url entry 'http:l//dummy' is not a valid url"):
-        lc = models.License(name="Dummy License", url="http:l//dummy")
+        models.License(name="Dummy License", url="http:l//dummy")
