@@ -198,7 +198,7 @@ class Contact(ExtensionMixin):
     url: str = None
 
     def validate(self):
-        if self.url
+        if self.url:
             validators.validate_url(self.url, "Contact.url")
 
 
