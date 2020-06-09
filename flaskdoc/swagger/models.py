@@ -269,7 +269,7 @@ class Server(ExtensionMixin):
 
     url: str
     description: str = None
-    variables: SwaggerDict[str, SwaggerDict] = None
+    variables: SwaggerDict = None
 
     def add_variable(self, name: str, variable: ServerVariable):
         """
