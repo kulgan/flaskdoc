@@ -30,7 +30,7 @@ setup(
     install_requires=[
         "flask~=1.0",
         "PyYaml~=5.3",
-        "dataclasses~=0.7; python_version == '3.6'"
+        "dataclasses; python_version == '3.6'"
     ],
     package_data={
         "flaskdoc": [
