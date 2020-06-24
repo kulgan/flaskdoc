@@ -2,7 +2,6 @@ name: ci
 
 on:
   - push
-  - pull_request
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -20,12 +19,11 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install
         run: |
-          pip install flit flake8
-          flit install
-      - name: Run Flake8
-        run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          pip install tox
+      - name: Linting
+        run: tox -e lint
       - name: Run Tests
-        run: python -m pytest -lvvv --cov=flaskdoc
+        run: tox -e py
       - name: Pypi Publish
         run: flit publish
         if: github.ref == 'master'
