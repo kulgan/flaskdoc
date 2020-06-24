@@ -4,10 +4,9 @@ import logging
 from collections import OrderedDict
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Any, Set, Union, Dict
-from urllib import parse
+from typing import List, Any, Set, Union, Dict, Type
 
-from flaskdoc.pallets.plugins import register_spec
+from flaskdoc.pallets import plugins
 from flaskdoc.swagger import validators
 
 logger = logging.getLogger(__name__)
@@ -26,7 +25,7 @@ class ApiDecoratorMixin(object):
     """ Makes a model a decorator that registers itself """
 
     def __call__(self, func):
-        register_spec(func, self)
+        plugins.register_spec(func, self)
         return func
 
 
@@ -95,9 +94,10 @@ class ExtensionMixin(ModelMixin):
     extensions: Dict[str, Any] = None
 
     def add_extension(self, name, value):
-        """
-        Allows extensions to the Swagger Schema. The field name MUST begin with x-,
-        for example, x-internal-id. The value can be null, a primitive, an array or an object.
+        """ Allows extensions to the Swagger Schema.
+
+        The field name MUST begin with x-, for example, x-internal-id. The value can be null, a primitive,
+        an array or an object.
         Args:
             name (str): custom extension name, must begin with x-
             value (Any): value, can be None, any object or list
@@ -269,18 +269,17 @@ class Server(ExtensionMixin):
 
     url: str
     description: str = None
-    variables: SwaggerDict = None
+    variables: Dict[str, ServerVariable] = None
 
     def add_variable(self, name: str, variable: ServerVariable):
-        """
-        Adds a server variable
+        """ Adds a server variable
         Args:
             name: variable name
             variable: Server variable instance
         """
         if self.variables is None:
             self.variables = SwaggerDict()
-        self.variables[name] = variable.dict()
+        self.variables[name] = variable
 
 
 class Style(Enum):
@@ -367,6 +366,12 @@ class Example(ExtensionMixin):
 
 @dataclass
 class Schema(ModelMixin):
+    """ The Schema Object allows the definition of input and output data types.
+
+    These types can be objects, but also primitives and arrays. This object is an extended subset of the JSON Schema
+    Specification Wright Draft 00. For more information about the properties, see JSON Schema Core and JSON Schema
+    Validation. Unless stated otherwise, the property definitions follow the JSON Schema.
+    """
 
     ref: str = None
     title: str = None
@@ -390,7 +395,7 @@ class Schema(ModelMixin):
     one_of = None
     any_of = None
     _not = None  # type: ignore
-    items = None
+    items: Union[ReferenceObject, 'Schema'] = None
     properties = None
     additional_properties = None
     description = None
@@ -452,10 +457,16 @@ class RequestBody(ExtensionMixin):
 
 
 class Component(ExtensionMixin):
-    """
-    Holds a set of reusable objects for different aspects of the OAS. All objects defined within the components
-    object will have no effect on the API unless they are explicitly referenced from properties outside the
-    components object.
+    """ Holds a set of reusable objects for different aspects of the OAS.
+
+    All objects defined within the components object will have no effect on the API unless they are explicitly
+    referenced from properties outside the components object.
+    
+    This object MAY be extended with Specification Extensions. All the fixed fields declared above are objects that
+    MUST use keys that match the regular expression: ^[a-zA-Z0-9\.\-_]+$.
+
+    Attributes:
+        schemas: An object to hold reusable Schema Objects.
     """
 
     def __init__(self):
@@ -470,11 +481,11 @@ class Component(ExtensionMixin):
         self.links = {}
         self.callbacks = {}
 
-    def add_schema(self, schema_name, schema):
-        self.schemas[schema_name] = schema.dict()
+    def add_schema(self, schema_name: str, schema: Schema):
+        self.schemas[schema_name] = schema
 
-    def add_response(self, response_name, response):
-        self.responses[response_name] = response.dict()
+    def add_response(self, response_name: str, response):
+        self.responses[response_name] = response
 
 
 class RelativePath(object):
@@ -603,7 +614,7 @@ class ResponseObject(ExtensionMixin):
     """
 
     description: str
-    content: Dict[str, MediaType] = None
+    content: Dict[str, Union[MediaType, Type]] = None
     headers: Dict[str, Union[ReferenceObject, HeaderParameter]] = None
     links: Dict[str, Union[Link, ReferenceObject]] = None
 
@@ -612,7 +623,7 @@ class ResponseObject(ExtensionMixin):
             self.headers = SwaggerDict()
         self.headers[name] = header
 
-    def add_content(self, media_type: str, content: MediaType):
+    def add_content(self, media_type: str, content: Union[MediaType, Type]):
         if not self.content:
             self.content = SwaggerDict()
         self.content[media_type] = content
@@ -635,12 +646,15 @@ class ResponsesObject(ExtensionMixin):
     """
 
     default: ResponseObject = None
-    responses: Dict[str, ResponseObject] = None
+    responses: Dict[str, Union[Type, ResponseObject]] = None
 
     def add_response(self, status_code: str, response: ResponseObject):
         if self.responses is None:
             self.responses = SwaggerDict()
         self.responses[status_code] = response
+
+    def __new__(cls, *args, **kwargs):
+        d = cls
 
 
 @dataclass
