@@ -1,11 +1,9 @@
 from setuptools import find_packages
 from setuptools import setup
 
-version = "0.0.1a0"
 
 setup(
     name="flaskdoc",
-    version=version,
     author="Rowland Ogwara",
     author_email="r.ogwara@gmail.com",
     keywords="swagger, openapi, flask, rest, api",
