@@ -11,9 +11,9 @@ license = "Apache 2.0"
 keywords = "swagger, openapi, flask, swagger-ui, api"
 requires-python = ">=3.6"
 requires = [
-    "flask>=1.0",
-    "PyYaml>=5.3",
-    "dataclasses>=0.7; python_version == '3.6'",
+    "flask~=1.0",
+    "PyYaml~=5.3",
+    "dataclasses~=0.7; python_version == '3.6'",
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
