@@ -30,18 +30,16 @@ def info_block():
         title="Test",
         version="1.2.2",
         contact=swagger.Contact(
-            name="Rowland",
-            email="r.ogwara@gmail.com",
-            url="https://github.com/kulgan"
+            name="Rowland", email="r.ogwara@gmail.com", url="https://github.com/kulgan"
         ),
         license=swagger.models.License(
             name="Apache 2.0", url="https://www.example.com/license"
-        )
+        ),
     )
     return _info
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     _s_app = flask.Flask("Test API")
     _s_app.config.from_object(AppConfig)
     _s_app.register_blueprint(mocks.blp, url_prefix="/mocks")

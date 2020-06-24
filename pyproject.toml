@@ -1,5 +1,4 @@
 [build-system]
-# minimum build requirements
 requires = ["flit_core >=2,<4"]
 build-backend = "flit_core.buildapi"
 
@@ -29,10 +28,16 @@ classifiers = [
 description-file = "README.md"
 
 [tool.flit.metadata.requires-extra]
+dev = [
+    "black",
+    "flake8",
+    "pre-commit",
+]
 test = [
+    "coverage[toml]",
     "pytest",
     "pytest-cov",
-    "pytest_flask"
+    "pytest-flask"
 ]
 doc = ["sphinx"]
 
@@ -41,3 +46,23 @@ include = [
     "static/",
     "templates/"
 ]
+
+[tool.black]
+line-length = 88
+target-version = [
+    'py36',
+    'py37',
+    'py38',
+]
+include = '\.pyi?$'
+
+
+[tool.coverage.run]
+branch = true
+context = "unit tests"
+source = ["flaskdoc"]
+
+[tool.coverage.html]
+title = "flaskdoc coverage report"
+directory = "htmlcov"
+show_contexts = true

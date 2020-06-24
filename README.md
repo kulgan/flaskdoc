@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.com/kulgan/flaskdoc.svg?branch=master)](https://travis-ci.com/kulgan/flaskdoc)
 
 # Flaskdoc
-FlaskDoc is an extension of the regular Flask API and adds support for Swagger/OpenAPI documentation. 
+FlaskDoc is an extension of the regular Flask API and adds support for Swagger/OpenAPI documentation.
 
 ## Requirements
 
@@ -23,8 +23,8 @@ from flaskdoc import swagger
 
 blp = flaskdoc.Blueprint("sample", __name__)
 
-@blp.route("/echo/<string:sample>", 
-    description="Simple Echo", 
+@blp.route("/echo/<string:sample>",
+    description="Simple Echo",
     methods=[
         swagger.GET(tags=["sample"])
     ]
