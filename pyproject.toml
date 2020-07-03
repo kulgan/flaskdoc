@@ -17,8 +17,9 @@ include = [
 ]
 
 [tool.black]
-line-length = 88
+line-length = 115
 target-version = [
+    'py35',
     'py36',
     'py37',
     'py38',
