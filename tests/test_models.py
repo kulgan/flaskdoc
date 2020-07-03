@@ -57,19 +57,11 @@ def test_path_items():
         operation_id="testGetExample",
         description="Get Example",
         tags=["example"],
-        parameters=[
-            swagger.QueryParameter(name="p1", description="page")
-        ],
-        responses=None
+        parameters=[swagger.QueryParameter(name="p1", description="page")],
+        responses=None,
     )
     post_op = swagger.POST(operation_id="testPostExample", description="POST Example", responses=None)
-    path_item = swagger.PathItem(
-        parameters=[
-            swagger.PathParameter(name="v1")
-        ],
-        get=get_op,
-        post=post_op
-    )
+    path_item = swagger.PathItem(parameters=[swagger.PathParameter(name="v1")], get=get_op, post=post_op)
 
     swag = path_item.dict()
     assert swag["parameters"][0]["name"] == "v1"

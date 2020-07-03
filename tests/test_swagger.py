@@ -19,10 +19,10 @@ def test_dict_set_item():
 
 def test_extension_model_usage():
     """ Tests adding and validating extensions to models """
-
+    print("SSSSSSSSSSSSSSSSSSSSs")
     lc = models.License(name="Dummy License", url="http://dummy")
 
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(ValueError):
         lc.add_extension("y-breaker", "BROKEN")
 
     lc.add_extension("x-hulu", "HULU")
@@ -42,3 +42,16 @@ def test_url_property_validation():
 
     with pytest.raises(ValueError, match="License.url entry 'http:l//dummy' is not a valid url"):
         models.License(name="Dummy License", url="http:l//dummy")
+
+
+def test_nested_models():
+
+    sv = models.ServerVariable(default="sample", enum=["sample", "quick"], description="dirty dozen")
+
+    server = models.Server(url="http://flaskdoc.com/{tick}", description="sample deploy site")
+    server.add_variable("tick", sv)
+    swagger = server.dict()
+
+    variables = swagger["variables"]
+    assert variables["tick"]["default"] == "sample"
+    assert variables["tick"]["description"] == "dirty dozen"

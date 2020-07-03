@@ -31,4 +31,3 @@ def test_registered_openapi(client):
     api_docs = yaml.safe_load(response.data)
     info_block = api_docs["info"]
     assert info_block["contact"]["email"] == "r.ogwara@gmail.com"
-
