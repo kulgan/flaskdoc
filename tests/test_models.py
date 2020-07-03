@@ -9,6 +9,7 @@ def test_license_model():
     assert "description" not in d
 
     li = swagger.License(name="Smith L.", url="https://www.example.com/license")
+    li.add_extension("x-d", 1)
     d = li.dict()
 
     assert d["name"] == "Smith L."
@@ -33,7 +34,7 @@ def test_contact_model():
 
 
 def test_server_variable():
-    sv = swagger.ServerVariable(default_val="1.0", description="version number")
+    sv = swagger.ServerVariable("1.0", description="version number")
     sv2 = swagger.ServerVariable("1.0", None, "version number")
 
     assert sv == sv2
@@ -45,7 +46,7 @@ def test_server_variable():
 
 def test_server():
     s1 = swagger.Server(url="https://api.dund.com/{version}", description="Service Endpoint")
-    s1.add_variable("version", swagger.ServerVariable("1.1", enum_values=["1.0", "1.1"]))
+    s1.add_variable("version", swagger.ServerVariable("1.1", enum=["1.0", "1.1"]))
 
     d = s1.dict()
     assert d["variables"]
@@ -53,21 +54,14 @@ def test_server():
 
 def test_path_items():
     get_op = swagger.GET(
-        operations_id="testGetExample",
+        operation_id="testGetExample",
         description="Get Example",
         tags=["example"],
-        parameters=[
-            swagger.QueryParameter(name="p1", description="page")
-        ]
+        parameters=[swagger.QueryParameter(name="p1", description="page")],
+        responses=None,
     )
-    post_op = swagger.POST(operations_id="testPostExample", description="POST Example")
-    path_item = swagger.PathItem(
-        parameters=[
-            swagger.PathParameter(name="v1")
-        ],
-        get=get_op,
-        post=post_op
-    )
+    post_op = swagger.POST(operation_id="testPostExample", description="POST Example", responses=None)
+    path_item = swagger.PathItem(parameters=[swagger.PathParameter(name="v1")], get=get_op, post=post_op)
 
     swag = path_item.dict()
     assert swag["parameters"][0]["name"] == "v1"

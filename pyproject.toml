@@ -1,0 +1,38 @@
+[build-system]
+requires = [
+    "setuptools>=42",
+    "wheel",
+    "setuptools_scm[toml]>=3.4"
+]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+local_scheme = "dirty-tag"
+version_scheme = "release-branch-semver"
+
+[tool.flit.sdist]
+include = [
+    "static/",
+    "templates/"
+]
+
+[tool.black]
+line-length = 115
+target-version = [
+    'py35',
+    'py36',
+    'py37',
+    'py38',
+]
+include = '\.pyi?$'
+
+
+[tool.coverage.run]
+branch = true
+context = "unit tests"
+source = ["flaskdoc"]
+
+[tool.coverage.html]
+title = "flaskdoc coverage report"
+directory = "docs/htmlcov"
+show_contexts = true
