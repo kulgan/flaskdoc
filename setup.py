@@ -49,6 +49,7 @@ setup(
             "pre-commit",
             "pytest",
             "pytest-cov",
+            "pytest-flask",
             "sphinx",
             "sphinxcontrib-napoleon",
         ]
