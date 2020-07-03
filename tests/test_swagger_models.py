@@ -9,11 +9,7 @@ def test_sample_swagger(info_block):
             summary="Sample GET request",
             description="Test",
             tags=["sample", "rest"],
-            parameters=[
-                swagger.QueryParameter(
-                    name="search", required=True, description="Search Param"
-                )
-            ],
+            parameters=[swagger.QueryParameter(name="search", required=True, description="Search Param")],
             responses=swagger.ResponsesObject(),
         ),
     )

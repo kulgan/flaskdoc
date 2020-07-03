@@ -59,10 +59,7 @@ class ModelMixin(object):
                 val = [v.dict() if isinstance(v, ModelMixin) else v for v in val]
 
             if isinstance(val, dict):
-                val = {
-                    k: v.dict() if isinstance(v, ModelMixin) else v
-                    for k, v in val.items()
-                }
+                val = {k: v.dict() if isinstance(v, ModelMixin) else v for k, v in val.items()}
 
             d[self.camel_case(key)] = val
 
@@ -879,11 +876,7 @@ class SecurityScheme(ExtensionMixin):
     ):
         super(SecurityScheme, self).__init__()
 
-        self.type = (
-            SecuritySchemeType(scheme_type)
-            if isinstance(scheme_type, str)
-            else scheme_type
-        )
+        self.type = SecuritySchemeType(scheme_type) if isinstance(scheme_type, str) else scheme_type
         self.name = name  # type: str
         self.description = description  # type: str
         self.scheme = scheme  # type: str
@@ -896,11 +889,7 @@ class OAuthFlows(ExtensionMixin):
     """ Allows configuration of the supported OAuth Flows. """
 
     def __init__(
-        self,
-        implicit=None,
-        password=None,
-        client_credentials=None,
-        authorization_code=None,
+        self, implicit=None, password=None, client_credentials=None, authorization_code=None,
     ):
         super(OAuthFlows, self).__init__()
 
@@ -913,9 +902,7 @@ class OAuthFlows(ExtensionMixin):
 class OAuthFlow(ExtensionMixin):
     """ Configuration details for a supported OAuth Flow """
 
-    def __init__(
-        self, authorization_url=None, token_url=None, refresh_url=None, scopes=None
-    ):
+    def __init__(self, authorization_url=None, token_url=None, refresh_url=None, scopes=None):
         super(OAuthFlow, self).__init__()
 
         self.authorization_url = authorization_url  # type: str

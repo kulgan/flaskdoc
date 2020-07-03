@@ -83,9 +83,7 @@ class TypesFactory:
 
 
 class SchemaFactory:
-    def __init__(
-        self, ref_base: str = "#/definitions", schema_key: str = "definitions"
-    ):
+    def __init__(self, ref_base: str = "#/definitions", schema_key: str = "definitions"):
         self.ref_base = ref_base
         self.schema_key = schema_key
         self.schema = {schema_key: {}}

@@ -16,9 +16,7 @@ from flaskdoc.pallets import plugins
 API_DOCS = {}
 static_ui = pkg_resources.resource_filename("flaskdoc", "static")
 static_templates = pkg_resources.resource_filename("flaskdoc", "templates")
-ui = flask.Blueprint(
-    "swagger-ui", __name__, static_folder=static_ui, template_folder=static_templates,
-)
+ui = flask.Blueprint("swagger-ui", __name__, static_folder=static_ui, template_folder=static_templates,)
 
 
 class Flask(flask.Flask, SwaggerMixin):
@@ -56,8 +54,7 @@ class Flask(flask.Flask, SwaggerMixin):
         info_block = swagger.Info(title=self.api_title, version=self.api_version)
         if "API_LICENSE_NAME" in self.config:
             license_block = swagger.License(
-                name=self.config["API_LICENSE_NAME"],
-                url=self.config.get("API_LICENSE_URL"),
+                name=self.config["API_LICENSE_NAME"], url=self.config.get("API_LICENSE_URL"),
             )
             info_block.license = license_block
         if "API_CONTACT_NAME" in self.config:
@@ -67,25 +64,17 @@ class Flask(flask.Flask, SwaggerMixin):
             info_block.contact = contact_block
 
         self._doc = swagger.OpenApi(
-            open_api_version=self.open_api_version,
-            info=info_block,
-            paths=swagger.Paths(),
+            open_api_version=self.open_api_version, info=info_block, paths=swagger.Paths(),
         )
-        self.add_url_rule(
-            "/openapi.json", view_func=self.register_json_path, methods=["GET"]
-        )
-        self.add_url_rule(
-            "/openapi.yaml", view_func=self.register_yaml_path, methods=["GET"]
-        )
+        self.add_url_rule("/openapi.json", view_func=self.register_json_path, methods=["GET"])
+        self.add_url_rule("/openapi.yaml", view_func=self.register_yaml_path, methods=["GET"])
 
     def register_json_path(self):
         return flask.jsonify(self._doc.dict()), 200
 
     def register_yaml_path(self):
         fk = json.dumps(self._doc.dict())
-        return flask.Response(
-            yaml.safe_dump(json.loads(fk)), mimetype="application/yaml"
-        )
+        return flask.Response(yaml.safe_dump(json.loads(fk)), mimetype="application/yaml")
 
     def route(self, rule, ref=None, description=None, summary=None, **options):
         self.init_swagger()
@@ -126,9 +115,7 @@ def register_openapi(app: flask.Flask, info: swagger.Info, openapi_verion="3.0.3
     app.add_url_rule("/openapi.json", view_func=register_json_path, methods=["GET"])
     app.add_url_rule("/openapi.yaml", view_func=register_yaml_path, methods=["GET"])
     app.register_blueprint(ui, url_prefix="/swagger-ui")
-    app.openapi = swagger.OpenApi(
-        info=info, paths=swagger.Paths(), open_api_version=openapi_verion
-    )
+    app.openapi = swagger.OpenApi(info=info, paths=swagger.Paths(), open_api_version=openapi_verion)
 
 
 @functools.lru_cache(maxsize=10)

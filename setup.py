@@ -13,10 +13,7 @@ setup(
     author="Rowland Ogwara",
     maintainer="Rowland Ogwara",
     author_email="r.ogwara@gmail.com",
-    use_scm_version={
-        "local_scheme": "dirty-tag",
-        "version_scheme": "release-branch-semver",
-    },
+    use_scm_version={"local_scheme": "dirty-tag", "version_scheme": "release-branch-semver"},
     keywords="swagger, openapi, flask, rest, api, swagger-ui",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -26,9 +23,7 @@ setup(
     package_dir={"": "src"},
     packages=find_packages(where="src"),
     zip_safe=True,
-    package_data={
-        "flaskdoc": ["static/*.css", "static/*.png", "static/*.js", "templates/*.html"]
-    },
+    package_data={"flaskdoc": ["static/*.css", "static/*.png", "static/*.js", "templates/*.html"]},
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Framework :: Flask",

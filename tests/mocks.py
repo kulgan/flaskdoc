@@ -25,9 +25,7 @@ servers = [
     swagger.Server(
         url="https://{sample}.sample/com",
         description="Test Suite",
-        variables=dict(
-            sample=swagger.ServerVariable(default="api", enum=["api", "api2", "api3"],),
-        ),
+        variables=dict(sample=swagger.ServerVariable(default="api", enum=["api", "api2", "api3"],),),
     ),
 ]
 
@@ -41,8 +39,7 @@ servers = [
     responses=swagger.ResponsesObject(
         responses={
             "200": swagger.ResponseObject(
-                description="Success",
-                content={"text/plain": swagger.MediaType(schema=flaskdoc.Email())},
+                description="Success", content={"text/plain": swagger.MediaType(schema=flaskdoc.Email())},
             )
         }
     ),
@@ -58,9 +55,7 @@ def echo(sample: str):
 
 
 @swagger.Tag(name="postEcho", description="Posts an Echo")
-@swagger.POST(
-    tags=["postEcho"], description="Posts an Echo", responses=swagger.ResponsesObject()
-)
+@swagger.POST(tags=["postEcho"], description="Posts an Echo", responses=swagger.ResponsesObject())
 @blp.route("/echo", methods=["POST"])
 def post():
     req = flask.request.get_json(force=True)

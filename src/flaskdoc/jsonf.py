@@ -1,6 +1,8 @@
 import inspect
 import typing as t
 
+import attr
+
 
 class SchemaTypeMap:
     TYPES_MAP = {
@@ -35,9 +37,7 @@ schema_types_map = SchemaTypeMap()
 
 
 class SchemaFactory:
-    def __init__(
-        self, ref_base: str = "#/definitions", schema_key: str = "definitions"
-    ):
+    def __init__(self, ref_base: str = "#/definitions", schema_key: str = "definitions"):
         self.ref_base = ref_base
         self.schema_key = schema_key
         self.schema = {schema_key: {}}
@@ -74,20 +74,19 @@ class SchemaFactory:
         return {"$ref": "{}/{}".format(self.ref_base, obj_type.__name__)}
 
 
+@attr.s
 class Soap:
 
-    meal: float
-    smokes: t.List[float]
+    meal = attr.ib(type=float)
+    smokes = attr.ib(type=list)
 
 
+@attr.s
 class Sample:
 
-    hulu: str = "NoNo"
-    palo: int
-    soap: Soap
-
-    def __init__(self, spare: float):
-        self.spare = spare
+    palo = attr.ib(type=int)
+    soap = attr.ib(type=Soap)
+    hulu = attr.ib(default="NoNo")
 
 
 CLASS_MAP = {}

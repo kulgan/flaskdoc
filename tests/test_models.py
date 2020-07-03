@@ -45,9 +45,7 @@ def test_server_variable():
 
 
 def test_server():
-    s1 = swagger.Server(
-        url="https://api.dund.com/{version}", description="Service Endpoint"
-    )
+    s1 = swagger.Server(url="https://api.dund.com/{version}", description="Service Endpoint")
     s1.add_variable("version", swagger.ServerVariable("1.1", enum=["1.0", "1.1"]))
 
     d = s1.dict()
@@ -62,12 +60,8 @@ def test_path_items():
         parameters=[swagger.QueryParameter(name="p1", description="page")],
         responses=None,
     )
-    post_op = swagger.POST(
-        operation_id="testPostExample", description="POST Example", responses=None
-    )
-    path_item = swagger.PathItem(
-        parameters=[swagger.PathParameter(name="v1")], get=get_op, post=post_op
-    )
+    post_op = swagger.POST(operation_id="testPostExample", description="POST Example", responses=None)
+    path_item = swagger.PathItem(parameters=[swagger.PathParameter(name="v1")], get=get_op, post=post_op)
 
     swag = path_item.dict()
     assert swag["parameters"][0]["name"] == "v1"
