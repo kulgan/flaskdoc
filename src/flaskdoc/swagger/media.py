@@ -1,4 +1,4 @@
-import json
+import jsonf
 from typing import Any
 
 from swagger.models import SwaggerDict

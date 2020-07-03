@@ -1,6 +1,6 @@
 import functools
 import inspect
-import json
+import jsonf
 from typing import List
 
 import flask
@@ -82,9 +82,9 @@ class Flask(flask.Flask, SwaggerMixin):
         return flask.jsonify(self._doc.dict()), 200
 
     def register_yaml_path(self):
-        fk = json.dumps(self._doc.dict())
+        fk = jsonf.dumps(self._doc.dict())
         return flask.Response(
-            yaml.safe_dump(json.loads(fk)), mimetype="application/yaml"
+            yaml.safe_dump(jsonf.loads(fk)), mimetype="application/yaml"
         )
 
     def route(self, rule, ref=None, description=None, summary=None, **options):
@@ -110,8 +110,8 @@ def register_json_path():
 
 def register_yaml_path():
     get_api_docs(flask.current_app)
-    fk = json.dumps(flask.current_app.openapi.dict())
-    return flask.Response(yaml.safe_dump(json.loads(fk)), mimetype="application/yaml")
+    fk = jsonf.dumps(flask.current_app.openapi.dict())
+    return flask.Response(yaml.safe_dump(jsonf.loads(fk)), mimetype="application/yaml")
 
 
 @ui.route("/")

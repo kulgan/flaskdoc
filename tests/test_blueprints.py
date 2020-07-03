@@ -1,4 +1,4 @@
-import json
+import jsonf
 
 import pytest
 import yaml
@@ -12,7 +12,7 @@ def test_route_decorator(client, sample):
     assert resp.get_data(as_text=True) == sample
 
     post_body = dict(sample=sample, message="Almighty")
-    resp = client.post("/mocks/echo", data=json.dumps(post_body))
+    resp = client.post("/mocks/echo", data=jsonf.dumps(post_body))
     assert resp.status_code == 200
     assert resp.json == post_body
 

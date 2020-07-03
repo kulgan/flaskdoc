@@ -2,9 +2,9 @@ import enum
 import json
 import logging
 from collections import OrderedDict
-from dataclasses import dataclass
-from enum import Enum
-from typing import List, Any, Set, Union, Dict, Type
+from typing import Union, Type
+
+import attr
 
 from flaskdoc.pallets import plugins
 from flaskdoc.swagger import validators
@@ -74,27 +74,11 @@ class ModelMixin(object):
     def __repr__(self):
         return self.json()
 
-    def __eq__(self, other):
-        if not isinstance(other, self.__class__):
-            return False
-        for field, val in vars(self).items():
-            if val != getattr(other, field, None):
-                return False
-        return True
 
-    def __hash__(self):
-        return hash((val for _, val in vars(self).items()))
-
-    def validate(self):
-        pass
-
-    def __post_init__(self):
-        self.validate()
-
-
+@attr.s
 class ExtensionMixin(ModelMixin):
 
-    extensions: Dict[str, Any] = None
+    extensions = attr.ib()
 
     def add_extension(self, name, value):
         """ Allows extensions to the Swagger Schema.
@@ -110,23 +94,21 @@ class ExtensionMixin(ModelMixin):
             ValueError: if key name is invalid
         """
 
-        self.validate_extension_name(name)
-
         if not self.extensions:
             self.extensions = SwaggerDict()
         self.extensions[name] = value
         return self
 
-    @staticmethod
-    def validate_extension_name(name):
+    @extensions.validator
+    def validate_extension_name(self, _, value):
         """
         Validates a custom extension name
         Args:
-            name (str): custom extension name
+            value (str): custom extension name
         Raises:
             ValueError: if key name is invalid
         """
-        if not (name and name.startswith("x-")):
+        if not (value and value.startswith("x-")):
             raise ValueError("Custom extension must start with x-")
 
     def dict(self):
@@ -136,9 +118,10 @@ class ExtensionMixin(ModelMixin):
         return di
 
 
+@attr.s
 class ContainerModel(ModelMixin):
 
-    items = None
+    items = attr.ib(default=SwaggerDict())
 
     def add(self, key, item):
         """ Adds an item
@@ -146,13 +129,9 @@ class ContainerModel(ModelMixin):
             key (str): item key
             item (dict): item
         """
-        if self.items is None:
-            self.items = SwaggerDict()
         self.items[key] = item
 
     def get(self, key):
-        if self.items is None:
-            self.items = SwaggerDict()
         return self.items.get(key)
 
     def __iter__(self):
@@ -169,7 +148,7 @@ class ContainerModel(ModelMixin):
         return self.json(indent=2)
 
 
-@dataclass
+@attr.s
 class License(ExtensionMixin):
     """ License information for the exposed API.
 
@@ -180,15 +159,16 @@ class License(ExtensionMixin):
         url: A URL to the license used for the API. MUST be in the format of a URL.
     """
 
-    name: str
-    url: str = None
+    name = attr.ib(type=str)
+    url = attr.ib(default=None, type=str)
 
-    def validate(self):
-        if self.url:
-            validators.validate_url(self.url, "License.url")
+    @url.validator
+    def validate(self, _, url):
+        if url:
+            validators.validate_url(url, "License.url")
 
 
-@dataclass
+@attr.s
 class Contact(ExtensionMixin):
     """ Contact information for the exposed API.
 
@@ -200,16 +180,17 @@ class Contact(ExtensionMixin):
           url: The URL pointing to the contact information. MUST be in the format of a URL.
     """
 
-    name: str = None
-    email: str = None
-    url: str = None
+    name = attr.ib(default=None, type=str)
+    email = attr.ib(default=None, type=str)
+    url = attr.ib(default=None, type=str)
 
-    def validate(self):
-        if self.url:
-            validators.validate_url(self.url, "Contact.url")
+    @url.validator
+    def validate(self, _, url):
+        if url:
+            validators.validate_url(url, "Contact.url")
 
 
-@dataclass
+@attr.s
 class Info(ExtensionMixin):
     """ The object provides metadata about the API.
 
@@ -226,15 +207,15 @@ class Info(ExtensionMixin):
         license: The license information for the exposed API.
     """
 
-    title: str
-    version: str
-    description: str = None
-    terms_of_service: str = None
-    contact: Contact = None
-    license: License = None
+    title = attr.ib(type=str)
+    version = attr.ib(type=str)
+    description = attr.ib(default=None, type=str)
+    terms_of_service = attr.ib(default=None, type=str)
+    contact = attr.ib(default=None, type=Contact)
+    license = attr.ib(default=None, type=License)
 
 
-@dataclass
+@attr.s
 class ServerVariable(ExtensionMixin):
     """ An object representing a Server Variable for server URL template substitution.
 
@@ -250,12 +231,12 @@ class ServerVariable(ExtensionMixin):
 
     """
 
-    default: str
-    enum: List[str] = None
-    description: str = None
+    default = attr.ib(type=str)
+    enum = attr.ib(default=None, type=list)
+    description = attr.ib(default=None, type=str)
 
 
-@dataclass
+@attr.s
 class Server(ExtensionMixin):
     """ An object representing a Server.
 
@@ -271,9 +252,9 @@ class Server(ExtensionMixin):
                    URL template.
     """
 
-    url: str
-    description: str = None
-    variables: Dict[str, ServerVariable] = None
+    url = attr.ib(type=str)
+    description = attr.ib(default=None, type=str)
+    variables = attr.ib(default=SwaggerDict(), type=str)
 
     def add_variable(self, name: str, variable: ServerVariable):
         """ Adds a server variable
@@ -281,12 +262,10 @@ class Server(ExtensionMixin):
             name: variable name
             variable: Server variable instance
         """
-        if self.variables is None:
-            self.variables = SwaggerDict()
         self.variables[name] = variable
 
 
-class Style(Enum):
+class Style(enum.Enum):
     """ Style values defined to aid serializing different simple parameters """
 
     FORM = "form"
@@ -304,54 +283,54 @@ class Style(Enum):
         return self.value
 
 
-@dataclass
+@attr.s
 class ReferenceObject(ModelMixin):
 
-    ref: str
+    ref = attr.ib(type=str)
 
 
-@dataclass
+@attr.s
 class Discriminator(ModelMixin):
     """ When request bodies or response payloads may be one of a number of different schemas, a discriminator object
     can be used to aid in serialization, deserialization, and validation. The discriminator is a specific object in a
     schema which is used to inform the consumer of the specification of an alternative schema based on the value
     associated with it. """
 
-    property_name: str
-    mapping: Dict[str, str] = None
+    property_name = attr.ib(type=str)
+    mapping = attr.ib(default=dict)
 
 
-@dataclass
+@attr.s
 class XML(ExtensionMixin):
     """ A metadata object that allows for more fine-tuned XML model definitions. When using arrays, XML element names
     are not inferred (for singular/plural forms) and the name property SHOULD be used to add that information. See
     examples for expected behavior.
     """
 
-    name: str = None
-    namespace: str = None
-    prefix: str = None
-    attribute: bool = False
-    wrapped: bool = False
+    name = attr.ib(default=None, type=str)
+    namespace = attr.ib(default=None, type=str)
+    prefix = attr.ib(default=None, type=str)
+    attribute = attr.ib(default=False)
+    wrapped = attr.ib(default=False)
 
 
-@dataclass
+@attr.s
 class ExternalDocumentation(ExtensionMixin):
     """ Allows referencing an external resource for extended documentation. """
 
-    url: str
-    description: str = None
+    url = attr.ib(type=str)
+    description = attr.ib(default=None, type=str)
 
 
-@dataclass
+@attr.s
 class Encoding(ExtensionMixin):
     """ A single encoding definition applied to a single schema property. """
 
-    content_type: str
-    headers: Dict[str, Union[ReferenceObject]] = None
-    style: Style = None
-    explode: bool = True
-    allow_reserved: bool = False
+    content_type = attr.ib(type=str)
+    headers = attr.ib(default=SwaggerDict())
+    style = attr.ib(default=None, type=Style)
+    explode = attr.ib(default=True)
+    allow_reserved = attr.ib(default=False)
 
     def add_header(self, name, header):
         if not self.headers:
@@ -359,16 +338,16 @@ class Encoding(ExtensionMixin):
         self.headers[name] = header
 
 
-@dataclass
+@attr.s
 class Example(ExtensionMixin):
 
-    summary: str = None
-    description: str = None
-    value: Any = None
-    external_value: str = None
+    summary = attr.ib(default=None, type=str)
+    description = attr.ib(default=None, type=str)
+    value = attr.ib(default=None)
+    external_value = attr.ib(default=None, type=str)
 
 
-@dataclass
+@attr.s
 class Schema(ModelMixin):
     """ The Schema Object allows the definition of input and output data types.
 
@@ -377,8 +356,8 @@ class Schema(ModelMixin):
     Validation. Unless stated otherwise, the property definitions follow the JSON Schema.
     """
 
-    ref: str = None
-    title: str = None
+    ref = attr.ib(default=None, type=str)
+    title = attr.ib(default=None, type=str)
     multiple_of = None
     maximum = None
     exclusive_maximum = None
@@ -403,7 +382,7 @@ class Schema(ModelMixin):
     properties = None
     additional_properties = None
     description = None
-    format: str = None
+    format = attr.ib(default=None, type=str)
     default = None
     nullable = None
     discriminator = None
@@ -418,14 +397,14 @@ class Schema(ModelMixin):
         return self._not
 
 
-@dataclass
+@attr.s
 class MediaType(ModelMixin):
     """ Each Media Type Object provides schema and examples for the media type identified by its key. """
 
-    schema: Union[ReferenceObject, Schema] = None
-    example: Any = None
-    examples: Dict[str, Union[Example, ReferenceObject]] = None
-    encoding: Dict[str, Encoding] = None
+    schema = attr.ib(default=None, type=Schema)
+    example = attr.ib(default=None)
+    examples = attr.ib(default=None, type=dict)
+    encoding = attr.ib(default=None, type=dict)
 
     def add_example(self, name: str, example: Union[Example, ReferenceObject]):
         if self.examples is None:
@@ -450,15 +429,16 @@ class Content(object):
         return self.contents
 
 
-@dataclass
+@attr.s
 class RequestBody(ExtensionMixin):
 
     # FIXME: reuse Content Class ?
-    content: Dict[str, MediaType]
-    description: str = None
-    required: bool = False
+    content = attr.ib(default=SwaggerDict())
+    description = attr.ib(default=None, type=str)
+    required = attr.ib(default=False)
 
 
+@attr.s
 class Component(ExtensionMixin):
     """ Holds a set of reusable objects for different aspects of the OAS.
 
@@ -472,17 +452,15 @@ class Component(ExtensionMixin):
         schemas: An object to hold reusable Schema Objects.
     """
 
-    def __init__(self):
-        super(Component, self).__init__()
-        self.schemas = {}
-        self.responses = {}
-        self.parameters = {}
-        self.examples = {}
-        self.request_bodies = {}
-        self.headers = {}
-        self.security_schemes = {}
-        self.links = {}
-        self.callbacks = {}
+    schemas = attr.ib(default={})
+    responses = attr.ib(default={})
+    parameters = attr.ib(default={})
+    examples = attr.ib(default={})
+    request_bodies = attr.ib(default={})
+    headers = attr.ib(default={})
+    security_schemes = attr.ib(default={})
+    links = attr.ib(default={})
+    callbacks = attr.ib(default={})
 
     def add_schema(self, schema_name: str, schema: Schema):
         self.schemas[schema_name] = schema
@@ -491,13 +469,15 @@ class Component(ExtensionMixin):
         self.responses[response_name] = response
 
 
+@attr.s
 class RelativePath(object):
-    def __init__(self, url):
-        self.len = 0
-        self.params = {}
-        self.url = url
 
-        self.parse(url)
+    url = attr.ib(type=str)
+    len = attr.ib(default=0, type=int)
+    params = attr.ib(default={})
+
+    def __attrs_post_init__(self):
+        self.parse(self.url)
 
     def parse(self, url_template):
         """
@@ -517,7 +497,7 @@ class RelativePath(object):
                 self.params[i] = path.replace("{", "").replace("}", "")
 
 
-class ParameterLocation(Enum):
+class ParameterLocation(enum.Enum):
     COOKIE = "cookie"
     HEADER = "header"
     PATH = "path"
@@ -527,29 +507,26 @@ class ParameterLocation(Enum):
         return self.value
 
 
-@dataclass
+@attr.s
 class Parameter(ModelMixin, ApiDecoratorMixin):
     """
     Describes a single operation parameter.
     A unique parameter is defined by a combination of a name and location.
     """
 
-    name: str
-    _in: ParameterLocation = None
-    required: bool = False
-    description: str = None
-    deprecated: bool = False
-
-    allow_empty_value: bool = False
-    allow_reserved: bool = False
-    schema: Union[Schema, ReferenceObject] = None
-    content: Dict[str, MediaType] = None
-
-    explode: bool = False
-    _style: Style = None
-
-    example: Any = None
-    examples: Dict[str, Union[Example, ReferenceObject]] = None
+    name = attr.ib(type=str)
+    _in = attr.ib(default=None, type=ParameterLocation)
+    required = attr.ib(default=False)
+    description = attr.ib(default=None, type=str)
+    deprecated = attr.ib(default=False)
+    allow_empty_value = attr.ib(default=False)
+    allow_reserved = attr.ib(default=False)
+    schema = attr.ib(default=None)
+    content = attr.ib(default={})
+    explode = attr.ib(default=False)
+    _style = attr.ib(default=None, type=Style)
+    example = attr.ib(default=None)
+    examples = attr.ib(default=SwaggerDict())
 
     @property
     def q_in(self):
@@ -560,36 +537,36 @@ class Parameter(ModelMixin, ApiDecoratorMixin):
         return self._style.value
 
 
-@dataclass
+@attr.s
 class PathParameter(Parameter):
 
-    _in: ParameterLocation = ParameterLocation.PATH
-    required: bool = True
-    _style: Style = Style.SIMPLE
+    _in = attr.ib(default=ParameterLocation.PATH)
+    required = attr.ib(default=True)
+    _style = attr.ib(default=Style.SIMPLE)
 
 
-@dataclass
+@attr.s
 class QueryParameter(Parameter):
 
-    _in: ParameterLocation = ParameterLocation.QUERY
-    _style: Style = Style.FORM
+    _in = attr.ib(default=ParameterLocation.QUERY)
+    _style = attr.ib(default=Style.FORM)
 
 
-@dataclass
+@attr.s
 class HeaderParameter(Parameter):
 
-    _in: ParameterLocation = ParameterLocation.HEADER
-    _style: Style = Style.SIMPLE
+    _in = attr.ib(default=ParameterLocation.HEADER)
+    _styl = attr.ib(default=Style.SIMPLE)
 
 
-@dataclass
+@attr.s
 class CookieParameter(Parameter):
 
-    _in: ParameterLocation = ParameterLocation.COOKIE
-    _style: Style = Style.FORM
+    _in = attr.ib(default=ParameterLocation.COOKIE)
+    _style = attr.ib(default=Style.FORM)
 
 
-@dataclass
+@attr.s
 class Link(ExtensionMixin):
     """
     The Link object represents a possible design-time link for a response. The presence of a link does not guarantee
@@ -600,25 +577,25 @@ class Link(ExtensionMixin):
     using them as parameters while invoking the linked operation.
     """
 
-    operation_ref: str = None
-    operation_id: str = None
-    description: str = None
-    parameters: Dict[str, Any] = None
-    request_body: Any = None
-    server: Server = None
+    operation_ref = attr.ib(default=None, type=str)
+    operation_id = attr.ib(default=None, type=str)
+    description = attr.ib(default=None, type=str)
+    parameters = attr.ib(default=None, type=SwaggerDict)
+    request_body = attr.ib(default=None)
+    server = attr.ib(default=None, type=Server)
 
 
-@dataclass
+@attr.s
 class ResponseObject(ExtensionMixin):
     """
     Describes a single response from an API Operation, including design-time, static links to operations based on
     the response.
     """
 
-    description: str
-    content: Dict[str, Union[MediaType, Type]] = None
-    headers: Dict[str, Union[ReferenceObject, HeaderParameter]] = None
-    links: Dict[str, Union[Link, ReferenceObject]] = None
+    description = attr.ib(type=str)
+    content = attr.ib(default=None, type=SwaggerDict)
+    headers = attr.ib(default=None, type=SwaggerDict)
+    links = attr.ib(default=None, type=SwaggerDict)
 
     def add_header(self, name: str, header: Union[ReferenceObject, HeaderParameter]):
         if self.headers is None:
@@ -636,7 +613,7 @@ class ResponseObject(ExtensionMixin):
         self.links[link_name] = link
 
 
-@dataclass
+@attr.s
 class ResponsesObject(ExtensionMixin):
     """
     A container for the expected responses of an operation. The container maps a HTTP response code to the
@@ -647,42 +624,40 @@ class ResponsesObject(ExtensionMixin):
     and it SHOULD be the response for a successful operation call.
     """
 
-    default: ResponseObject = None
-    responses: Dict[str, Union[Type, ResponseObject]] = None
+    default = attr.ib(default=None, type=ResponseObject)
+    responses = attr.ib(default=SwaggerDict())
 
     def add_response(self, status_code: str, response: ResponseObject):
-        if self.responses is None:
-            self.responses = SwaggerDict()
         self.responses[status_code] = response
 
 
-@dataclass
+@attr.s
 class Tag(ModelMixin, ApiDecoratorMixin):
 
-    name: str
-    description: str = None
-    external_docs: ExternalDocumentation = None
+    name = attr.ib(type=str)
+    description = attr.ib(default=None, type=str)
+    external_docs = attr.ib(default=None, type=ExternalDocumentation)
 
     def external_doc(self, url, description=None):
         self.external_docs = ExternalDocumentation(url=url, description=description)
 
 
-@dataclass
+@attr.s
 class Operation(ExtensionMixin, ApiDecoratorMixin):
     """ Describes a single API operation on a path. """
 
-    responses: ResponsesObject
-    tags: List[str] = None
-    summary: str = None
-    description: str = None
-    external_docs: ExternalDocumentation = None
-    operation_id: str = None
-    parameters: List[Union[ReferenceObject, Parameter]] = None
-    request_body: Union[RequestBody, ReferenceObject] = None
-    callbacks: Dict[str, ReferenceObject] = None
-    deprecated = False
-    security: List[Dict[str, Any]] = None
-    servers: Set[Server] = None
+    responses = attr.ib(type=ResponsesObject)
+    tags = attr.ib(default=[], type=list)
+    summary = attr.ib(default=None, type=str)
+    description = attr.ib(default=None, type=str)
+    external_docs = attr.ib(default=None, type=ExternalDocumentation)
+    operation_id = attr.ib(default=None, type=str)
+    parameters = attr.ib(default=None, type=list)
+    request_body = attr.ib(default=None)
+    callbacks = attr.ib(default=None, type=SwaggerDict)
+    deprecated = attr.ib(default=False)
+    security = attr.ib(default=None, type=list)
+    servers = attr.ib(default=None, type=list)
 
     @property
     def http_method(self):
@@ -716,7 +691,7 @@ class Operation(ExtensionMixin, ApiDecoratorMixin):
             return HEAD(responses=responses)
 
 
-@dataclass
+@attr.s
 class PathItem(ModelMixin):
     """
     Describes the operations available on a single path. A Path Item MAY be empty, due to ACL constraints. The
@@ -724,21 +699,21 @@ class PathItem(ModelMixin):
     are available.
     """
 
-    ref: str = None
-    summary: str = None
-    description: str = None
+    ref = attr.ib(default=None, type=str)
+    summary = attr.ib(default=None, type=str)
+    description = attr.ib(default=None, type=str)
 
-    servers: List[Server] = None
-    parameters: List[Union[Parameter, ReferenceObject]] = None
+    servers = attr.ib(default=None, type=list)
+    parameters = attr.ib(default=None, type=list)
 
-    get: Operation = None
-    delete: Operation = None
-    head: Operation = None
-    options: Operation = None
-    patch: Operation = None
-    post: Operation = None
-    put: Operation = None
-    trace: Operation = None
+    get = attr.ib(default=None, type=Operation)
+    delete = attr.ib(default=None, type=Operation)
+    head = attr.ib(default=None, type=Operation)
+    options = attr.ib(default=None, type=Operation)
+    patch = attr.ib(default=None, type=Operation)
+    post = attr.ib(default=None, type=Operation)
+    put = attr.ib(default=None, type=Operation)
+    trace = attr.ib(default=None, type=Operation)
 
     def add_operation(self, operation):
         """
@@ -808,14 +783,12 @@ class Paths(ContainerModel):
         super(Paths, self).add(relative_url, path_item)
 
 
-@dataclass
 class GET(Operation):
     @property
     def http_method(self):
         return HttpMethod.GET
 
 
-@dataclass
 class POST(Operation):
     @property
     def http_method(self):
@@ -869,7 +842,7 @@ class HttpMethod(enum.Enum):
     TRACE = "TRACE"
 
 
-@dataclass
+@attr.s
 class Callback(ModelMixin):
     """
     A map of possible out-of band callbacks related to the parent operation. Each value in the map is a Path Item
@@ -878,10 +851,10 @@ class Callback(ModelMixin):
     use for the callback operation.
     """
 
-    expression: PathItem
+    expression = attr.ib(type=PathItem)
 
 
-class SecuritySchemeType(Enum):
+class SecuritySchemeType(enum.Enum):
 
     API_KEY = "apiKey"
     HTTP = "http"

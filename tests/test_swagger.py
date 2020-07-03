@@ -19,7 +19,7 @@ def test_dict_set_item():
 
 def test_extension_model_usage():
     """ Tests adding and validating extensions to models """
-
+    print("SSSSSSSSSSSSSSSSSSSSs")
     lc = models.License(name="Dummy License", url="http://dummy")
 
     with pytest.raises(ValueError):
