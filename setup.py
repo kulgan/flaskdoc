@@ -19,7 +19,7 @@ setup(
     long_description_content_type="text/markdown",
     license="Apache 2.0",
     url="https://github.com/kulgan/flaskdoc",
-    python_requires=">=3.5",
+    python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*",
     package_dir={"": "src"},
     packages=find_packages(where="src"),
     zip_safe=True,
