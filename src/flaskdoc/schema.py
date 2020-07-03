@@ -1,53 +1,54 @@
-from dataclasses import dataclass
 import typing as t
+
+import attr
 
 from flaskdoc import swagger
 
 
-@dataclass
+@attr.s
 class Boolean(swagger.Schema):
-    type: str = "boolean"
+    type = attr.ib(default="boolean", init=False)
 
 
-@dataclass
+@attr.s
 class String(swagger.Schema):
-    type: str = "string"
+    type = attr.ib(default="string", init=False)
 
 
-@dataclass
+@attr.s
 class Email(String):
-    type: str = "string"
-    format: str = "email"
+    type = attr.ib(default="string", init=False)
+    format = attr.ib(default="email", init=False)
 
 
-@dataclass
+@attr.s
 class Int32(swagger.Schema):
-    type: str = "integer"
-    format: str = "int32"
-    minimum: int = 0
+    type = attr.ib(default="integer", init=False)
+    format = attr.ib(default="int32", init=False)
+    minimum = attr.ib(default=0, type=int)
 
 
-@dataclass
+@attr.s
 class Number(Int32):
-    type: str = "number"
+    type = attr.ib(default="number", init=False)
 
 
-@dataclass
+@attr.s
 class Int64(Int32):
-    format: str = "int64"
+    format = attr.ib(default="int64", init=False)
 
 
-@dataclass
+@attr.s
 class Base64String(String):
-    format: str = "base64"
+    format = attr.ib(default="base64", init=False)
 
 
-@dataclass
+@attr.s
 class BinaryString(String):
-    format: str = "binary"
+    format = attr.ib(default="binary", init=False)
 
 
-@dataclass
+@attr.s
 class Image(BinaryString):
     pass
 
@@ -56,9 +57,9 @@ class MultipartFormData:
     pass
 
 
-@dataclass
+@attr.s
 class Array(swagger.Schema):
-    type: str = "array"
+    type = attr.ib(default="array", init=False)
 
 
 _MAP = {

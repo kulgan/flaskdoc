@@ -1,8 +1,0 @@
-black
-coverage[toml]
-flake8
-pre-commit
-pytest
-pytest-cov
-pytest-flask
-sphinx
