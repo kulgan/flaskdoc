@@ -29,6 +29,7 @@ from flaskdoc.swagger.models import (
     Tag,
     ReferenceObject,
     Schema,
+    SwaggerDict,
     Discriminator,
     XML,
     SecuritySchemeType,

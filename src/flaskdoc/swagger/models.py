@@ -356,7 +356,7 @@ class Schema(ModelMixin):
     ref = attr.ib(default=None, type=str)
     title = attr.ib(default=None, type=str)
     multiple_of = None
-    maximum = None
+    maximum = attr.ib(default=None, type=int)
     exclusive_maximum = None
     minimum = None
     exclusive_minimum = None
