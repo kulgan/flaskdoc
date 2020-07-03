@@ -37,7 +37,7 @@ class Blueprint(flask.Blueprint, mixin.SwaggerMixin):
         servers=None,
         parameters=None,
         responses=None,
-        **options,
+        **options
     ):
         """
         Extends flask blueprint route
