@@ -39,9 +39,7 @@ class SwaggerMixin(object):
         """
         if isinstance(tags, six.string_types):
             return [swagger.Tag(name=tags)]
-        tags = [
-            swagger.Tag(name=t) if isinstance(t, six.string_types) else t for t in tags
-        ]
+        tags = [swagger.Tag(name=t) if isinstance(t, six.string_types) else t for t in tags]
         return tags
 
     @staticmethod
@@ -57,10 +55,7 @@ class SwaggerMixin(object):
         if isinstance(methods, swagger.Operation):
             return [methods], [methods.http_method.value]
         methods = [
-            swagger.Operation.from_op(m, responses)
-            if isinstance(m, six.string_types)
-            else m
-            for m in methods
+            swagger.Operation.from_op(m, responses) if isinstance(m, six.string_types) else m for m in methods
         ]
         flask_methods = [m.http_method.value for m in methods]
         return methods, flask_methods
@@ -78,14 +73,10 @@ class SwaggerMixin(object):
         servers=None,
         parameters=None,
         responses=None,
-        **options,
+        **options
     ):
         path_item = swagger.PathItem(
-            ref=ref,
-            description=description,
-            summary=summary,
-            servers=servers,
-            parameters=parameters,
+            ref=ref, description=description, summary=summary, servers=servers, parameters=parameters,
         )
         methods = options.pop("methods", ["GET"])
         operations, methods = self.extract_operations(methods, responses)
