@@ -78,7 +78,7 @@ class ModelMixin(object):
 @attr.s
 class ExtensionMixin(ModelMixin):
 
-    extensions = attr.ib()
+    extensions = attr.ib(default=None, init=False)
 
     def add_extension(self, name, value):
         """ Allows extensions to the Swagger Schema.
@@ -93,14 +93,14 @@ class ExtensionMixin(ModelMixin):
         Raises:
             ValueError: if key name is invalid
         """
-
+        self.validate_extension_name(name)
         if not self.extensions:
             self.extensions = SwaggerDict()
         self.extensions[name] = value
         return self
 
-    @extensions.validator
-    def validate_extension_name(self, _, value):
+    @staticmethod
+    def validate_extension_name(value):
         """
         Validates a custom extension name
         Args:
@@ -108,7 +108,7 @@ class ExtensionMixin(ModelMixin):
         Raises:
             ValueError: if key name is invalid
         """
-        if not (value and value.startswith("x-")):
+        if value and not value.startswith("x-"):
             raise ValueError("Custom extension must start with x-")
 
     def dict(self):
@@ -373,12 +373,12 @@ class Schema(ModelMixin):
     min_properties = None  # type: ignore
     required = None
     enum = None
-    type: str = None
+    type = attr.ib(default=None, type=str)
     all_of = None
     one_of = None
     any_of = None
     _not = None  # type: ignore
-    items: Union[ReferenceObject, "Schema"] = None
+    items = attr.ib(default=None)
     properties = None
     additional_properties = None
     description = None
@@ -515,7 +515,7 @@ class Parameter(ModelMixin, ApiDecoratorMixin):
     """
 
     name = attr.ib(type=str)
-    _in = attr.ib(default=None, type=ParameterLocation)
+    _in = attr.ib(default=None, type=ParameterLocation, init=False)
     required = attr.ib(default=False)
     description = attr.ib(default=None, type=str)
     deprecated = attr.ib(default=False)
@@ -524,7 +524,7 @@ class Parameter(ModelMixin, ApiDecoratorMixin):
     schema = attr.ib(default=None)
     content = attr.ib(default={})
     explode = attr.ib(default=False)
-    _style = attr.ib(default=None, type=Style)
+    _style = attr.ib(default=None, type=Style, init=False)
     example = attr.ib(default=None)
     examples = attr.ib(default=SwaggerDict())
 
@@ -540,30 +540,30 @@ class Parameter(ModelMixin, ApiDecoratorMixin):
 @attr.s
 class PathParameter(Parameter):
 
-    _in = attr.ib(default=ParameterLocation.PATH)
-    required = attr.ib(default=True)
-    _style = attr.ib(default=Style.SIMPLE)
+    _in = attr.ib(default=ParameterLocation.PATH, init=False)
+    required = attr.ib(default=True, init=False)
+    _style = attr.ib(default=Style.SIMPLE, init=False)
 
 
 @attr.s
 class QueryParameter(Parameter):
 
-    _in = attr.ib(default=ParameterLocation.QUERY)
-    _style = attr.ib(default=Style.FORM)
+    _in = attr.ib(default=ParameterLocation.QUERY, init=False)
+    _style = attr.ib(default=Style.FORM, init=False)
 
 
 @attr.s
 class HeaderParameter(Parameter):
 
-    _in = attr.ib(default=ParameterLocation.HEADER)
-    _styl = attr.ib(default=Style.SIMPLE)
+    _in = attr.ib(default=ParameterLocation.HEADER, init=False)
+    _styl = attr.ib(default=Style.SIMPLE, init=False)
 
 
 @attr.s
 class CookieParameter(Parameter):
 
-    _in = attr.ib(default=ParameterLocation.COOKIE)
-    _style = attr.ib(default=Style.FORM)
+    _in = attr.ib(default=ParameterLocation.COOKIE, init=False)
+    _style = attr.ib(default=Style.FORM, init=False)
 
 
 @attr.s
