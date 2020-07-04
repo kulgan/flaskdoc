@@ -30,7 +30,6 @@ servers = [
 ]
 
 
-@swagger.Tag(name="getEcho", description="Retrieve echos wit Get")
 @swagger.GET(
     tags=["getEcho"],
     operation_id="getEcho",
@@ -54,7 +53,6 @@ def echo(sample: str):
     return sample
 
 
-@swagger.Tag(name="postEcho", description="Posts an Echo")
 @swagger.POST(tags=["postEcho"], description="Posts an Echo", responses=swagger.ResponsesObject())
 @blp.route("/echo", methods=["POST"])
 def post():
