@@ -60,14 +60,12 @@ add_inventory_docs = swagger.POST(
 
 
 @search_inventory_docs
-@swagger.Tag(name="developers", description="Operations available to regular developers")
 @blp.route("", methods=["GET"])
 def search_inventory():
     pass
 
 
 @add_inventory_docs
-@swagger.Tag(name="admin", description="Secured Admin-Only calls")
 @blp.route("", methods=["POST"])
 def add_inventory():
     pass

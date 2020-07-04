@@ -24,7 +24,15 @@ def make_app():
         contact=swagger.Contact(name="Rowland", email="r.ogwara@gmail.com", url="https://github.com/kulgan"),
         license=swagger.models.License(name="Apache 2.0", url="https://www.example.com/license"),
     )
-    flaskdoc.register_openapi(app, info=info, openapi_verion="3.0")
+    flaskdoc.register_openapi(
+        app,
+        info=info,
+        servers=[swagger.Server(url="https://virtserver.swaggerhub.com/rogwara/petstore/1.0.0")],
+        tags=[
+            swagger.Tag(name="admin", description="Secured Admin-Only calls"),
+            swagger.Tag(name="developers", description="Operations available to regular developers"),
+        ],
+    )
     return app
 
 
