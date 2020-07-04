@@ -911,31 +911,25 @@ class OAuthFlow(ExtensionMixin):
         self.scopes = scopes  # type: dict
 
 
+@attr.s
 class OpenApi(ModelMixin):
-    """ This is the root document object of the OpenAPI document. """
+    """ This is the root document object of the OpenAPI document.
 
-    def __init__(self, info, paths, open_api_version="3.0.2"):
-        """
         OpenApi specs tree, contains the overall specs for the API
-        Args:
-            open_api_version (str): Open API version used by API
+        Arguments:
+            openapi (str): Open API version used by API
             info (flaskdoc.swagger.info.Info): open api info object
             paths (flaskdoc.swagger.path.Paths): Paths definitions
-        """
-        super(OpenApi, self).__init__()
+    """
 
-        self.openapi = open_api_version
-        self.info = info
-
-        # TODO disallow duplicates
-        self.tags = []  # type -> swagger.tag.Tag
-        self.paths = paths  # type -> swagger.path.Paths
-        self.servers = set()
-
-        self.components = None
-        self.security = []
-
-        self.external_docs = None
+    info = attr.ib(type=Info)
+    paths = attr.ib(type=Paths)
+    openapi = attr.ib(default="3.0.2")
+    tags = attr.ib(default=[], type=list)
+    servers = attr.ib(default=None, type=set)
+    security = attr.ib(default=[])
+    external_docs = attr.ib(default=None)
+    components = attr.ib(default={}, type=dict, init=False)
 
     def add_tag(self, tag):
         """
@@ -963,8 +957,3 @@ class OpenApi(ModelMixin):
         for r_url in paths:
             path_url = "{}{}{}".format(url_prefix, blp_prefix, r_url)
             self.paths.add(path_url, paths.get(r_url))
-
-
-if __name__ == "__main__":
-    paths = Paths()
-    paths.add("test", None)
