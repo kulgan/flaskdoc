@@ -1,16 +1,17 @@
 import flask
-import flaskdoc
 
+import flaskdoc
 from flaskdoc import swagger
 
-inv = flask.Blueprint("inventory", __name__, url_prefix="/inventory")
+blp = flask.Blueprint("inventory", __name__, url_prefix="/inventory")
 
 
 class InventoryItem:
     pass
 
 
-@swagger.GET(
+search_inventory_docs = swagger.GET(
+    tags=["developers"],
     operation_id="searchInventory",
     summary="searches inventory",
     description="By passing in the appropriate options, you can search for available inventory in the system",
@@ -38,12 +39,35 @@ class InventoryItem:
         }
     ),
 )
+
+
+add_inventory_docs = swagger.POST(
+    tags=["admin"],
+    operation_id="addInventory",
+    summary="adds an inventory item",
+    description="adds an item to the system",
+    request_body=swagger.RequestBody(
+        content={"application/json": InventoryItem}, description="Inventory item to add",
+    ),
+    responses=swagger.ResponsesObject(
+        responses={
+            "201": swagger.ResponseObject(description="item created"),
+            "400": swagger.ResponseObject(description="Invalid input, object invalid",),
+            "409": swagger.ResponseObject(description="an existing item already exists"),
+        }
+    ),
+)
+
+
+@search_inventory_docs
 @swagger.Tag(name="developers", description="Operations available to regular developers")
-@inv.route("", methods=["GET"])
+@blp.route("", methods=["GET"])
 def search_inventory():
     pass
 
 
-@inv.route("", methods=["POST"])
+@add_inventory_docs
+@swagger.Tag(name="admin", description="Secured Admin-Only calls")
+@blp.route("", methods=["POST"])
 def add_inventory():
     pass

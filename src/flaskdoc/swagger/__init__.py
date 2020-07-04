@@ -30,6 +30,7 @@ from flaskdoc.swagger.models import (
     ReferenceObject,
     Schema,
     SwaggerDict,
+    RequestBody,
     Discriminator,
     XML,
     SecuritySchemeType,

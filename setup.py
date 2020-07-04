@@ -35,7 +35,7 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Topic :: Documentation",
     ],
-    install_requires=["attrs~=19.3", "flask~=1.0", "PyYaml~=5.3"],
+    install_requires=["attrs~=19.3", "click~=7.1", "flask~=1.0", "PyYaml~=5.3"],
     extras_require={
         "dev": [
             "black; python_version >= '3.6'",
@@ -51,4 +51,5 @@ setup(
     },
     setup_requires=["setuptools_scm"],
     project_urls={"source": "https://github.com/kulgan/flaskdoc"},
+    entry_points={"console_scripts": ["flaskdoc = flaskdoc.cli:flaskdoc"]},
 )

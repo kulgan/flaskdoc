@@ -1,5 +1,9 @@
 import flask
 
+import flaskdoc
+from flaskdoc import swagger
+from flaskdoc.examples import inventory
+
 
 class AppConfig:
     API_LICENSE_NAME = "Apache 2.0"
@@ -12,6 +16,18 @@ class AppConfig:
 
 def make_app():
     app = flask.Flask("Test API")
-    # _app.register_blueprint(mocks.blp, url_prefix="/mocks")
+    app.register_blueprint(inventory.blp)
 
+    info = swagger.models.Info(
+        title="Test",
+        version="1.2.2",
+        contact=swagger.Contact(name="Rowland", email="r.ogwara@gmail.com", url="https://github.com/kulgan"),
+        license=swagger.models.License(name="Apache 2.0", url="https://www.example.com/license"),
+    )
+    flaskdoc.register_openapi(app, info=info, openapi_verion="3.0")
     return app
+
+
+def run_examples():
+    app = make_app()
+    app.run(port=80708)
