@@ -109,7 +109,7 @@ def register_swagger_ui(path="index.html"):
     return flask.send_from_directory(static_ui, path)
 
 
-def register_openapi(app, info: swagger.Info, openapi="3.0.3", servers=None, tags=None, security=None):
+def register_openapi(app, info, openapi="3.0.3", servers=None, tags=None, security=None):
     """ Registers flaskdoc api specs to an existing flask app
 
     Args:
@@ -131,7 +131,15 @@ def register_openapi(app, info: swagger.Info, openapi="3.0.3", servers=None, tag
 
 
 @functools.lru_cache(maxsize=10)
-def get_api_docs(app: flask.Flask):
+def get_api_docs(app):
+    """ Traverses all flask mappings and retrieves all specified paths and parsing the specs
+
+    Args:
+        app (flask.Flask): flask app instance
+
+    Returns:
+        int: #fixme doesn't seem like a useful return value
+    """
 
     api = app.openapi  # type: swagger.OpenApi
     for fn, spec in plugins.get_docs():
@@ -153,7 +161,17 @@ def get_api_rule(fn, app):
     return None
 
 
-def parse_specs(rule: Rule, spec: List, api: swagger.OpenApi):
+def parse_specs(rule, spec, api):
+    """ Parses spec for a given flask route
+
+    Args:
+        rule (werkzeug.routing.Rule): route rule
+        spec (list): swagger model objects associated with this route
+        api (swagger.OpenApi): flaskdoc api container
+
+    Returns:
+        swagger.PathItem: PathItem spec for the route
+    """
 
     pi = swagger.PathItem()
     for arg in rule.arguments:
