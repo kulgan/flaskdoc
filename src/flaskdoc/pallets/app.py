@@ -63,9 +63,7 @@ class Flask(flask.Flask, SwaggerMixin):
             contact_block.url = self.config.get("API_CONTACT_URL")
             info_block.contact = contact_block
 
-        self._doc = swagger.OpenApi(
-            open_api_version=self.open_api_version, info=info_block, paths=swagger.Paths(),
-        )
+        self._doc = swagger.OpenApi(openapi=self.open_api_version, info=info_block, paths=swagger.Paths(),)
         self.add_url_rule("/openapi.json", view_func=self.register_json_path, methods=["GET"])
         self.add_url_rule("/openapi.yaml", view_func=self.register_yaml_path, methods=["GET"])
 
@@ -111,15 +109,37 @@ def register_swagger_ui(path="index.html"):
     return flask.send_from_directory(static_ui, path)
 
 
-def register_openapi(app: flask.Flask, info: swagger.Info, openapi_verion="3.0.3"):
+def register_openapi(app, info, openapi="3.0.3", servers=None, tags=None, security=None):
+    """ Registers flaskdoc api specs to an existing flask app
+
+    Args:
+        app (flask.Flask): an existing flask app instance
+        info (swagger.Info): OpenAPI info block
+        openapi (str): openapi version number as string
+        servers (list[swagger.Server]): list of servers used for testing
+        tags (list[swagger.Tag]): list of tags with name and description
+        security (list[swagger.SecurityScheme]): security schemes to apply
+    Returns:
+
+    """
     app.add_url_rule("/openapi.json", view_func=register_json_path, methods=["GET"])
     app.add_url_rule("/openapi.yaml", view_func=register_yaml_path, methods=["GET"])
     app.register_blueprint(ui, url_prefix="/swagger-ui")
-    app.openapi = swagger.OpenApi(info=info, paths=swagger.Paths(), open_api_version=openapi_verion)
+    app.openapi = swagger.OpenApi(
+        info=info, paths=swagger.Paths(), openapi=openapi, servers=servers, tags=tags, security=security
+    )
 
 
 @functools.lru_cache(maxsize=10)
-def get_api_docs(app: flask.Flask):
+def get_api_docs(app):
+    """ Traverses all flask mappings and retrieves all specified paths and parsing the specs
+
+    Args:
+        app (flask.Flask): flask app instance
+
+    Returns:
+        int: #fixme doesn't seem like a useful return value
+    """
 
     api = app.openapi  # type: swagger.OpenApi
     for fn, spec in plugins.get_docs():
@@ -141,7 +161,17 @@ def get_api_rule(fn, app):
     return None
 
 
-def parse_specs(rule: Rule, spec: List, api: swagger.OpenApi):
+def parse_specs(rule, spec, api):
+    """ Parses spec for a given flask route
+
+    Args:
+        rule (werkzeug.routing.Rule): route rule
+        spec (list): swagger model objects associated with this route
+        api (swagger.OpenApi): flaskdoc api container
+
+    Returns:
+        swagger.PathItem: PathItem spec for the route
+    """
 
     pi = swagger.PathItem()
     for arg in rule.arguments:

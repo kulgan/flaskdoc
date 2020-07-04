@@ -20,7 +20,9 @@ def app(request, info_block):
     _app = flask.Flask("Test API")
     _app.register_blueprint(mocks.blp, url_prefix="/mocks")
 
-    flaskdoc.register_openapi(_app, info=info_block, openapi_verion="3.0.3")
+    get_echo_tag = swagger.Tag(name="getEcho", description="gets echos no matter where they are hiding")
+    post_echo_tag = swagger.Tag(name="postEcho", description="posts echos to hidden locations")
+    flaskdoc.register_openapi(_app, info=info_block, tags=[get_echo_tag, post_echo_tag])
     return _app
 
 
