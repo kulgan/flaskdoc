@@ -320,6 +320,35 @@ class ExternalDocumentation(ExtensionMixin):
 
 
 @attr.s
+class Content(object):
+    """ A content container for response and request objects """
+
+    content_type = attr.ib(type=str)
+    schema = attr.ib(type=type)
+    description = attr.ib(default=None, type=str)
+
+    def to_schema(self):
+
+        # handle primitives
+        if self.schema in [str, int, bool, dict]:
+            schema_class = SCHEMA_TYPES_MAP[self.schema]
+            schema = schema_class()
+            schema.description = self.description or schema.description
+            return schema
+        return None
+
+
+@attr.s
+class JsonType(Content):
+    content_type = attr.ib(default="application/json", init=False)
+
+
+@attr.s
+class PlainText(Content):
+    content_type = attr.ib(default="text/plain", init=False)
+
+
+@attr.s
 class Encoding(ExtensionMixin):
     """ A single encoding definition applied to a single schema property. """
 
@@ -376,7 +405,7 @@ class Schema(ModelMixin):
     any_of = None
     _not = None  # type: ignore
     items = attr.ib(default=None)
-    properties = None
+    properties = attr.ib(default=None, type=dict, init=False)
     additional_properties = None
     description = None
     format = attr.ib(default=None, type=str)
@@ -392,6 +421,72 @@ class Schema(ModelMixin):
 
     def q_not(self):
         return self._not
+
+    def __attrs_post_init__(self):
+        # register schema
+        pass
+
+
+@attr.s
+class Boolean(Schema):
+    type = attr.ib(default="boolean", init=False)
+
+
+@attr.s
+class String(Schema):
+    type = attr.ib(default="string", init=False)
+
+
+@attr.s
+class Email(String):
+    type = attr.ib(default="string", init=False)
+    format = attr.ib(default="email", init=False)
+
+
+@attr.s
+class Int32(Schema):
+    type = attr.ib(default="integer", init=False)
+    format = attr.ib(default="int32", init=False)
+    minimum = attr.ib(default=0, type=int)
+
+
+@attr.s
+class Number(Int32):
+    type = attr.ib(default="number", init=False)
+
+
+@attr.s
+class Int64(Int32):
+    format = attr.ib(default="int64", init=False)
+
+
+@attr.s
+class Base64String(String):
+    format = attr.ib(default="base64", init=False)
+
+
+@attr.s
+class BinaryString(String):
+    format = attr.ib(default="binary", init=False)
+
+
+@attr.s
+class Image(BinaryString):
+    pass
+
+
+class MultipartFormData:
+    pass
+
+
+@attr.s
+class Object(Schema):
+    type = attr.ib(default="object", init=False)
+
+
+@attr.s
+class Array(Schema):
+    type = attr.ib(default="array", init=False)
 
 
 @attr.s
@@ -414,23 +509,27 @@ class MediaType(ModelMixin):
         self.encoding[name] = encoding
 
 
-class Content(object):
-    def __init__(self):
-        super(Content, self).__init__()
-        self.contents = SwaggerDict()
+@attr.s
+class ContentMixin(object):
 
-    def add_media_type(self, name: str, media_type: MediaType):
-        self.contents[name] = media_type.dict()
+    content = attr.ib()  # type: list[Content]
 
-    def dict(self):
-        return self.contents
+    def __attrs_post_init__(self):
+
+        if not self.content:
+            return
+
+        if not isinstance(self.content, list):
+            self.content = [self.content]
+        cnt = SwaggerDict()
+        for content in self.content:
+            cnt[content.content_type] = content.to_schema()
+        self.content = cnt
 
 
 @attr.s
-class RequestBody(ExtensionMixin):
+class RequestBody(ContentMixin, ExtensionMixin):
 
-    # FIXME: reuse Content Class ?
-    content = attr.ib(default=SwaggerDict())
     description = attr.ib(default=None, type=str)
     required = attr.ib(default=False)
 
@@ -513,14 +612,14 @@ class Parameter(ModelMixin, ApiDecoratorMixin):
 
     name = attr.ib(type=str)
     _in = attr.ib(default=None, type=ParameterLocation, init=False)
-    required = attr.ib(default=False)
+    required = attr.ib(default=None)
     description = attr.ib(default=None, type=str)
-    deprecated = attr.ib(default=False)
-    allow_empty_value = attr.ib(default=False)
-    allow_reserved = attr.ib(default=False)
+    deprecated = attr.ib(default=None)
+    allow_empty_value = attr.ib(default=None)
+    allow_reserved = attr.ib(default=None)
     schema = attr.ib(default=None)
     content = attr.ib(default={})
-    explode = attr.ib(default=False)
+    explode = attr.ib(default=None)
     _style = attr.ib(default=None, type=Style, init=False)
     example = attr.ib(default=None)
     examples = attr.ib(default=SwaggerDict())
@@ -583,7 +682,7 @@ class Link(ExtensionMixin):
 
 
 @attr.s
-class ResponseObject(ExtensionMixin):
+class ResponseObject(ContentMixin, ExtensionMixin):
     """
     Describes a single response from an API Operation, including design-time, static links to operations based on
     the response.
@@ -652,7 +751,7 @@ class Operation(ExtensionMixin, ApiDecoratorMixin):
     parameters = attr.ib(default=None, type=list)
     request_body = attr.ib(default=None)
     callbacks = attr.ib(default=None, type=SwaggerDict)
-    deprecated = attr.ib(default=False)
+    deprecated = attr.ib(default=None)
     security = attr.ib(default=None, type=list)
     servers = attr.ib(default=None, type=list)
 
@@ -700,8 +799,8 @@ class PathItem(ModelMixin):
     summary = attr.ib(default=None, type=str)
     description = attr.ib(default=None, type=str)
 
-    servers = attr.ib(default=None, type=list)
-    parameters = attr.ib(default=None, type=list)
+    servers = attr.ib(default=[], type=list)
+    parameters = attr.ib(default=[], type=list)
 
     get = attr.ib(default=None, type=Operation)
     delete = attr.ib(default=None, type=Operation)
@@ -742,9 +841,7 @@ class PathItem(ModelMixin):
         Merges another path item into this on
         Args:
             path_item (PathItem): PathItem instance to merge
-
-
-                    """
+        """
         for server in path_item.servers:
             self.add_server(server)
 
@@ -767,7 +864,7 @@ class Paths(ContainerModel):
     from the Server Object in order to construct the full URL. The Paths MAY be empty, due to ACL constraints.
     """
 
-    def add(self, relative_url: str, path_item: Union[PathItem, SwaggerDict]):
+    def add(self, relative_url, path_item):
         """
         Adds a path item
         Args:
@@ -775,8 +872,10 @@ class Paths(ContainerModel):
           path_item (PathItem|SwaggerDict) : PathItem instance describing the path
         """
 
-        if isinstance(path_item, PathItem):
-            path_item = path_item.dict()
+        if relative_url in self.items:
+            pi = self.get(relative_url)  # type: PathItem
+            pi.merge_path_item(path_item)
+            return
         super(Paths, self).add(relative_url, path_item)
 
 
@@ -957,3 +1056,6 @@ class OpenApi(ModelMixin):
         for r_url in paths:
             path_url = "{}{}{}".format(url_prefix, blp_prefix, r_url)
             self.paths.add(path_url, paths.get(r_url))
+
+
+SCHEMA_TYPES_MAP = {int: Int32, str: String, bool: Boolean, dict: Object}

@@ -58,8 +58,32 @@ class MultipartFormData:
 
 
 @attr.s
+class Object(swagger.Schema):
+    type = attr.ib(default="object", init=False)
+
+    @classmethod
+    def from_class(cls, class_type):
+        return cls()
+
+
+@attr.s
 class Array(swagger.Schema):
     type = attr.ib(default="array", init=False)
+
+
+@attr.s
+class Content(object):
+    item = attr.ib(type=type)
+    is_array = attr.ib(default=False)
+    type = attr.ib(default="application/json", type=str)
+
+    def __attrs_post_init__(self):
+        pass
+
+
+@attr.s
+class JsonContent(Content):
+    type = attr.ib(init=False, default="application/json")
 
 
 _MAP = {
@@ -92,3 +116,7 @@ class SchemaFactory:
         # is typing Alias?
         if not isinstance(_type, type):
             pass
+
+
+if __name__ == "__main__":
+    print(isinstance(String, swagger.Schema))

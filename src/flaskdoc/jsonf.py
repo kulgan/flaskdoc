@@ -75,14 +75,14 @@ class SchemaFactory:
 
 
 @attr.s
-class Soap:
+class Soap(object):
 
     meal = attr.ib(type=float)
     smokes = attr.ib(type=list)
 
 
 @attr.s
-class Sample:
+class Sample(object):
 
     palo = attr.ib(type=int)
     soap = attr.ib(type=Soap)
