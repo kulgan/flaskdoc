@@ -7,7 +7,8 @@ blp = flask.Blueprint("inventory", __name__, url_prefix="/inventory")
 
 
 class InventoryItem:
-    pass
+    id: str
+    name: str
 
 
 search_inventory_docs = swagger.GET(
@@ -32,7 +33,7 @@ search_inventory_docs = swagger.GET(
     responses=swagger.ResponsesObject(
         responses={
             "200": swagger.ResponseObject(
-                description="search results matching criteria", content=swagger.JsonType(schema=str),
+                description="search results matching criteria", content=swagger.JsonType(schema=InventoryItem),
             ),
             "400": swagger.ResponseObject(description="bad input parameter"),
         }
@@ -45,7 +46,9 @@ add_inventory_docs = swagger.POST(
     operation_id="addInventory",
     summary="adds an inventory item",
     description="adds an item to the system",
-    request_body=swagger.RequestBody(content=swagger.JsonType(schema=int), description="Inventory item to add",),
+    request_body=swagger.RequestBody(
+        content=swagger.JsonType(schema=InventoryItem), description="Inventory item to add",
+    ),
     responses=swagger.ResponsesObject(
         responses={
             "201": swagger.ResponseObject(description="item created"),

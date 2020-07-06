@@ -1,7 +1,8 @@
 import enum
+import inspect
 import json
 import logging
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from typing import Union, Type, List
 
 import attr
@@ -29,6 +30,7 @@ class ApiDecoratorMixin(object):
         return func
 
 
+@attr.s
 class ModelMixin(object):
     """ Model mixin that provides common methods like to dict and to json """
 
@@ -340,7 +342,7 @@ class Content(object):
             self.schema.description = self.description or self.schema.description
             return self.schema
         # handle custom class types
-        return None
+        return schema_factory.get_schema(self.schema)
 
 
 @attr.s
@@ -526,9 +528,9 @@ class ContentMixin(object):
 
         if not isinstance(self.content, list):
             self.content = [self.content]
-        cnt = SwaggerDict()
+        cnt = defaultdict(dict)
         for content in self.content:
-            cnt[content.content_type] = content.to_schema()
+            cnt[content.content_type]["schema"] = content.to_schema()
         self.content = cnt
 
 
@@ -1033,7 +1035,7 @@ class OpenApi(ModelMixin):
     servers = attr.ib(default=None, type=set)
     security = attr.ib(default=[])
     external_docs = attr.ib(default=None)
-    components = attr.ib(default={}, type=dict, init=False)
+    components = attr.ib(default=SwaggerDict(), type=dict, init=False)
 
     def add_tag(self, tag):
         """
@@ -1064,3 +1066,61 @@ class OpenApi(ModelMixin):
 
 
 SCHEMA_TYPES_MAP = {int: Int32, str: String, bool: Boolean, dict: Object}
+
+
+@attr.s
+class SchemaFactory(object):
+
+    ref_base = attr.ib(default="#/components/schemas", init=False)
+    components = attr.ib(init=False, default={})
+    class_map = attr.ib(init=False, default={})
+
+    def parse_data_fields(self, cls, fields):
+        """
+
+        Args:
+            cls (class):
+            fields (dict):
+
+        Returns:
+
+        """
+        if isinstance(fields, dict):
+            fields = fields.values()
+        for props in fields:
+            field_type = props.type or type(props.default) if props.default else str
+            self.class_map[cls.__name__][props.name] = self.get_schema(field_type)
+
+    def from_type(self, cls):
+
+        if cls.__name__ in self.class_map:
+            return self.class_map[cls.__name__]
+
+        self.class_map[cls.__name__] = {}
+        annotations = cls.__annotations__ if hasattr(cls, "__annotations__") else {}
+        members = inspect.getmembers(cls)
+        for field, member in members:
+
+            if field in ["__dataclass_fields__", "__attrs_attrs__"]:
+                self.parse_data_fields(cls, member)
+                continue
+
+            # skip private members and methods
+            if not (field.startswith("_") or inspect.ismethod(member) or inspect.isfunction(member)):
+                field_type = type(member) if member else annotations.get(field)
+                field_type = field_type or str
+                self.class_map[cls.__name__][field] = self.get_schema(field_type).dict()
+
+        return self.class_map[cls.__name__]
+
+    def get_schema(self, cls):
+        # handle primitives
+        if cls in [str, int, bool, dict]:
+            schema_class = SCHEMA_TYPES_MAP[cls]
+            return schema_class().dict()
+
+        self.from_type(cls)
+        return Schema(ref="{}/{}".format(self.ref_base, cls.__name__))
+
+
+schema_factory = SchemaFactory()

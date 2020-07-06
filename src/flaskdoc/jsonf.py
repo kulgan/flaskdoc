@@ -4,6 +4,8 @@ from dataclasses import dataclass
 
 import attr
 
+from flaskdoc.swagger.models import schema_factory
+
 
 class SchemaTypeMap:
     TYPES_MAP = {
@@ -135,7 +137,7 @@ class SchemaFactory:
 
 
 @attr.s
-class Soap(object):
+class SoapStar(object):
 
     meal = attr.ib(type=float)
     smokes = attr.ib(default=10)
@@ -145,7 +147,7 @@ class Soap(object):
 class Sample(object):
     danni = "fear"
     palo = attr.ib(type=int)
-    soap = attr.ib(type=Soap)
+    soap = attr.ib(type=SoapStar)
     hulu = attr.ib(default="NoNo")
 
 
@@ -187,6 +189,5 @@ def et(cls):
 
 
 if __name__ == "__main__":
-    f = SchemaFactory()
-    f.generate_schema(Sample)
-    print(f.schema)
+    schema_factory.get_schema(Sample)
+    print(schema_factory.class_map)

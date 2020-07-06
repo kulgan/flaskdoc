@@ -12,6 +12,7 @@ from flaskdoc import swagger
 from flaskdoc.pallets.blueprints import Blueprint
 from flaskdoc.pallets.mixin import SwaggerMixin
 from flaskdoc.pallets import plugins
+from flaskdoc.swagger.models import schema_factory
 
 API_DOCS = {}
 static_ui = pkg_resources.resource_filename("flaskdoc", "static")
@@ -149,6 +150,7 @@ def get_api_docs(app):
             pi = parse_specs(rule, spec, api)
             pi.description = docs
             api.paths.add(plugins.parse_flask_rule(rule.rule), pi)
+    api.components["schemas"] = schema_factory.class_map
     return 1
 
 
