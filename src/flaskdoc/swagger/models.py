@@ -2,7 +2,7 @@ import enum
 import json
 import logging
 from collections import OrderedDict
-from typing import Union, Type
+from typing import Union, Type, List
 
 import attr
 
@@ -335,6 +335,11 @@ class Content(object):
             schema = schema_class()
             schema.description = self.description or schema.description
             return schema
+        # handle schema derivatives
+        if isinstance(self.schema, Schema):
+            self.schema.description = self.description or self.schema.description
+            return self.schema
+        # handle custom class types
         return None
 
 
@@ -512,7 +517,7 @@ class MediaType(ModelMixin):
 @attr.s
 class ContentMixin(object):
 
-    content = attr.ib()  # type: list[Content]
+    content = attr.ib()  # type: Union[SwaggerDict, Content, List[Content]]
 
     def __attrs_post_init__(self):
 
