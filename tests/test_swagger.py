@@ -27,13 +27,13 @@ def test_extension_model_usage():
 
     lc.add_extension("x-hulu", "HULU")
 
-    lc_dict = lc.dict()
+    lc_dict = lc.to_dict()
     assert lc_dict["x-hulu"] == "HULU"
 
 
 def test_to_camel_case():
     inf = models.Info(title="Test A", version="123", terms_of_service="organized")
-    inf_dict = inf.dict()
+    inf_dict = inf.to_dict()
 
     assert inf_dict["termsOfService"] == "organized"
 
@@ -46,11 +46,13 @@ def test_url_property_validation():
 
 def test_nested_models():
 
-    sv = models.ServerVariable(default="sample", enum=["sample", "quick"], description="dirty dozen")
+    sv = models.ServerVariable(
+        default="sample", enum=["sample", "quick"], description="dirty dozen"
+    )
 
     server = models.Server(url="http://flaskdoc.com/{tick}", description="sample deploy site")
     server.add_variable("tick", sv)
-    swagger = server.dict()
+    swagger = server.to_dict()
 
     variables = swagger["variables"]
     assert variables["tick"]["default"] == "sample"

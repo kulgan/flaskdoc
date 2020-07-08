@@ -84,7 +84,7 @@ class ExtensionMixin(ModelMixin):
         if value and not value.startswith("x-"):
             raise ValueError("Custom extension must start with x-")
 
-    def dict(self):
+    def to_dict(self):
         di = super(ExtensionMixin, self).to_dict()
         if self.extensions:
             di.update(self.extensions)
@@ -221,7 +221,7 @@ class Server(ExtensionMixin):
 
     url = attr.ib(type=str)
     description = attr.ib(default=None, type=str)
-    variables = attr.ib(default=SwaggerDict(), type=str)
+    variables = attr.ib(default={}, type=str)
 
     def add_variable(self, name: str, variable: ServerVariable):
         """ Adds a server variable

@@ -25,7 +25,9 @@ servers = [
     swagger.Server(
         url="https://{sample}.sample/com",
         description="Test Suite",
-        variables=dict(sample=swagger.ServerVariable(default="api", enum=["api", "api2", "api3"],),),
+        variables=dict(
+            sample=swagger.ServerVariable(default="api", enum=["api", "api2", "api3"],),
+        ),
     ),
 ]
 
@@ -38,7 +40,7 @@ servers = [
     responses=swagger.ResponsesObject(
         responses={
             "200": swagger.ResponseObject(
-                description="Success", content={"text/plain": swagger.MediaType(schema=flaskdoc.Email())},
+                description="Success", content=swagger.PlainText(schema=flaskdoc.Email()),
             )
         }
     ),
