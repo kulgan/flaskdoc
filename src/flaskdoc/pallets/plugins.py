@@ -1,9 +1,7 @@
 """
 
 """
-
 from collections import defaultdict
-
 
 API_SPECS = defaultdict(list)
 

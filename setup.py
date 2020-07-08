@@ -1,7 +1,6 @@
 from os import path
 
-from setuptools import find_packages
-from setuptools import setup
+from setuptools import find_packages, setup
 
 here = path.abspath(path.dirname(__file__))
 
@@ -23,7 +22,9 @@ setup(
     package_dir={"": "src"},
     packages=find_packages(where="src"),
     zip_safe=True,
-    package_data={"flaskdoc": ["static/*.css", "static/*.png", "static/*.js", "templates/*.html"]},
+    package_data={
+        "flaskdoc": ["static/*.css", "static/*.png", "static/*.js", "templates/*.html"]
+    },
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Framework :: Flask",

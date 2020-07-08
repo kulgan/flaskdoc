@@ -1,8 +1,8 @@
 import inspect
 import typing as t
-from dataclasses import dataclass
 
 import attr
+from dataclasses import dataclass
 
 from flaskdoc.swagger.models import schema_factory
 
@@ -101,7 +101,9 @@ class SchemaFactory:
                 continue
 
             # skip private members and methods
-            if not (field.startswith("_") or inspect.ismethod(member) or inspect.isfunction(member)):
+            if not (
+                field.startswith("_") or inspect.ismethod(member) or inspect.isfunction(member)
+            ):
                 field_type = type(member) if member else annotations.get(field)
                 field_type = field_type or str
                 self.class_map[cls.__name__][field] = field_type
@@ -157,7 +159,6 @@ class OakTown:
     snux = "2"
 
 
-@dataclass
 class Squeezed:
 
     sample: int
