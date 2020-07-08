@@ -2,7 +2,6 @@ import inspect
 import typing as t
 
 import attr
-from dataclasses import dataclass
 
 from flaskdoc.swagger.models import schema_factory
 
