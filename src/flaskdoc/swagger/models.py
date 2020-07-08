@@ -1,19 +1,21 @@
+# Standard Library
 import enum
 import inspect
 import json
 import logging
 from collections import OrderedDict, defaultdict
-from typing import Union, Type, List
+from typing import List, Type, Union
 
 import attr
 
+from flaskdoc.helpers import DictMixin
 from flaskdoc.pallets import plugins
 from flaskdoc.swagger import validators
 
 logger = logging.getLogger(__name__)
 
 
-class SwaggerDict(OrderedDict):
+class SwaggerDict(OrderedDict, DictMixin):
     """ Used to filter out properties that are not set """
 
     def __setitem__(self, key, value):
@@ -31,7 +33,7 @@ class ApiDecoratorMixin(object):
 
 
 @attr.s
-class ModelMixin(object):
+class ModelMixin(DictMixin):
     """ Model mixin that provides common methods like to dict and to json """
 
     @staticmethod
@@ -39,36 +41,8 @@ class ModelMixin(object):
         cpnts = snake_case.split("_")
         return cpnts[0] + "".join(x.title() for x in cpnts[1:])
 
-    def dict(self):
-        d = SwaggerDict()
-        for key, val in vars(self).items():
-            # skip extensions
-            if key == "extensions":
-                continue
-
-            if key.startswith("_"):
-                key = key[1:]
-                val = getattr(self, "q_" + key, None)
-
-            # map ref
-            if key == "ref":
-                key = "$ref"
-
-            if isinstance(val, ModelMixin) or hasattr(val, "dict"):
-                val = val.dict()
-
-            if isinstance(val, (set, list)):
-                val = [v.dict() if isinstance(v, ModelMixin) else v for v in val]
-
-            if isinstance(val, dict):
-                val = {k: v.dict() if isinstance(v, ModelMixin) else v for k, v in val.items()}
-
-            d[self.camel_case(key)] = val
-
-        return d
-
     def json(self, indent=2):
-        return json.dumps(self.dict(), indent=indent)
+        return json.dumps(self.to_dict(), indent=indent)
 
     def __repr__(self):
         return self.json()
@@ -111,7 +85,7 @@ class ExtensionMixin(ModelMixin):
             raise ValueError("Custom extension must start with x-")
 
     def dict(self):
-        di = super(ExtensionMixin, self).dict()
+        di = super(ExtensionMixin, self).to_dict()
         if self.extensions:
             di.update(self.extensions)
         return di
@@ -137,14 +111,8 @@ class ContainerModel(ModelMixin):
         for item in self.items:
             yield item
 
-    def dict(self):
-        return self.items
-
-    def json(self, indent=2):
-        return json.dumps(self.items, indent=indent)
-
-    def __repr__(self):
-        return self.json(indent=2)
+    def to_dict(self):
+        return self._parse_dict(self.items)
 
 
 @attr.s
@@ -982,7 +950,9 @@ class SecurityScheme(ExtensionMixin):
     ):
         super(SecurityScheme, self).__init__()
 
-        self.type = SecuritySchemeType(scheme_type) if isinstance(scheme_type, str) else scheme_type
+        self.type = (
+            SecuritySchemeType(scheme_type) if isinstance(scheme_type, str) else scheme_type
+        )
         self.name = name  # type: str
         self.description = description  # type: str
         self.scheme = scheme  # type: str
@@ -1025,7 +995,7 @@ class OpenApi(ModelMixin):
         Arguments:
             openapi (str): Open API version used by API
             info (flaskdoc.swagger.info.Info): open api info object
-            paths (flaskdoc.swagger.path.Paths): Paths definitions
+            paths (Paths): Paths definitions
     """
 
     info = attr.ib(type=Info)
@@ -1035,7 +1005,7 @@ class OpenApi(ModelMixin):
     servers = attr.ib(default=None, type=set)
     security = attr.ib(default=[])
     external_docs = attr.ib(default=None)
-    components = attr.ib(default=SwaggerDict(), type=dict, init=False)
+    components = attr.ib(default={}, type=dict, init=False)
 
     def add_tag(self, tag):
         """
@@ -1106,20 +1076,24 @@ class SchemaFactory(object):
                 continue
 
             # skip private members and methods
-            if not (field.startswith("_") or inspect.ismethod(member) or inspect.isfunction(member)):
+            if not (
+                field.startswith("_") or inspect.ismethod(member) or inspect.isfunction(member)
+            ):
                 field_type = type(member) if member else annotations.get(field)
                 field_type = field_type or str
-                self.class_map[cls.__name__][field] = self.get_schema(field_type).dict()
+                self.class_map[cls.__name__][field] = self.get_schema(field_type)
 
         return self.class_map[cls.__name__]
 
     def get_schema(self, cls):
         # handle primitives
-        if cls in [str, int, bool, dict]:
+        if cls in SCHEMA_TYPES_MAP:
             schema_class = SCHEMA_TYPES_MAP[cls]
-            return schema_class().dict()
+            return schema_class()
 
-        self.from_type(cls)
+        sch = Object()
+        sch.properties = self.from_type(cls)
+        self.components[cls.__name__] = sch
         return Schema(ref="{}/{}".format(self.ref_base, cls.__name__))
 
 

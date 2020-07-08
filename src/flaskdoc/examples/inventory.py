@@ -1,3 +1,4 @@
+import attr
 import flask
 
 import flaskdoc
@@ -6,9 +7,19 @@ from flaskdoc import swagger
 blp = flask.Blueprint("inventory", __name__, url_prefix="/inventory")
 
 
-class InventoryItem:
-    id: str
-    name: str
+@attr.s
+class Manufacturer(object):
+    name = attr.ib(type=str)
+    phone = attr.ib(default=None, type=str)
+    homepage = attr.ib(default=None, type=str)
+
+
+@attr.s
+class InventoryItem(object):
+    id = attr.ib(type=str)
+    name = attr.ib(type=str)
+    manufacturer = attr.ib(type=Manufacturer)
+    release_date = attr.ib(type=str)
 
 
 search_inventory_docs = swagger.GET(
@@ -24,16 +35,21 @@ search_inventory_docs = swagger.GET(
             description="pass an optional search string for looking up inventory",
         ),
         swagger.QueryParameter(
-            name="skip", schema=flaskdoc.Int32(), description="number of records to skip for pagination",
+            name="skip",
+            schema=flaskdoc.Int32(),
+            description="number of records to skip for pagination",
         ),
         swagger.QueryParameter(
-            name="limit", schema=flaskdoc.Int32(maximum=50), description="maximum number of records to return",
+            name="limit",
+            schema=flaskdoc.Int32(maximum=50),
+            description="maximum number of records to return",
         ),
     ],
     responses=swagger.ResponsesObject(
         responses={
             "200": swagger.ResponseObject(
-                description="search results matching criteria", content=swagger.JsonType(schema=InventoryItem),
+                description="search results matching criteria",
+                content=swagger.JsonType(schema=InventoryItem),
             ),
             "400": swagger.ResponseObject(description="bad input parameter"),
         }
