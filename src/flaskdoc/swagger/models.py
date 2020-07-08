@@ -399,7 +399,8 @@ class Schema(ModelMixin):
 
     def __attrs_post_init__(self):
         # register schema
-        pass
+        if self.items:
+            self.items = schema_factory.get_schema(self.items)
 
 
 @attr.s
@@ -461,7 +462,13 @@ class Object(Schema):
 
 @attr.s
 class Array(Schema):
+    items = attr.ib(default=None)
     type = attr.ib(default="array", init=False)
+
+    @items.validator
+    def validate(self, _, items):
+        if not items:
+            raise ValueError("items must be specified for Array schema")
 
 
 @attr.s
@@ -1085,11 +1092,15 @@ class SchemaFactory(object):
 
         return self.class_map[cls.__name__]
 
-    def get_schema(self, cls):
+    def get_schema(self, cls, description=None):
         # handle primitives
         if cls in SCHEMA_TYPES_MAP:
             schema_class = SCHEMA_TYPES_MAP[cls]
             return schema_class()
+        # handle schema derivatives
+        if isinstance(cls, Schema):
+            cls.description = description or cls.description
+            return cls
 
         sch = Object()
         sch.properties = self.from_type(cls)

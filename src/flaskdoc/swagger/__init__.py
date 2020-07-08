@@ -7,6 +7,7 @@ from flaskdoc.swagger.models import (
     PUT,
     TRACE,
     XML,
+    Array,
     Component,
     Contact,
     CookieParameter,

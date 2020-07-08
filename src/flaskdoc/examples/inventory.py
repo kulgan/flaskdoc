@@ -49,7 +49,7 @@ search_inventory_docs = swagger.GET(
         responses={
             "200": swagger.ResponseObject(
                 description="search results matching criteria",
-                content=swagger.JsonType(schema=InventoryItem),
+                content=swagger.JsonType(schema=swagger.Array(items=InventoryItem)),
             ),
             "400": swagger.ResponseObject(description="bad input parameter"),
         }
