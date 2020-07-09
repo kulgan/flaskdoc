@@ -1,7 +1,7 @@
 import attr
 import flask
 
-import flaskdoc
+import flaskdoc.schema
 from flaskdoc import swagger
 
 blp = flask.Blueprint("inventory", __name__, url_prefix="/inventory")
@@ -49,7 +49,9 @@ search_inventory_docs = swagger.GET(
         responses={
             "200": swagger.ResponseObject(
                 description="search results matching criteria",
-                content=swagger.JsonType(schema=swagger.Array(items=InventoryItem)),
+                content=flaskdoc.schema.JsonType(
+                    schema=flaskdoc.schema.Array(items=InventoryItem)
+                ),
             ),
             "400": swagger.ResponseObject(description="bad input parameter"),
         }
@@ -63,7 +65,8 @@ add_inventory_docs = swagger.POST(
     summary="adds an inventory item",
     description="adds an item to the system",
     request_body=swagger.RequestBody(
-        content=swagger.JsonType(schema=InventoryItem), description="Inventory item to add",
+        content=flaskdoc.schema.JsonType(schema=InventoryItem),
+        description="Inventory item to add",
     ),
     responses=swagger.ResponsesObject(
         responses={

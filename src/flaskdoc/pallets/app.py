@@ -10,7 +10,7 @@ from flaskdoc import swagger
 from flaskdoc.pallets import plugins
 from flaskdoc.pallets.blueprints import Blueprint
 from flaskdoc.pallets.mixin import SwaggerMixin
-from flaskdoc.swagger.models import schema_factory
+from flaskdoc.schema import schema_factory
 
 API_DOCS = {}
 static_ui = pkg_resources.resource_filename("flaskdoc", "static")

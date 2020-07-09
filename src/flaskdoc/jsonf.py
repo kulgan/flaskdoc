@@ -3,7 +3,7 @@ import typing as t
 
 import attr
 
-from flaskdoc.swagger.models import schema_factory
+from flaskdoc.schema import schema_factory
 
 
 class SchemaTypeMap:

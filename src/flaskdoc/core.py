@@ -1,3 +1,10 @@
+import json
+
+import attr
+
+from flaskdoc.pallets import plugins
+
+
 class DictMixin:
     """ General usage mixin for handling nested dictionary conversion. """
 
@@ -31,3 +38,27 @@ class DictMixin:
 def camel_case(snake_case):
     cpnts = snake_case.split("_")
     return cpnts[0] + "".join(x.title() for x in cpnts[1:])
+
+
+class ApiDecoratorMixin(object):
+    """ Makes a model a decorator that registers itself """
+
+    def __call__(self, func):
+        plugins.register_spec(func, self)
+        return func
+
+
+@attr.s
+class ModelMixin(DictMixin):
+    """ Model mixin that provides common methods like to dict and to json """
+
+    @staticmethod
+    def camel_case(snake_case):
+        cpnts = snake_case.split("_")
+        return cpnts[0] + "".join(x.title() for x in cpnts[1:])
+
+    def json(self, indent=2):
+        return json.dumps(self.to_dict(), indent=indent)
+
+    def __repr__(self):
+        return self.json()

@@ -1,3 +1,4 @@
+from flaskdoc.schema import Array, JsonType, PlainText, Schema
 from flaskdoc.swagger.models import (
     GET,
     HEAD,
@@ -7,7 +8,6 @@ from flaskdoc.swagger.models import (
     PUT,
     TRACE,
     XML,
-    Array,
     Component,
     Contact,
     CookieParameter,
@@ -15,7 +15,6 @@ from flaskdoc.swagger.models import (
     HeaderParameter,
     HttpMethod,
     Info,
-    JsonType,
     License,
     MediaType,
     OAuthFlow,
@@ -27,13 +26,11 @@ from flaskdoc.swagger.models import (
     PathItem,
     PathParameter,
     Paths,
-    PlainText,
     QueryParameter,
     ReferenceObject,
     RequestBody,
     ResponseObject,
     ResponsesObject,
-    Schema,
     SecurityScheme,
     SecuritySchemeType,
     Server,
@@ -42,5 +39,3 @@ from flaskdoc.swagger.models import (
     SwaggerDict,
     Tag,
 )
-
-__all__ = []
