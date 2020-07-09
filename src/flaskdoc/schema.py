@@ -1,6 +1,6 @@
 import inspect
 from collections import defaultdict
-from typing import List, Union
+from typing import AnyStr, ByteString, List, Text, Union
 
 import attr
 
@@ -122,6 +122,7 @@ class Int32(Schema):
 @attr.s
 class Number(Int32):
     type = attr.ib(default="number", init=False)
+    format = attr.ib(default=None, init=False)
 
 
 @attr.s
@@ -245,5 +246,14 @@ class SchemaFactory(object):
         return Schema(ref="{}/{}".format(self.ref_base, cls.__name__))
 
 
-SCHEMA_TYPES_MAP = {int: Int32, str: String, bool: Boolean, dict: Object}
+SCHEMA_TYPES_MAP = {
+    int: Int32,
+    str: String,
+    bool: Boolean,
+    dict: Object,
+    float: Number,
+    Text: String,
+    AnyStr: String,
+    ByteString: BinaryString,
+}
 schema_factory = SchemaFactory()
