@@ -23,15 +23,15 @@ class OakTown:
     """ Sample class without any special annotations """
 
     oaks = None
-    smugs: int = 0
-    snux = "2"
+    smugs = 0  # type: int
+    snux = "2"  # type: str
 
 
 class Squeezed:
     """ Sample class with typed annotations """
 
-    sample: int
-    spaces: str
+    sample = 1
+    spaces = 6
 
     def hangout(self):
         return self.sample

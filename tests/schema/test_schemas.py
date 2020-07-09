@@ -3,7 +3,7 @@ import typing as t
 import pytest
 
 from flaskdoc.schema import SchemaFactory
-from tests.schema.models import SoapStar
+from tests.schema import models
 
 
 @pytest.fixture()
@@ -12,8 +12,8 @@ def schema_factory():
 
 
 def test_to_schema(schema_factory):
-    schema = schema_factory.get_schema(SoapStar)
-    assert schema.ref == "#/components/schemas/SoapStar"
+    schema = schema_factory.get_schema(models.OakTown)
+    assert schema.ref == "#/components/schemas/OakTown"
 
 
 @pytest.mark.parametrize(

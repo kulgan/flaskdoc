@@ -75,7 +75,7 @@ class Schema(ModelMixin):
     items = attr.ib(default=None)
     properties = attr.ib(default=None, type=dict, init=False)
     additional_properties = None
-    description = None
+    description = attr.ib(default=None, type=str)
     format = attr.ib(default=None, type=str)
     default = None
     nullable = None
@@ -243,7 +243,9 @@ class SchemaFactory(object):
         sch = Object()
         sch.properties = self.from_type(cls)
         self.components[cls.__name__] = sch
-        return Schema(ref="{}/{}".format(self.ref_base, cls.__name__))
+        return Schema(
+            ref="{}/{}".format(self.ref_base, cls.__name__), description=inspect.getdoc(cls)
+        )
 
 
 SCHEMA_TYPES_MAP = {
