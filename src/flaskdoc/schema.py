@@ -13,10 +13,9 @@
 
     Also provides fully implemented mume types
 """
-
 import inspect
 from collections import defaultdict
-from typing import AnyStr, ByteString, List, Text, Union
+from typing import AnyStr, ByteString, List, Set, Text, Union
 
 import attr
 
@@ -261,7 +260,7 @@ class SchemaFactory(object):
         if hasattr(cls, "__origin__"):
             print(cls)
             origin = cls.__origin__
-            if origin in [list, set]:
+            if origin in [list, set, List, Set]:
                 args = cls.__args__[0]
                 arg_schema = self.get_schema(args)
                 return Array(items=arg_schema, description=description)
