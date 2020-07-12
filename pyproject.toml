@@ -17,7 +17,7 @@ include = [
 ]
 
 [tool.black]
-line-length = 115
+line-length = 98
 target-version = [
     'py35',
     'py36',
@@ -36,3 +36,8 @@ source = ["flaskdoc"]
 title = "flaskdoc coverage report"
 directory = "docs/htmlcov"
 show_contexts = true
+
+[tool.isort]
+profile = "black"
+known_third_party = ["attr", "click", "flask", "pkg_resources", "pytest", "setuptools", "six", "yaml"]
+known_first_party = ["flaskdoc"]

@@ -55,7 +55,8 @@ class SwaggerMixin(object):
         if isinstance(methods, swagger.Operation):
             return [methods], [methods.http_method.value]
         methods = [
-            swagger.Operation.from_op(m, responses) if isinstance(m, six.string_types) else m for m in methods
+            swagger.Operation.from_op(m, responses) if isinstance(m, six.string_types) else m
+            for m in methods
         ]
         flask_methods = [m.http_method.value for m in methods]
         return methods, flask_methods
@@ -76,7 +77,11 @@ class SwaggerMixin(object):
         **options
     ):
         path_item = swagger.PathItem(
-            ref=ref, description=description, summary=summary, servers=servers, parameters=parameters,
+            ref=ref,
+            description=description,
+            summary=summary,
+            servers=servers,
+            parameters=parameters,
         )
         methods = options.pop("methods", ["GET"])
         operations, methods = self.extract_operations(methods, responses)

@@ -1,22 +1,23 @@
 import functools
 import inspect
 import json
-from typing import List
 
 import flask
 import pkg_resources
 import yaml
-from werkzeug.routing import Rule
 
 from flaskdoc import swagger
+from flaskdoc.pallets import plugins
 from flaskdoc.pallets.blueprints import Blueprint
 from flaskdoc.pallets.mixin import SwaggerMixin
-from flaskdoc.pallets import plugins
+from flaskdoc.schema import schema_factory
 
 API_DOCS = {}
 static_ui = pkg_resources.resource_filename("flaskdoc", "static")
 static_templates = pkg_resources.resource_filename("flaskdoc", "templates")
-ui = flask.Blueprint("swagger-ui", __name__, static_folder=static_ui, template_folder=static_templates,)
+ui = flask.Blueprint(
+    "swagger-ui", __name__, static_folder=static_ui, template_folder=static_templates,
+)
 
 
 class Flask(flask.Flask, SwaggerMixin):
@@ -63,7 +64,9 @@ class Flask(flask.Flask, SwaggerMixin):
             contact_block.url = self.config.get("API_CONTACT_URL")
             info_block.contact = contact_block
 
-        self._doc = swagger.OpenApi(openapi=self.open_api_version, info=info_block, paths=swagger.Paths(),)
+        self._doc = swagger.OpenApi(
+            openapi=self.open_api_version, info=info_block, paths=swagger.Paths(),
+        )
         self.add_url_rule("/openapi.json", view_func=self.register_json_path, methods=["GET"])
         self.add_url_rule("/openapi.yaml", view_func=self.register_yaml_path, methods=["GET"])
 
@@ -92,12 +95,12 @@ class Flask(flask.Flask, SwaggerMixin):
 
 def register_json_path():
     get_api_docs(flask.current_app)
-    return flask.jsonify(flask.current_app.openapi.dict()), 200
+    return flask.jsonify(flask.current_app.openapi.to_dict()), 200
 
 
 def register_yaml_path():
     get_api_docs(flask.current_app)
-    fk = json.dumps(flask.current_app.openapi.dict())
+    fk = json.dumps(flask.current_app.openapi.to_dict())
     return flask.Response(yaml.safe_dump(json.loads(fk)), mimetype="application/yaml")
 
 
@@ -126,7 +129,12 @@ def register_openapi(app, info, openapi="3.0.3", servers=None, tags=None, securi
     app.add_url_rule("/openapi.yaml", view_func=register_yaml_path, methods=["GET"])
     app.register_blueprint(ui, url_prefix="/swagger-ui")
     app.openapi = swagger.OpenApi(
-        info=info, paths=swagger.Paths(), openapi=openapi, servers=servers, tags=tags, security=security
+        info=info,
+        paths=swagger.Paths(),
+        openapi=openapi,
+        servers=servers,
+        tags=tags,
+        security=security,
     )
 
 
@@ -149,6 +157,7 @@ def get_api_docs(app):
             pi = parse_specs(rule, spec, api)
             pi.description = docs
             api.paths.add(plugins.parse_flask_rule(rule.rule), pi)
+    api.components["schemas"] = schema_factory.components
     return 1
 
 

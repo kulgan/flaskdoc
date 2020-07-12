@@ -9,7 +9,9 @@ def test_sample_swagger(info_block):
             summary="Sample GET request",
             description="Test",
             tags=["sample", "rest"],
-            parameters=[swagger.QueryParameter(name="search", required=True, description="Search Param")],
+            parameters=[
+                swagger.QueryParameter(name="search", required=True, description="Search Param")
+            ],
             responses=swagger.ResponsesObject(),
         ),
     )
@@ -17,5 +19,5 @@ def test_sample_swagger(info_block):
     paths.add("/echo", item)
     api = swagger.OpenApi(info_block, paths)
 
-    swagger_json = api.dict()
+    swagger_json = api.to_dict()
     assert swagger_json

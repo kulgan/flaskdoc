@@ -1,6 +1,6 @@
+import flask
 import pytest
 
-import flask
 import flaskdoc
 from flaskdoc import swagger
 from tests import mocks
@@ -20,7 +20,9 @@ def app(request, info_block):
     _app = flask.Flask("Test API")
     _app.register_blueprint(mocks.blp, url_prefix="/mocks")
 
-    get_echo_tag = swagger.Tag(name="getEcho", description="gets echos no matter where they are hiding")
+    get_echo_tag = swagger.Tag(
+        name="getEcho", description="gets echos no matter where they are hiding"
+    )
     post_echo_tag = swagger.Tag(name="postEcho", description="posts echos to hidden locations")
     flaskdoc.register_openapi(_app, info=info_block, tags=[get_echo_tag, post_echo_tag])
     return _app
@@ -31,7 +33,9 @@ def info_block():
     _info = swagger.models.Info(
         title="Test",
         version="1.2.2",
-        contact=swagger.Contact(name="Rowland", email="r.ogwara@gmail.com", url="https://github.com/kulgan"),
+        contact=swagger.Contact(
+            name="Rowland", email="r.ogwara@gmail.com", url="https://github.com/kulgan"
+        ),
         license=swagger.models.License(name="Apache 2.0", url="https://www.example.com/license"),
     )
     return _info

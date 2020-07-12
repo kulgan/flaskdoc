@@ -1,3 +1,5 @@
+import sys
+
 import click
 
 from flaskdoc.examples.app import run_examples
@@ -14,3 +16,7 @@ def start_examples():
 
 
 flaskdoc.add_command(start_examples)
+
+
+if __name__ == "__main__":
+    flaskdoc(sys.argv[1:])

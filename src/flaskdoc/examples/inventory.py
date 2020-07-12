@@ -1,13 +1,25 @@
+import attr
 import flask
 
-import flaskdoc
+import flaskdoc.schema
 from flaskdoc import swagger
 
 blp = flask.Blueprint("inventory", __name__, url_prefix="/inventory")
 
 
-class InventoryItem:
-    pass
+@attr.s
+class Manufacturer(object):
+    name = attr.ib(type=str)
+    phone = attr.ib(default=None, type=str)
+    homepage = attr.ib(default=None, type=str)
+
+
+@attr.s
+class InventoryItem(object):
+    id = attr.ib(type=str)
+    name = attr.ib(type=str)
+    manufacturer = attr.ib(type=Manufacturer)
+    release_date = attr.ib(type=str)
 
 
 search_inventory_docs = swagger.GET(
@@ -19,21 +31,23 @@ search_inventory_docs = swagger.GET(
         swagger.QueryParameter(
             required=False,
             name="searchString",
-            schema=flaskdoc.String(),
+            schema=str,
             description="pass an optional search string for looking up inventory",
         ),
         swagger.QueryParameter(
-            name="skip", schema=flaskdoc.Int32(), description="number of records to skip for pagination",
+            name="skip", schema=int, description="number of records to skip for pagination",
         ),
         swagger.QueryParameter(
-            name="limit", schema=flaskdoc.Int32(maximum=50), description="maximum number of records to return",
+            name="limit",
+            schema=flaskdoc.Int32(maximum=50),
+            description="maximum number of records to return",
         ),
     ],
     responses=swagger.ResponsesObject(
         responses={
             "200": swagger.ResponseObject(
                 description="search results matching criteria",
-                content={"application/json": flaskdoc.Array(items=InventoryItem)},
+                content=flaskdoc.schema.JsonType(schema=[InventoryItem]),
             ),
             "400": swagger.ResponseObject(description="bad input parameter"),
         }
@@ -47,12 +61,13 @@ add_inventory_docs = swagger.POST(
     summary="adds an inventory item",
     description="adds an item to the system",
     request_body=swagger.RequestBody(
-        content={"application/json": InventoryItem}, description="Inventory item to add",
+        content=flaskdoc.schema.JsonType(schema=InventoryItem),
+        description="Inventory item to add",
     ),
     responses=swagger.ResponsesObject(
         responses={
             "201": swagger.ResponseObject(description="item created"),
-            "400": swagger.ResponseObject(description="Invalid input, object invalid",),
+            "400": swagger.ResponseObject(description="Invalid input, object invalid"),
             "409": swagger.ResponseObject(description="an existing item already exists"),
         }
     ),
