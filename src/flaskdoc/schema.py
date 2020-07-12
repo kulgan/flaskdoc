@@ -16,7 +16,7 @@
 
 import inspect
 from collections import defaultdict
-from typing import AnyStr, ByteString, List, Text, Union, _GenericAlias
+from typing import AnyStr, ByteString, List, Text, Union
 
 import attr
 
@@ -249,16 +249,17 @@ class SchemaFactory(object):
         return self.class_map[cls.__name__]
 
     def get_schema(self, cls, description=None):
-        # handle primitives
-        if cls in SCHEMA_TYPES_MAP:
-            schema_class = SCHEMA_TYPES_MAP[cls]
-            return schema_class()
         # handle schema derivatives
         if isinstance(cls, Schema):
             cls.description = description or cls.description
             return cls
+        # handle primitives
+        if cls in SCHEMA_TYPES_MAP:
+            schema_class = SCHEMA_TYPES_MAP[cls]
+            return schema_class()
         # collection based typing
-        if isinstance(cls, _GenericAlias):
+        if hasattr(cls, "__origin__"):
+            print(cls)
             origin = cls.__origin__
             if origin in [list, set]:
                 args = cls.__args__[0]
