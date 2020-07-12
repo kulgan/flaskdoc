@@ -19,7 +19,9 @@ def test_to_schema(schema_factory):
 
 @pytest.mark.skipif(sys.version_info < (3, 6), reason="requires python3.6 or higher")
 def test_to_schema_py36(schema_factory):
-    schema = schema_factory.get_schema(models.SoakedBean)
+    from tests.schema.py36models import SoakedBean
+
+    schema = schema_factory.get_schema(SoakedBean)
     assert schema.ref == "#/components/schemas/SoakedBean"
 
 

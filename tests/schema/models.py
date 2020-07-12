@@ -1,5 +1,3 @@
-from typing import List
-
 import attr
 
 
@@ -38,10 +36,3 @@ class Squeezed:
 
     def hangout(self):
         return self.sample
-
-
-# py36 and higher typing annotations
-class SoakedBean(object):
-
-    density: int = None
-    samples: List[Sample] = []
