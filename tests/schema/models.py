@@ -27,6 +27,7 @@ class OakTown:
     oaks = None
     smugs = 0  # type: int
     snux = "2"  # type: str
+    sample = Sample(palo=1, soap=SoapStar(meal=1.2))
 
 
 class Squeezed:

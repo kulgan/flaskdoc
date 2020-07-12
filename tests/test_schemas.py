@@ -13,8 +13,8 @@ def schema_factory():
 
 
 def test_to_schema(schema_factory):
-    schema = schema_factory.get_schema(models.SoakedBean)
-    assert schema.ref == "#/components/schemas/SoakedBean"
+    schema = schema_factory.get_schema(models.OakTown)
+    assert schema.ref == "#/components/schemas/OakTown"
 
 
 @pytest.mark.skipif(sys.version_info < (3, 6), reason="requires python3.6 or higher")
