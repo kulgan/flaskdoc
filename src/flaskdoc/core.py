@@ -1,3 +1,4 @@
+import collections
 import json
 
 import attr
@@ -30,7 +31,7 @@ class DictMixin:
             return val.to_dict()
         if isinstance(val, list):
             return [self._to_dict(v) for v in val]
-        if isinstance(val, dict) or hasattr(val, "__dict__"):
+        if isinstance(val, collections.Mapping) or hasattr(val, "__dict__"):
             return self._parse_dict(val)
         return val
 

@@ -31,13 +31,11 @@ search_inventory_docs = swagger.GET(
         swagger.QueryParameter(
             required=False,
             name="searchString",
-            schema=flaskdoc.String(),
+            schema=str,
             description="pass an optional search string for looking up inventory",
         ),
         swagger.QueryParameter(
-            name="skip",
-            schema=flaskdoc.Int32(),
-            description="number of records to skip for pagination",
+            name="skip", schema=int, description="number of records to skip for pagination",
         ),
         swagger.QueryParameter(
             name="limit",
@@ -49,9 +47,7 @@ search_inventory_docs = swagger.GET(
         responses={
             "200": swagger.ResponseObject(
                 description="search results matching criteria",
-                content=flaskdoc.schema.JsonType(
-                    schema=flaskdoc.schema.Array(items=InventoryItem)
-                ),
+                content=flaskdoc.schema.JsonType(schema=[InventoryItem]),
             ),
             "400": swagger.ResponseObject(description="bad input parameter"),
         }

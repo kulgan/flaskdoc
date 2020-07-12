@@ -13,9 +13,10 @@
 
     Also provides fully implemented mume types
 """
+import collections
 import inspect
 from collections import defaultdict
-from typing import AnyStr, ByteString, List, Set, Text, Union
+from typing import AnyStr, ByteString, Dict, List, Set, Text, Union
 
 import attr
 
@@ -252,18 +253,32 @@ class SchemaFactory(object):
         if isinstance(cls, Schema):
             cls.description = description or cls.description
             return cls
+        # if raw dict instances
+        if isinstance(cls, collections.Mapping):
+            schema = Object(description=description)
+            properties = {}
+            for k, v in cls.items():
+                properties[k] = self.get_schema(v)
+            schema.properties = properties
+            return schema
+
+        # if raw list
+        if isinstance(cls, (set, list)):
+            return Array(items=self.get_schema(cls[0], description=description))
+
         # handle primitives
         if cls in SCHEMA_TYPES_MAP:
             schema_class = SCHEMA_TYPES_MAP[cls]
             return schema_class()
         # collection based typing
         if hasattr(cls, "__origin__"):
-            print(cls)
             origin = cls.__origin__
             if origin in [list, set, List, Set]:
                 args = cls.__args__[0]
                 arg_schema = self.get_schema(args)
                 return Array(items=arg_schema, description=description)
+            if origin in [dict, Dict]:
+                pass
 
         sch = Object()
         sch.properties = self.from_type(cls)

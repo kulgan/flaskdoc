@@ -7,7 +7,7 @@ from typing import Type, Union
 import attr
 
 from flaskdoc.core import ApiDecoratorMixin, DictMixin, ModelMixin
-from flaskdoc.schema import ContentMixin, Schema
+from flaskdoc.schema import ContentMixin, Schema, schema_factory
 from flaskdoc.swagger import validators
 
 logger = logging.getLogger(__name__)
@@ -412,6 +412,10 @@ class Parameter(ModelMixin, ApiDecoratorMixin):
     @property
     def q_style(self):
         return self._style.value
+
+    def __attrs_post_init__(self):
+        if self.schema:
+            self.schema = schema_factory.get_schema(self.schema)
 
 
 @attr.s

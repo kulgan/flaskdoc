@@ -44,6 +44,28 @@ def test_primitives_to_schema(schema_factory, cls, exp, form):
         (t.ByteString, dict(type="string", format="binary")),
         (dict, dict(type="object")),
         (t.List[str], dict(type="array", items=dict(type="string"))),
+        (
+            [models.OakTown],
+            dict(
+                type="array",
+                items={
+                    "$ref": "#/components/schemas/OakTown",
+                    "description": "Sample class without any special annotations ",
+                },
+            ),
+        ),
+        (
+            {"town": models.OakTown},
+            dict(
+                type="object",
+                properties=dict(
+                    town={
+                        "$ref": "#/components/schemas/OakTown",
+                        "description": "Sample class without any special annotations ",
+                    }
+                ),
+            ),
+        ),
     ],
 )
 def test_primitive_to_dict(schema_factory, cls, exp):

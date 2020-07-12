@@ -36,7 +36,7 @@ servers = [
 @swagger.GET(
     tags=["getEcho"],
     operation_id="getEcho",
-    parameters=[swagger.PathParameter(name="sample", schema=flaskdoc.String())],
+    parameters=[swagger.PathParameter(name="sample", schema=str)],
     description="Retrieve echos wit Get",
     responses=swagger.ResponsesObject(
         responses={
