@@ -188,7 +188,7 @@ def parse_specs(rule, spec, api):
         pi.add_parameter(par)
 
     for op in rule.methods:
-        operation = swagger.Operation.from_op(op, swagger.ResponsesObject())
+        operation = swagger.Operation.from_op(op, {})
         pi.add_operation(operation)
     for model in spec:
         if isinstance(model, swagger.PathItem):

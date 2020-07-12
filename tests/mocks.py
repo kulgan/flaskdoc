@@ -1,6 +1,5 @@
 import flask
 
-import flaskdoc
 import flaskdoc.schema
 from flaskdoc import swagger
 
@@ -19,7 +18,7 @@ simple_get = swagger.GET(
         ),
         swagger.QueryParameter(name="age", description="age of user",),
     ],
-    responses=swagger.ResponsesObject(),
+    responses={"200": swagger.ResponseObject(description="Echos whatever")},
 )
 
 servers = [
@@ -38,13 +37,11 @@ servers = [
     operation_id="getEcho",
     parameters=[swagger.PathParameter(name="sample", schema=str)],
     description="Retrieve echos wit Get",
-    responses=swagger.ResponsesObject(
-        responses={
-            "200": swagger.ResponseObject(
-                description="Success", content=flaskdoc.schema.PlainText(schema=flaskdoc.Email()),
-            )
-        }
-    ),
+    responses={
+        "200": swagger.ResponseObject(
+            description="Success", content=flaskdoc.schema.PlainText(schema=flaskdoc.Email()),
+        )
+    },
 )
 @blp.route("/echo/<string:sample>", methods=["GET"])
 def echo(sample: str):
@@ -56,20 +53,12 @@ def echo(sample: str):
     return sample
 
 
-@swagger.POST(tags=["postEcho"], description="Posts an Echo", responses=swagger.ResponsesObject())
+@swagger.POST(
+    tags=["postEcho"],
+    description="Posts an Echo",
+    responses={"201": swagger.ResponseObject(description="OK")},
+)
 @blp.route("/echo", methods=["POST"])
 def post():
     req = flask.request.get_json(force=True)
     return flask.jsonify(req), 200
-
-
-# @swagger.Tag(name="first")
-# @swagger.Tag(name="second")
-# @swagger.Tag(name="third")
-def pest(ar):
-    print(ar)
-
-
-if __name__ == "__main__":
-    pest(ar=34)
-    pest(ar=134)

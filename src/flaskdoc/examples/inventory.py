@@ -43,15 +43,13 @@ search_inventory_docs = swagger.GET(
             description="maximum number of records to return",
         ),
     ],
-    responses=swagger.ResponsesObject(
-        responses={
-            "200": swagger.ResponseObject(
-                description="search results matching criteria",
-                content=flaskdoc.schema.JsonType(schema=[InventoryItem]),
-            ),
-            "400": swagger.ResponseObject(description="bad input parameter"),
-        }
-    ),
+    responses={
+        "200": swagger.ResponseObject(
+            description="search results matching criteria",
+            content=flaskdoc.schema.JsonType(schema=[InventoryItem]),
+        ),
+        "400": swagger.ResponseObject(description="bad input parameter"),
+    },
 )
 
 
@@ -64,13 +62,11 @@ add_inventory_docs = swagger.POST(
         content=flaskdoc.schema.JsonType(schema=InventoryItem),
         description="Inventory item to add",
     ),
-    responses=swagger.ResponsesObject(
-        responses={
-            "201": swagger.ResponseObject(description="item created"),
-            "400": swagger.ResponseObject(description="Invalid input, object invalid"),
-            "409": swagger.ResponseObject(description="an existing item already exists"),
-        }
-    ),
+    responses={
+        "201": swagger.ResponseObject(description="item created"),
+        "400": swagger.ResponseObject(description="Invalid input, object invalid"),
+        "409": swagger.ResponseObject(description="an existing item already exists"),
+    },
 )
 
 

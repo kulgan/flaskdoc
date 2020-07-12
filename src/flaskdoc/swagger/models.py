@@ -527,7 +527,7 @@ class Tag(ModelMixin, ApiDecoratorMixin):
 class Operation(ExtensionMixin, ApiDecoratorMixin):
     """ Describes a single API operation on a path. """
 
-    responses = attr.ib(type=ResponsesObject)
+    responses = attr.ib(type=dict)
     tags = attr.ib(default=[], type=list)
     summary = attr.ib(default=None, type=str)
     description = attr.ib(default=None, type=str)
@@ -550,7 +550,7 @@ class Operation(ExtensionMixin, ApiDecoratorMixin):
         self.parameters.append(parameter)
 
     @staticmethod
-    def from_op(http_method: str, responses: ResponsesObject):
+    def from_op(http_method: str, responses: SwaggerDict):
         """ Factory for creating instances of Http Operations """
 
         http_method = HttpMethod(http_method)

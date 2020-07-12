@@ -12,7 +12,7 @@ def test_sample_swagger(info_block):
             parameters=[
                 swagger.QueryParameter(name="search", required=True, description="Search Param")
             ],
-            responses=swagger.ResponsesObject(),
+            responses={},
         ),
     )
 
