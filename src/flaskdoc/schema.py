@@ -1,6 +1,22 @@
+""" Provides implementations of JSON schema objects and a factory instance
+
+    The Schema class conforms to openapi schema definition, also provides ready
+    to use implementations for String, Number, Boolean etc, these objects can readily
+    be converted to json schemas
+
+    Examples:
+        >> string = String(description="spoils")
+        >> string.type
+        spoils
+        >> string.to_dict()
+        {"type": "string", "description": "spoils"}
+
+    Also provides fully implemented mume types
+"""
+
 import inspect
 from collections import defaultdict
-from typing import AnyStr, ByteString, List, Text, Union
+from typing import AnyStr, ByteString, List, Text, Union, _GenericAlias
 
 import attr
 
@@ -33,6 +49,8 @@ class Content(object):
 
 @attr.s
 class JsonType(Content):
+    """ mime type application/json content type """
+
     content_type = attr.ib(default="application/json", init=False)
 
 
@@ -191,7 +209,7 @@ class SchemaFactory(object):
     class_map = attr.ib(init=False, default={})
 
     def parse_data_fields(self, cls, fields):
-        """
+        """ Parses classes implemented using either py37 dataclasses or attrs
 
         Args:
             cls (class):
@@ -239,6 +257,13 @@ class SchemaFactory(object):
         if isinstance(cls, Schema):
             cls.description = description or cls.description
             return cls
+        # collection based typing
+        if isinstance(cls, _GenericAlias):
+            origin = cls.__origin__
+            if origin in [list, set]:
+                args = cls.__args__[0]
+                arg_schema = self.get_schema(args)
+                return Array(items=arg_schema, description=description)
 
         sch = Object()
         sch.properties = self.from_type(cls)
@@ -253,6 +278,7 @@ SCHEMA_TYPES_MAP = {
     str: String,
     bool: Boolean,
     dict: Object,
+    list: Array,
     float: Number,
     Text: String,
     AnyStr: String,

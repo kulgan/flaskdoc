@@ -32,3 +32,20 @@ def test_primitives_to_schema(schema_factory, cls, exp, form):
     schema = schema_factory.get_schema(cls)
     assert schema.type == exp
     assert schema.format == form
+
+
+@pytest.mark.parametrize(
+    "cls, exp",
+    [
+        (str, dict(type="string")),
+        (int, dict(type="integer", format="int32", minimum=0)),
+        (bool, dict(type="boolean")),
+        (float, dict(type="number", minimum=0)),
+        (t.ByteString, dict(type="string", format="binary")),
+        (dict, dict(type="object")),
+        (t.List[str], dict(type="array", items=dict(type="string"))),
+    ],
+)
+def test_primitive_to_dict(schema_factory, cls, exp):
+    schema = schema_factory.get_schema(cls)
+    assert schema.to_dict() == exp
