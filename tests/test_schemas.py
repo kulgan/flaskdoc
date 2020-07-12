@@ -1,3 +1,4 @@
+import sys
 import typing as t
 
 import pytest
@@ -12,8 +13,14 @@ def schema_factory():
 
 
 def test_to_schema(schema_factory):
-    schema = schema_factory.get_schema(models.OakTown)
-    assert schema.ref == "#/components/schemas/OakTown"
+    schema = schema_factory.get_schema(models.SoakedBean)
+    assert schema.ref == "#/components/schemas/SoakedBean"
+
+
+@pytest.mark.skipif(sys.version_info < (3, 6), reason="requires python3.6 or higher")
+def test_to_schema_py36(schema_factory):
+    schema = schema_factory.get_schema(models.SoakedBean)
+    assert schema.ref == "#/components/schemas/SoakedBean"
 
 
 @pytest.mark.parametrize(
