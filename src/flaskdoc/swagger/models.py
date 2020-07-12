@@ -1,75 +1,25 @@
+# Standard Library
 import enum
-import json
 import logging
 from collections import OrderedDict
-from typing import Union, Type
+from typing import Type, Union
 
 import attr
 
-from flaskdoc.pallets import plugins
+from flaskdoc.core import ApiDecoratorMixin, DictMixin, ModelMixin
+from flaskdoc.schema import ContentMixin, Schema, schema_factory
 from flaskdoc.swagger import validators
 
 logger = logging.getLogger(__name__)
 
 
-class SwaggerDict(OrderedDict):
+class SwaggerDict(OrderedDict, DictMixin):
     """ Used to filter out properties that are not set """
 
     def __setitem__(self, key, value):
         if value not in [False, True] and not value:
             return
         super(SwaggerDict, self).__setitem__(key, value)
-
-
-class ApiDecoratorMixin(object):
-    """ Makes a model a decorator that registers itself """
-
-    def __call__(self, func):
-        plugins.register_spec(func, self)
-        return func
-
-
-class ModelMixin(object):
-    """ Model mixin that provides common methods like to dict and to json """
-
-    @staticmethod
-    def camel_case(snake_case):
-        cpnts = snake_case.split("_")
-        return cpnts[0] + "".join(x.title() for x in cpnts[1:])
-
-    def dict(self):
-        d = SwaggerDict()
-        for key, val in vars(self).items():
-            # skip extensions
-            if key == "extensions":
-                continue
-
-            if key.startswith("_"):
-                key = key[1:]
-                val = getattr(self, "q_" + key, None)
-
-            # map ref
-            if key == "ref":
-                key = "$ref"
-
-            if isinstance(val, ModelMixin) or hasattr(val, "dict"):
-                val = val.dict()
-
-            if isinstance(val, (set, list)):
-                val = [v.dict() if isinstance(v, ModelMixin) else v for v in val]
-
-            if isinstance(val, dict):
-                val = {k: v.dict() if isinstance(v, ModelMixin) else v for k, v in val.items()}
-
-            d[self.camel_case(key)] = val
-
-        return d
-
-    def json(self, indent=2):
-        return json.dumps(self.dict(), indent=indent)
-
-    def __repr__(self):
-        return self.json()
 
 
 @attr.s
@@ -108,8 +58,8 @@ class ExtensionMixin(ModelMixin):
         if value and not value.startswith("x-"):
             raise ValueError("Custom extension must start with x-")
 
-    def dict(self):
-        di = super(ExtensionMixin, self).dict()
+    def to_dict(self):
+        di = super(ExtensionMixin, self).to_dict()
         if self.extensions:
             di.update(self.extensions)
         return di
@@ -135,14 +85,8 @@ class ContainerModel(ModelMixin):
         for item in self.items:
             yield item
 
-    def dict(self):
-        return self.items
-
-    def json(self, indent=2):
-        return json.dumps(self.items, indent=indent)
-
-    def __repr__(self):
-        return self.json(indent=2)
+    def to_dict(self):
+        return self._parse_dict(self.items)
 
 
 @attr.s
@@ -251,7 +195,7 @@ class Server(ExtensionMixin):
 
     url = attr.ib(type=str)
     description = attr.ib(default=None, type=str)
-    variables = attr.ib(default=SwaggerDict(), type=str)
+    variables = attr.ib(default={}, type=str)
 
     def add_variable(self, name: str, variable: ServerVariable):
         """ Adds a server variable
@@ -345,56 +289,6 @@ class Example(ExtensionMixin):
 
 
 @attr.s
-class Schema(ModelMixin):
-    """ The Schema Object allows the definition of input and output data types.
-
-    These types can be objects, but also primitives and arrays. This object is an extended subset of the JSON Schema
-    Specification Wright Draft 00. For more information about the properties, see JSON Schema Core and JSON Schema
-    Validation. Unless stated otherwise, the property definitions follow the JSON Schema.
-    """
-
-    ref = attr.ib(default=None, type=str)
-    title = attr.ib(default=None, type=str)
-    multiple_of = None
-    maximum = None
-    exclusive_maximum = None
-    minimum = None
-    exclusive_minimum = None
-    max_length = None  # type: int
-    min_length = None  # type: int
-    pattern = None
-    max_items = None  # type: ignore
-    min_items = None  # type: ignore
-    unique_item = None
-    max_properties = None  # type: ignore
-    min_properties = None  # type: ignore
-    required = None
-    enum = None
-    type = attr.ib(default=None, type=str)
-    all_of = None
-    one_of = None
-    any_of = None
-    _not = None  # type: ignore
-    items = attr.ib(default=None)
-    properties = None
-    additional_properties = None
-    description = None
-    format = attr.ib(default=None, type=str)
-    default = None
-    nullable = None
-    discriminator = None
-    read_only = None
-    write_only = None
-    xml = None
-    external_docs = None
-    example = None
-    deprecated = None
-
-    def q_not(self):
-        return self._not
-
-
-@attr.s
 class MediaType(ModelMixin):
     """ Each Media Type Object provides schema and examples for the media type identified by its key. """
 
@@ -414,23 +308,9 @@ class MediaType(ModelMixin):
         self.encoding[name] = encoding
 
 
-class Content(object):
-    def __init__(self):
-        super(Content, self).__init__()
-        self.contents = SwaggerDict()
-
-    def add_media_type(self, name: str, media_type: MediaType):
-        self.contents[name] = media_type.dict()
-
-    def dict(self):
-        return self.contents
-
-
 @attr.s
-class RequestBody(ExtensionMixin):
+class RequestBody(ContentMixin, ExtensionMixin):
 
-    # FIXME: reuse Content Class ?
-    content = attr.ib(default=SwaggerDict())
     description = attr.ib(default=None, type=str)
     required = attr.ib(default=False)
 
@@ -513,14 +393,14 @@ class Parameter(ModelMixin, ApiDecoratorMixin):
 
     name = attr.ib(type=str)
     _in = attr.ib(default=None, type=ParameterLocation, init=False)
-    required = attr.ib(default=False)
+    required = attr.ib(default=None)
     description = attr.ib(default=None, type=str)
-    deprecated = attr.ib(default=False)
-    allow_empty_value = attr.ib(default=False)
-    allow_reserved = attr.ib(default=False)
+    deprecated = attr.ib(default=None)
+    allow_empty_value = attr.ib(default=None)
+    allow_reserved = attr.ib(default=None)
     schema = attr.ib(default=None)
     content = attr.ib(default={})
-    explode = attr.ib(default=False)
+    explode = attr.ib(default=None)
     _style = attr.ib(default=None, type=Style, init=False)
     example = attr.ib(default=None)
     examples = attr.ib(default=SwaggerDict())
@@ -532,6 +412,10 @@ class Parameter(ModelMixin, ApiDecoratorMixin):
     @property
     def q_style(self):
         return self._style.value
+
+    def __attrs_post_init__(self):
+        if self.schema:
+            self.schema = schema_factory.get_schema(self.schema)
 
 
 @attr.s
@@ -583,7 +467,7 @@ class Link(ExtensionMixin):
 
 
 @attr.s
-class ResponseObject(ExtensionMixin):
+class ResponseObject(ContentMixin, ExtensionMixin):
     """
     Describes a single response from an API Operation, including design-time, static links to operations based on
     the response.
@@ -643,7 +527,7 @@ class Tag(ModelMixin, ApiDecoratorMixin):
 class Operation(ExtensionMixin, ApiDecoratorMixin):
     """ Describes a single API operation on a path. """
 
-    responses = attr.ib(type=ResponsesObject)
+    responses = attr.ib(type=dict)
     tags = attr.ib(default=[], type=list)
     summary = attr.ib(default=None, type=str)
     description = attr.ib(default=None, type=str)
@@ -652,7 +536,7 @@ class Operation(ExtensionMixin, ApiDecoratorMixin):
     parameters = attr.ib(default=None, type=list)
     request_body = attr.ib(default=None)
     callbacks = attr.ib(default=None, type=SwaggerDict)
-    deprecated = attr.ib(default=False)
+    deprecated = attr.ib(default=None)
     security = attr.ib(default=None, type=list)
     servers = attr.ib(default=None, type=list)
 
@@ -666,7 +550,7 @@ class Operation(ExtensionMixin, ApiDecoratorMixin):
         self.parameters.append(parameter)
 
     @staticmethod
-    def from_op(http_method: str, responses: ResponsesObject):
+    def from_op(http_method: str, responses: SwaggerDict):
         """ Factory for creating instances of Http Operations """
 
         http_method = HttpMethod(http_method)
@@ -700,8 +584,8 @@ class PathItem(ModelMixin):
     summary = attr.ib(default=None, type=str)
     description = attr.ib(default=None, type=str)
 
-    servers = attr.ib(default=None, type=list)
-    parameters = attr.ib(default=None, type=list)
+    servers = attr.ib(default=[], type=list)
+    parameters = attr.ib(default=[], type=list)
 
     get = attr.ib(default=None, type=Operation)
     delete = attr.ib(default=None, type=Operation)
@@ -742,9 +626,7 @@ class PathItem(ModelMixin):
         Merges another path item into this on
         Args:
             path_item (PathItem): PathItem instance to merge
-
-
-                    """
+        """
         for server in path_item.servers:
             self.add_server(server)
 
@@ -767,7 +649,7 @@ class Paths(ContainerModel):
     from the Server Object in order to construct the full URL. The Paths MAY be empty, due to ACL constraints.
     """
 
-    def add(self, relative_url: str, path_item: Union[PathItem, SwaggerDict]):
+    def add(self, relative_url, path_item):
         """
         Adds a path item
         Args:
@@ -775,8 +657,10 @@ class Paths(ContainerModel):
           path_item (PathItem|SwaggerDict) : PathItem instance describing the path
         """
 
-        if isinstance(path_item, PathItem):
-            path_item = path_item.dict()
+        if relative_url in self.items:
+            pi = self.get(relative_url)  # type: PathItem
+            pi.merge_path_item(path_item)
+            return
         super(Paths, self).add(relative_url, path_item)
 
 
@@ -876,7 +760,9 @@ class SecurityScheme(ExtensionMixin):
     ):
         super(SecurityScheme, self).__init__()
 
-        self.type = SecuritySchemeType(scheme_type) if isinstance(scheme_type, str) else scheme_type
+        self.type = (
+            SecuritySchemeType(scheme_type) if isinstance(scheme_type, str) else scheme_type
+        )
         self.name = name  # type: str
         self.description = description  # type: str
         self.scheme = scheme  # type: str
@@ -919,7 +805,7 @@ class OpenApi(ModelMixin):
         Arguments:
             openapi (str): Open API version used by API
             info (flaskdoc.swagger.info.Info): open api info object
-            paths (flaskdoc.swagger.path.Paths): Paths definitions
+            paths (Paths): Paths definitions
     """
 
     info = attr.ib(type=Info)

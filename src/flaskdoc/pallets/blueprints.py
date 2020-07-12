@@ -55,5 +55,7 @@ class Blueprint(flask.Blueprint, mixin.SwaggerMixin):
             callback:
         """
 
-        options = self.parse_route(rule, ref, description, summary, servers, parameters, responses, **options)
+        options = self.parse_route(
+            rule, ref, description, summary, servers, parameters, responses, **options
+        )
         return super(Blueprint, self).route(rule, **options)

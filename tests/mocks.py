@@ -1,6 +1,6 @@
 import flask
 
-import flaskdoc
+import flaskdoc.schema
 from flaskdoc import swagger
 
 blp = flask.Blueprint("Dummy", __name__, url_prefix="/v1")
@@ -14,18 +14,20 @@ simple_get = swagger.GET(
             name="id",
             description="root id",
             allow_empty_value=True,
-            schema=swagger.Schema(type="string", format="email",),
+            schema=flaskdoc.schema.Schema(type="string", format="email",),
         ),
         swagger.QueryParameter(name="age", description="age of user",),
     ],
-    responses=swagger.ResponsesObject(),
+    responses={"200": swagger.ResponseObject(description="Echos whatever")},
 )
 
 servers = [
     swagger.Server(
         url="https://{sample}.sample/com",
         description="Test Suite",
-        variables=dict(sample=swagger.ServerVariable(default="api", enum=["api", "api2", "api3"],),),
+        variables=dict(
+            sample=swagger.ServerVariable(default="api", enum=["api", "api2", "api3"],),
+        ),
     ),
 ]
 
@@ -33,15 +35,13 @@ servers = [
 @swagger.GET(
     tags=["getEcho"],
     operation_id="getEcho",
-    parameters=[swagger.PathParameter(name="sample", schema=flaskdoc.String())],
+    parameters=[swagger.PathParameter(name="sample", schema=str)],
     description="Retrieve echos wit Get",
-    responses=swagger.ResponsesObject(
-        responses={
-            "200": swagger.ResponseObject(
-                description="Success", content={"text/plain": swagger.MediaType(schema=flaskdoc.Email())},
-            )
-        }
-    ),
+    responses={
+        "200": swagger.ResponseObject(
+            description="Success", content=flaskdoc.schema.PlainText(schema=flaskdoc.Email()),
+        )
+    },
 )
 @blp.route("/echo/<string:sample>", methods=["GET"])
 def echo(sample: str):
@@ -53,20 +53,12 @@ def echo(sample: str):
     return sample
 
 
-@swagger.POST(tags=["postEcho"], description="Posts an Echo", responses=swagger.ResponsesObject())
+@swagger.POST(
+    tags=["postEcho"],
+    description="Posts an Echo",
+    responses={"201": swagger.ResponseObject(description="OK")},
+)
 @blp.route("/echo", methods=["POST"])
 def post():
     req = flask.request.get_json(force=True)
     return flask.jsonify(req), 200
-
-
-# @swagger.Tag(name="first")
-# @swagger.Tag(name="second")
-# @swagger.Tag(name="third")
-def pest(ar):
-    print(ar)
-
-
-if __name__ == "__main__":
-    pest(ar=34)
-    pest(ar=134)

@@ -1,7 +1,6 @@
 from os import path
 
-from setuptools import find_packages
-from setuptools import setup
+from setuptools import find_packages, setup
 
 here = path.abspath(path.dirname(__file__))
 
@@ -23,7 +22,9 @@ setup(
     package_dir={"": "src"},
     packages=find_packages(where="src"),
     zip_safe=True,
-    package_data={"flaskdoc": ["static/*.css", "static/*.png", "static/*.js", "templates/*.html"]},
+    package_data={
+        "flaskdoc": ["static/*.css", "static/*.png", "static/*.js", "templates/*.html"]
+    },
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Framework :: Flask",
@@ -35,7 +36,7 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Topic :: Documentation",
     ],
-    install_requires=["attrs~=19.3", "flask~=1.0", "PyYaml~=5.3"],
+    install_requires=["attrs~=19.3", "click~=7.1", "flask~=1.0", "PyYaml~=5.3"],
     extras_require={
         "dev": [
             "black; python_version >= '3.6'",
@@ -51,4 +52,5 @@ setup(
     },
     setup_requires=["setuptools_scm"],
     project_urls={"source": "https://github.com/kulgan/flaskdoc"},
+    entry_points={"console_scripts": ["flaskdoc = flaskdoc.cli:flaskdoc"]},
 )
