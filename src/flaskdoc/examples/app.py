@@ -18,7 +18,7 @@ def make_app():
     app = flask.Flask("Test API")
     app.register_blueprint(inventory.blp)
 
-    info = swagger.models.Info(
+    info = swagger.Info(
         title="Test",
         version="1.2.2",
         contact=swagger.Contact(

@@ -30,13 +30,13 @@ def app(request, info_block):
 
 @pytest.fixture()
 def info_block():
-    _info = swagger.models.Info(
+    _info = swagger.Info(
         title="Test",
         version="1.2.2",
         contact=swagger.Contact(
             name="Rowland", email="r.ogwara@gmail.com", url="https://github.com/kulgan"
         ),
-        license=swagger.models.License(name="Apache 2.0", url="https://www.example.com/license"),
+        license=swagger.License(name="Apache 2.0", url="https://www.example.com/license"),
     )
     return _info
 
