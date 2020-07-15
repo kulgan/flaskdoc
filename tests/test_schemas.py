@@ -80,3 +80,8 @@ def test_primitives_to_schema(schema_factory, cls, exp, form):
 def test_primitive_to_dict(schema_factory, cls, exp):
     schema = schema_factory.get_schema(cls)
     assert schema.to_dict() == exp
+
+
+def test_jo_models(schema_factory):
+    schema = schema_factory.get_schema(models.Lemons)
+    assert schema, "Not implemented"

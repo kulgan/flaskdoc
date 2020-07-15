@@ -231,17 +231,6 @@ class ReferenceObject(ModelMixin):
 
 
 @attr.s
-class Discriminator(ModelMixin):
-    """ When request bodies or response payloads may be one of a number of different schemas, a discriminator object
-    can be used to aid in serialization, deserialization, and validation. The discriminator is a specific object in a
-    schema which is used to inform the consumer of the specification of an alternative schema based on the value
-    associated with it. """
-
-    property_name = attr.ib(type=str)
-    mapping = attr.ib(default=dict)
-
-
-@attr.s
 class XML(ExtensionMixin):
     """ A metadata object that allows for more fine-tuned XML model definitions. When using arrays, XML element names
     are not inferred (for singular/plural forms) and the name property SHOULD be used to add that information. See
