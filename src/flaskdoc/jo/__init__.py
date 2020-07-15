@@ -1,3 +1,17 @@
+from flaskdoc.jo.schema import (
+    Array,
+    BinaryString,
+    Boolean,
+    Discriminator,
+    Email,
+    Int64,
+    Integer,
+    JsonType,
+    Number,
+    PlainText,
+    Schema,
+    String,
+)
 from flaskdoc.jo.types import (
     all_of,
     any_of,
@@ -12,4 +26,28 @@ from flaskdoc.jo.types import (
     string,
 )
 
-__all__ = [integer, string, schema, email, number, one_of, boolean, all_of, any_of, array, object]
+__all__ = [
+    integer,
+    string,
+    schema,
+    email,
+    number,
+    one_of,
+    boolean,
+    all_of,
+    any_of,
+    array,
+    object,
+    JsonType,
+    Array,
+    Boolean,
+    BinaryString,
+    Schema,
+    Int64,
+    Integer,
+    String,
+    Email,
+    Number,
+    Discriminator,
+    PlainText,
+]

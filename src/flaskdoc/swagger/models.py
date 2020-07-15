@@ -7,7 +7,7 @@ from typing import Type, Union
 import attr
 
 from flaskdoc.core import ApiDecoratorMixin, DictMixin, ModelMixin
-from flaskdoc.schema import ContentMixin, Schema, schema_factory
+from flaskdoc.jo.schema import ContentMixin, Schema, schema_factory
 from flaskdoc.swagger import validators
 
 logger = logging.getLogger(__name__)

@@ -3,7 +3,7 @@ import typing as t
 
 import pytest
 
-from flaskdoc.schema import SchemaFactory
+from flaskdoc.jo.schema import SchemaFactory
 from tests.schema import models
 
 

@@ -7,10 +7,10 @@ import pkg_resources
 import yaml
 
 from flaskdoc import swagger
+from flaskdoc.jo.schema import schema_factory
 from flaskdoc.pallets import plugins
 from flaskdoc.pallets.blueprints import Blueprint
 from flaskdoc.pallets.mixin import SwaggerMixin
-from flaskdoc.schema import schema_factory
 
 API_DOCS = {}
 static_ui = pkg_resources.resource_filename("flaskdoc", "static")
@@ -95,6 +95,7 @@ class Flask(flask.Flask, SwaggerMixin):
 
 def register_json_path():
     get_api_docs(flask.current_app)
+    print(flask.current_app.openapi.components)
     return flask.jsonify(flask.current_app.openapi.to_dict()), 200
 
 

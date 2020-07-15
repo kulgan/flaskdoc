@@ -1,9 +1,9 @@
 import attr
 
-from flaskdoc.schema import (
+from flaskdoc.jo.schema import (
     Array,
     Boolean,
-    Int32,
+    Integer,
     Number,
     Object,
     Schema,
@@ -43,8 +43,18 @@ def schema(additional_properties=False, required=None, min_properties=None, max_
     return wraps
 
 
-def string(default=None, required=None, format=None, min_length=None, max_length=None, enum=None):
-    sc = String(format=format, min_length=min_length, max_length=max_length, enum=enum)
+def string(
+    default=None,
+    required=None,
+    format=None,
+    min_length=None,
+    max_length=None,
+    enum=None,
+    example=None,
+):
+    sc = String(
+        format=format, min_length=min_length, max_length=max_length, enum=enum, example=example
+    )
     return attr.ib(type=str, default=default, metadata={JO_SCHEMA: sc, JO_REQUIRED: required})
 
 
@@ -63,11 +73,13 @@ def number(
     required=None,
     read_only=None,
     write_only=None,
+    example=None,
 ):
     sc = Number(
         format=format,
         minimum=minimum,
         maximum=maximum,
+        example=example,
         read_only=read_only,
         write_only=write_only,
         multiple_of=multiple_of,
@@ -88,12 +100,13 @@ def integer(
     required=None,
     read_only=None,
     write_only=None,
+    example=None,
 ):
-    sc = Schema(
-        type="integer",
+    sc = Integer(
         format=format,
         minimum=minimum,
         maximum=maximum,
+        example=None,
         read_only=read_only,
         write_only=write_only,
         multiple_of=multiple_of,

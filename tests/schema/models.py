@@ -48,7 +48,7 @@ class Color(Enum):
     pint = "pinksys"
 
 
-@jo.schema(additional_properties=True)
+@jo.schema()
 class Lemons(object):
     name = jo.string(format="uuid", required=True, enum=[None, "a", "b"])
     size = jo.integer(maximum=1000)

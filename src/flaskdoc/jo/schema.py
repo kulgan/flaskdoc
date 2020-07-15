@@ -113,7 +113,6 @@ class Schema(ModelMixin):
     write_only = attr.ib(default=None, type=bool)
     xml = None
     external_docs = None
-    example = None
     deprecated = None
 
     def q_not(self):
@@ -127,11 +126,13 @@ class Schema(ModelMixin):
 
 @attr.s
 class Boolean(Schema):
+    example = attr.ib(default=None, type=bool)
     type = attr.ib(default="boolean", init=False)
 
 
 @attr.s
 class String(Schema):
+    example = attr.ib(default=None, type=str)
     type = attr.ib(default="string", init=False)
 
 
@@ -143,18 +144,20 @@ class Email(String):
 
 @attr.s
 class Number(Schema):
+    example = attr.ib(default=None, type=float)
     type = attr.ib(default="number", init=False)
 
 
 @attr.s
-class Int32(Number):
+class Integer(Number):
     type = attr.ib(default="integer", init=False)
-    format = attr.ib(default="int32", init=False)
+    format = attr.ib(default="int32", type=str)
+    example = attr.ib(default=None, type=int)
     minimum = attr.ib(default=0, type=int)
 
 
 @attr.s
-class Int64(Int32):
+class Int64(Integer):
     format = attr.ib(default="int64", init=False)
 
 
@@ -260,9 +263,7 @@ class SchemaFactory(object):
         return self.class_map[cls.__name__]
 
     def get_schema(self, cls, description=None):
-        # handle custom jo objects
-        if hasattr(cls, "jo_schema"):
-            return cls.jo_schema()
+
         # handle schema derivatives
         if isinstance(cls, Schema):
             cls.description = description or cls.description
@@ -298,6 +299,9 @@ class SchemaFactory(object):
         if isinstance(cls, enum.EnumMeta):
             enums = [c._value_ for c in cls.__members__.values()]
             sch = Schema(enum=enums)
+        # handle custom jo objects
+        elif hasattr(cls, "jo_schema"):
+            sch = cls.jo_schema()
         else:
             sch = Object()
             sch.properties = self.from_type(cls)
@@ -308,7 +312,7 @@ class SchemaFactory(object):
 
 
 SCHEMA_TYPES_MAP = {
-    int: Int32,
+    int: Integer,
     str: String,
     bool: Boolean,
     dict: Object,
