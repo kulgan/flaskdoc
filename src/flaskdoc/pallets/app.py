@@ -95,7 +95,6 @@ class Flask(flask.Flask, SwaggerMixin):
 
 def register_json_path():
     get_api_docs(flask.current_app)
-    print(flask.current_app.openapi.components)
     return flask.jsonify(flask.current_app.openapi.to_dict()), 200
 
 
@@ -184,13 +183,15 @@ def parse_specs(rule, spec, api):
     """
 
     pi = swagger.PathItem()
-    for arg in rule.arguments:
-        par = swagger.PathParameter(name=arg)
-        pi.add_parameter(par)
+    # for arg in rule.arguments:
+    #     par = swagger.PathParameter(name=arg)
+    #     pi.add_parameter(par)
 
-    for op in rule.methods:
-        operation = swagger.Operation.from_op(op, {})
-        pi.add_operation(operation)
+    # TODO: review extracting from flask
+    # for op in rule.methods:
+    #     operation = swagger.Operation.from_op(op, {})
+    #     pi.add_operation(operation)
+
     for model in spec:
         if isinstance(model, swagger.PathItem):
             pi.merge_path_item(model)

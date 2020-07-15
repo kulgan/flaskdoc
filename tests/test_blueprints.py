@@ -2,6 +2,7 @@ import json
 
 import pytest
 import yaml
+from openapi_spec_validator import validate_spec
 
 
 @pytest.mark.parametrize("sample", ["hulu", "polo"])
@@ -31,3 +32,9 @@ def test_registered_openapi(client):
     api_docs = yaml.safe_load(response.data)
     info_block = api_docs["info"]
     assert info_block["contact"]["email"] == "r.ogwara@gmail.com"
+
+
+def test_mocks_spec_is_valid(client):
+    r = client.get("/openapi.json")
+    print(json.dumps(r.json, indent=2))
+    validate_spec(r.json)

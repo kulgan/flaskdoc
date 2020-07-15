@@ -220,7 +220,6 @@ class SchemaFactory(object):
 
     ref_base = attr.ib(default="#/components/schemas", init=False)
     components = attr.ib(init=False, default={})
-    class_map = attr.ib(init=False, default={})
 
     def parse_data_fields(self, cls, fields):
         """ Parses classes implemented using either py37 dataclasses or attrs
@@ -236,14 +235,14 @@ class SchemaFactory(object):
             fields = fields.values()
         for props in fields:
             field_type = props.type or type(props.default) if props.default else str
-            self.class_map[cls.__name__][props.name] = self.get_schema(field_type)
+            CLASS_MAP[cls.__name__][props.name] = self.get_schema(field_type)
 
     def from_type(self, cls):
 
-        if cls.__name__ in self.class_map:
-            return self.class_map[cls.__name__]
+        if cls.__name__ in CLASS_MAP:
+            return CLASS_MAP[cls.__name__]
 
-        self.class_map[cls.__name__] = {}
+        CLASS_MAP[cls.__name__] = {}
         annotations = cls.__annotations__ if hasattr(cls, "__annotations__") else {}
         members = inspect.getmembers(cls)
         for field, member in members:
@@ -258,9 +257,9 @@ class SchemaFactory(object):
             ):
                 field_type = type(member) if member else annotations.get(field)
                 field_type = field_type or str
-                self.class_map[cls.__name__][field] = self.get_schema(field_type)
+                CLASS_MAP[cls.__name__][field] = self.get_schema(field_type)
 
-        return self.class_map[cls.__name__]
+        return CLASS_MAP[cls.__name__]
 
     def get_schema(self, cls, description=None):
 
@@ -297,8 +296,15 @@ class SchemaFactory(object):
                 return Object(additional_properties=True)
 
         if isinstance(cls, enum.EnumMeta):
-            enums = [c._value_ for c in cls.__members__.values()]
-            sch = Schema(enum=enums)
+            enums = []
+            for c in cls.__members__.values():
+                v = c._value_
+                enums.append(v)
+                if v:
+                    sch_typ = SCHEMA_TYPES_MAP.get(type(v))
+                    sch = sch_typ(enum=enums)
+                else:
+                    sch = Schema(enum=enums)
         # handle custom jo objects
         elif hasattr(cls, "jo_schema"):
             sch = cls.jo_schema()
@@ -322,8 +328,5 @@ SCHEMA_TYPES_MAP = {
     AnyStr: String,
     ByteString: BinaryString,
 }
+CLASS_MAP = {}
 schema_factory = SchemaFactory()
-
-
-def model():
-    pass

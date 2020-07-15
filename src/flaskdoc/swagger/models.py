@@ -406,6 +406,14 @@ class Parameter(ModelMixin, ApiDecoratorMixin):
         if self.schema:
             self.schema = schema_factory.get_schema(self.schema)
 
+    def merge(self, parameter):
+        if self.required is None:
+            self.required = parameter.required
+        if self.schema is None:
+            self.schema = parameter.schema
+        if self.content is None:
+            self.content = parameter.content
+
 
 @attr.s
 class PathParameter(Parameter):
@@ -606,8 +614,11 @@ class PathItem(ModelMixin):
         self.servers.append(server)
 
     def add_parameter(self, parameter):
-        if not self.parameters:
-            self.parameters = []
+        for param in self.parameters:
+            if param.name == parameter.name:
+                # previously added
+                param.merge(parameter)
+                return
         self.parameters.append(parameter)
 
     def merge_path_item(self, path_item):

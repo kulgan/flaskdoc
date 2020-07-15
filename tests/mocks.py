@@ -15,7 +15,7 @@ simple_get = swagger.GET(
             allow_empty_value=True,
             schema=jo.Schema(type="string", format="email",),
         ),
-        swagger.QueryParameter(name="age", description="age of user",),
+        swagger.QueryParameter(name="age", description="age of user", schema=jo.Integer()),
     ],
     responses={"200": swagger.ResponseObject(description="Echos whatever")},
 )

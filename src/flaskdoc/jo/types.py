@@ -1,5 +1,6 @@
 import attr
 
+from flaskdoc.core import camel_case
 from flaskdoc.jo.schema import (
     Array,
     Boolean,
@@ -32,8 +33,9 @@ def schema(additional_properties=False, required=None, min_properties=None, max_
             for attrib in attributes:
                 psc = attrib.metadata[JO_SCHEMA]
                 is_required = attrib.metadata.get(JO_REQUIRED, False)
-                if is_required:
-                    sc.required.append(attrib.name)
+                field_name = camel_case(attrib.name)
+                if is_required and field_name not in sc.required:
+                    sc.required.append(field_name)
                 sc.properties[attrib.name] = psc
             return sc
 
