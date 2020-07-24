@@ -23,3 +23,9 @@ repos:
     rev: v5.0.4
     hooks:
       - id: isort
+  - repo: git@github.com:Yelp/detect-secrets
+    rev: v0.14.1
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: src/flaskdoc/static/*.js

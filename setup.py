@@ -41,6 +41,7 @@ setup(
         "dev": [
             "black; python_version >= '3.6'",
             "coverage[toml]",
+            "detect-secrets",
             "flake8",
             "pre-commit",
             "pytest",
