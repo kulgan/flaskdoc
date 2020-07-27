@@ -1,8 +1,6 @@
 import flask
 
 import flaskdoc
-from flaskdoc import swagger
-from flaskdoc.examples import inventory, petstore
 
 
 class AppConfig:
@@ -17,20 +15,26 @@ class AppConfig:
 def make_app(name="inventory"):
     app = flask.Flask("Test API")
 
-    info = inventory.info
-    servers = (inventory.servers,)
-    tags = inventory.tags
+    info = servers = tags = security = None
     if name == "inventory":
+        from flaskdoc.examples import inventory
+
         app.register_blueprint(inventory.blp)
+        info = inventory.info
+        servers = inventory.servers
+        tags = inventory.tags
 
     elif name == "petstore":
+        from flaskdoc.examples import petstore
+
         app.register_blueprint(petstore.pet)
         info = petstore.info
         servers = petstore.servers
         tags = petstore.tags
+        security = petstore.security_schemes
 
     flaskdoc.register_openapi(
-        app, info=info, servers=servers, tags=tags,
+        app, info=info, servers=servers, tags=tags, security=security,
     )
     return app
 

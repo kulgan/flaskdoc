@@ -41,6 +41,16 @@ tags = [
     ),
 ]
 
+security_schemes = {
+    "api_key": swagger.ApiKeySecurityScheme(name="api_key"),
+    "petstore_auth": swagger.OAuth2SecurityScheme(
+        flows=swagger.ImplicitOAuthFlow(
+            authorization_url="https://petstore.swagger.io/oauth/authorize",
+            scopes={"read:pets": "read your pets", "write:pets": "write pets in your account"},
+        )
+    ),
+}
+
 
 @jo.schema()
 class ApiResponse(object):
@@ -54,7 +64,7 @@ class ApiResponse(object):
     summary="uploads an image",
     operation_id="uploadFile",
     parameters=[
-        swagger.PathParameter(name="petId", description="ID of pet to update", schema=jo.Int64(),)
+        swagger.PathParameter(name="petId", description="ID of pet to update", schema=jo.Int64())
     ],
     request_body=swagger.RequestBody(
         content=jo.Content(
@@ -74,6 +84,7 @@ class ApiResponse(object):
             description="successful operation", content=jo.JsonType(schema=ApiResponse)
         )
     },
+    security={"pet_store": ["write:pets", "read:pets"]},
 )
 @pet.route("/<int:petId>/uploadImage")
 def upload_image(petId):

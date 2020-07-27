@@ -12,7 +12,7 @@ class DictMixin:
     def to_dict(self):
         return self._parse_dict(self.__dict__)
 
-    def _parse_dict(self, val: dict):
+    def _parse_dict(self, val):
         parsed = {}
         for k, v in val.items():
             if k == "extensions" or (v not in [True, False] and not v):

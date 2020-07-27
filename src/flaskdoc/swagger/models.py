@@ -744,58 +744,105 @@ class SecuritySchemeType(enum.Enum):
     OPEN_ID_CONNECT = "openIdConnect"
 
 
+@attr.s
 class SecurityScheme(ExtensionMixin):
     """ Defines a security scheme that can be used by the operations. Supported schemes are HTTP authentication,
     an API key (either as a header or as a query parameter), OAuth2's common flows (implicit, password, application
     and access code) as defined in RFC6749, and OpenID Connect Discovery. """
 
-    def __init__(
-        self,
-        scheme_type,
-        name,
-        description=None,
-        scheme=None,
-        bearer_format=None,
-        flows=None,
-        open_id_connect_url=None,
-    ):
-        super(SecurityScheme, self).__init__()
+    _type = attr.ib(type=str, init=False)
 
-        self.type = (
-            SecuritySchemeType(scheme_type) if isinstance(scheme_type, str) else scheme_type
+    @property
+    def q_type(self):
+        if self._type:
+            return self._type.value
+
+
+@attr.s
+class ApiKeySecurityScheme(SecurityScheme):
+    name = attr.ib(type=str)
+    _type = attr.ib(default=SecuritySchemeType.API_KEY, init=False)
+    _in = attr.ib(default=ParameterLocation.HEADER, init=False)
+    description = attr.ib(default=None, type=str)
+
+    @property
+    def q_in(self):
+        return self._in.value
+
+
+@attr.s
+class HttpSecurityScheme(SecurityScheme):
+    scheme = attr.ib(type="string")
+    bearer_format = attr.ib(default="bearer")
+    description = attr.ib(default=None, type=str)
+    _type = attr.ib(default=SecuritySchemeType.HTTP, init=False)
+
+
+@attr.s
+class OpenIDConnectScheme(SecurityScheme):
+    open_id_connect_url = attr.ib(type=str)
+    _type = attr.ib(default=SecuritySchemeType.OPEN_ID_CONNECT, init=False)
+
+    @open_id_connect_url.validator
+    def validate(self, _, url):
+        if url:
+            validators.validate_url(url, "OpenIDConnectScheme.open_id_connect_url")
+
+
+@attr.s
+class OAuth2SecurityScheme(SecurityScheme):
+    flows = attr.ib()
+    _type = attr.ib(default=SecuritySchemeType.OAUTH2, init=False)
+
+
+class ImplicitOAuthFlow(object):
+    def __init__(self, authorization_url, scopes, token_url=None, refresh_url=None):
+        self.implicit = OAuthFlow(
+            authorization_url=authorization_url,
+            token_url=token_url,
+            refresh_url=refresh_url,
+            scopes=scopes,
         )
-        self.name = name  # type: str
-        self.description = description  # type: str
-        self.scheme = scheme  # type: str
-        self.bearer_format = bearer_format  # type: str
-        self.flows = flows
-        self.open_id_connect_url = open_id_connect_url
 
 
-class OAuthFlows(ExtensionMixin):
-    """ Allows configuration of the supported OAuth Flows. """
-
-    def __init__(
-        self, implicit=None, password=None, client_credentials=None, authorization_code=None,
-    ):
-        super(OAuthFlows, self).__init__()
-
-        self.implicit = implicit  # type: OAuthFlow
-        self.password = password  # type: OAuthFlow
-        self.client_credentials = client_credentials  # type: OAuthFlow
-        self.authorization_code = authorization_code  # type: OAuthFlow
+class AuthorizationCodeOAuthFlow(ExtensionMixin):
+    def __init__(self, authorization_url, token_url, scopes, refresh_url=None):
+        self.authorization_code = OAuthFlow(
+            authorization_url=authorization_url,
+            token_url=token_url,
+            refresh_url=refresh_url,
+            scopes=scopes,
+        )
 
 
+class PasswordOAuthFlow(ExtensionMixin):
+    def __init__(self, token_url, scopes, authorization_url=None, refresh_url=None):
+        self.password = OAuthFlow(
+            authorization_url=authorization_url,
+            token_url=token_url,
+            refresh_url=refresh_url,
+            scopes=scopes,
+        )
+
+
+class ClientCredentialsOAuthFlow(ExtensionMixin):
+    def __init__(self, token_url, scopes, authorization_url=None, refresh_url=None):
+        self.clientCredentials = OAuthFlow(
+            authorization_url=authorization_url,
+            token_url=token_url,
+            refresh_url=refresh_url,
+            scopes=scopes,
+        )
+
+
+@attr.s
 class OAuthFlow(ExtensionMixin):
     """ Configuration details for a supported OAuth Flow """
 
-    def __init__(self, authorization_url=None, token_url=None, refresh_url=None, scopes=None):
-        super(OAuthFlow, self).__init__()
-
-        self.authorization_url = authorization_url  # type: str
-        self.token_url = token_url  # type: str
-        self.refresh_url = refresh_url  # type: str
-        self.scopes = scopes  # type: dict
+    authorization_url = attr.ib(type=str)
+    token_url = attr.ib(type=str)
+    refresh_url = attr.ib(type=str)
+    scopes = attr.ib(type={})
 
 
 @attr.s
