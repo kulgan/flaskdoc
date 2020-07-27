@@ -2,7 +2,7 @@ import flask
 
 import flaskdoc
 from flaskdoc import swagger
-from flaskdoc.examples import inventory
+from flaskdoc.examples import inventory, petstore
 
 
 class AppConfig:
@@ -14,32 +14,27 @@ class AppConfig:
     API_CONTACT_URL = "http://www.example.com/rogwa"
 
 
-def make_app():
+def make_app(name="inventory"):
     app = flask.Flask("Test API")
-    app.register_blueprint(inventory.blp)
 
-    info = swagger.Info(
-        title="Test",
-        version="1.2.2",
-        contact=swagger.Contact(
-            name="Rowland", email="r.ogwara@gmail.com", url="https://github.com/kulgan"
-        ),
-        license=swagger.License(name="Apache 2.0", url="https://www.example.com/license"),
-    )
+    info = inventory.info
+    servers = (inventory.servers,)
+    tags = inventory.tags
+    if name == "inventory":
+        app.register_blueprint(inventory.blp)
+
+    elif name == "petstore":
+        app.register_blueprint(petstore.pet)
+        info = petstore.info
+        servers = petstore.servers
+        tags = petstore.tags
+
     flaskdoc.register_openapi(
-        app,
-        info=info,
-        servers=[swagger.Server(url="http://localhost:15172")],
-        tags=[
-            swagger.Tag(name="admin", description="Secured Admin-Only calls"),
-            swagger.Tag(
-                name="developers", description="Operations available to regular developers"
-            ),
-        ],
+        app, info=info, servers=servers, tags=tags,
     )
     return app
 
 
-def run_examples():
-    app = make_app()
+def run_examples(example="inventory"):
+    app = make_app(name=example)
     app.run(port=80708)

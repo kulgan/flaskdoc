@@ -11,6 +11,7 @@ from flaskdoc.swagger.models import (
     Component,
     Contact,
     CookieParameter,
+    ExternalDocumentation,
     HeaderParameter,
     HttpMethod,
     Info,
