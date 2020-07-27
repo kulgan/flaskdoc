@@ -42,6 +42,7 @@ setup(
             "black; python_version >= '3.6'",
             "coverage[toml]",
             "flake8",
+            "openapi-spec-validator",
             "pre-commit",
             "pytest",
             "pytest-cov",

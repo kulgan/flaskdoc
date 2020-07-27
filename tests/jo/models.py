@@ -1,4 +1,8 @@
+from enum import Enum
+
 import attr
+
+from flaskdoc import jo
 
 
 @attr.s
@@ -36,3 +40,23 @@ class Squeezed:
 
     def hangout(self):
         return self.sample
+
+
+class Color(Enum):
+    black = "black"
+    white = "white"
+    pint = "pinksys"
+
+
+@jo.schema()
+class Lemons(object):
+    name = jo.string(format="uuid", required=True, enum=[None, "a", "b"])
+    size = jo.integer(maximum=1000)
+    flows = jo.one_of(types=[Squeezed, OakTown])
+    samples = jo.array(item=Sample, required=True, min_items=1)
+    star = jo.object(SoapStar, required=True)
+    color = jo.object(Color, required=True)
+
+
+if __name__ == "__main__":
+    print(Lemons.jo_schema().json())

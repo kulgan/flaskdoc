@@ -1,25 +1,25 @@
-import attr
 import flask
 
-import flaskdoc.schema
-from flaskdoc import swagger
+from flaskdoc import jo, swagger
 
 blp = flask.Blueprint("inventory", __name__, url_prefix="/inventory")
 
 
-@attr.s
+@jo.schema()
 class Manufacturer(object):
-    name = attr.ib(type=str)
-    phone = attr.ib(default=None, type=str)
-    homepage = attr.ib(default=None, type=str)
+    name = jo.string(example="ACME Corporation", required=True)
+    phone = jo.string(example="408-867-5309")
+    homepage = jo.string(format="url", example="https://www.acme-corp.com")
 
 
-@attr.s
+@jo.schema()
 class InventoryItem(object):
-    id = attr.ib(type=str)
-    name = attr.ib(type=str)
-    manufacturer = attr.ib(type=Manufacturer)
-    release_date = attr.ib(type=str)
+    id = jo.string(format="uuid", example="d290f1ee-6c54-4b01-90e6-d701748f0851", required=True)
+    name = jo.string(example="Widget Adapter", required=True)
+    manufacturer = jo.object(item=Manufacturer, required=True)
+    release_date = jo.string(
+        format="date-time", example="2016-08-29T09:12:33.001Z", required=True
+    )
 
 
 search_inventory_docs = swagger.GET(
@@ -39,14 +39,14 @@ search_inventory_docs = swagger.GET(
         ),
         swagger.QueryParameter(
             name="limit",
-            schema=flaskdoc.Int32(maximum=50),
+            schema=jo.Integer(maximum=50),
             description="maximum number of records to return",
         ),
     ],
     responses={
         "200": swagger.ResponseObject(
             description="search results matching criteria",
-            content=flaskdoc.schema.JsonType(schema=[InventoryItem]),
+            content=jo.JsonType(schema=[InventoryItem]),
         ),
         "400": swagger.ResponseObject(description="bad input parameter"),
     },
@@ -59,8 +59,7 @@ add_inventory_docs = swagger.POST(
     summary="adds an inventory item",
     description="adds an item to the system",
     request_body=swagger.RequestBody(
-        content=flaskdoc.schema.JsonType(schema=InventoryItem),
-        description="Inventory item to add",
+        content=jo.JsonType(schema=InventoryItem), description="Inventory item to add",
     ),
     responses={
         "201": swagger.ResponseObject(description="item created"),

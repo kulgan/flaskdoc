@@ -1,4 +1,3 @@
-from flaskdoc.schema import Array, JsonType, PlainText, Schema
 from flaskdoc.swagger.models import (
     GET,
     HEAD,
@@ -6,12 +5,12 @@ from flaskdoc.swagger.models import (
     PATCH,
     POST,
     PUT,
+    SCHEMA_FACTORY,
     TRACE,
     XML,
     Component,
     Contact,
     CookieParameter,
-    Discriminator,
     HeaderParameter,
     HttpMethod,
     Info,

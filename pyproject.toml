@@ -39,5 +39,5 @@ show_contexts = true
 
 [tool.isort]
 profile = "black"
-known_third_party = ["attr", "click", "flask", "pkg_resources", "pytest", "setuptools", "six", "yaml"]
+known_third_party = ["attr", "click", "flask", "openapi_spec_validator", "pkg_resources", "pytest", "setuptools", "six", "yaml"]
 known_first_party = ["flaskdoc"]

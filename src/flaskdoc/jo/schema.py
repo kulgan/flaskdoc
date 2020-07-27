@@ -11,9 +11,10 @@
         >> string.to_dict()
         {"type": "string", "description": "spoils"}
 
-    Also provides fully implemented mume types
+    Also provides fully implemented mime types
 """
 import collections
+import enum
 import inspect
 from collections import defaultdict
 from typing import AnyStr, ByteString, Dict, List, Set, Text, Union
@@ -60,6 +61,17 @@ class PlainText(Content):
 
 
 @attr.s
+class Discriminator(ModelMixin):
+    """ When request bodies or response payloads may be one of a number of different schemas, a discriminator object
+    can be used to aid in serialization, deserialization, and validation. The discriminator is a specific object in a
+    schema which is used to inform the consumer of the specification of an alternative schema based on the value
+    associated with it. """
+
+    property_name = attr.ib(type=str)
+    mapping = attr.ib(default=dict)
+
+
+@attr.s
 class Schema(ModelMixin):
     """ The Schema Object allows the definition of input and output data types.
 
@@ -70,39 +82,37 @@ class Schema(ModelMixin):
 
     ref = attr.ib(default=None, type=str)
     title = attr.ib(default=None, type=str)
-    multiple_of = None
+    multiple_of = attr.ib(default=None, type=float)
     maximum = attr.ib(default=None, type=int)
-    exclusive_maximum = None
-    minimum = None
-    exclusive_minimum = None
-    max_length = None  # type: int
-    min_length = None  # type: int
-    pattern = None
-    max_items = None  # type: ignore
-    min_items = None  # type: ignore
-    unique_item = None
-    max_properties = None  # type: ignore
-    min_properties = None  # type: ignore
-    required = None
-    enum = None
+    minimum = attr.ib(default=None, type=int)
+    exclusive_maximum = attr.ib(default=None, type=bool)
+    exclusive_minimum = attr.ib(default=None, type=bool)
+    max_length = attr.ib(default=None, type=int)  # type: int
+    min_length = attr.ib(default=None, type=int)  # type: int
+    pattern = attr.ib(default=None, type=str)
+    max_items = attr.ib(default=None, type=int)  # type: ignore
+    min_items = attr.ib(default=None, type=int)  # type: ignore
+    unique_items = attr.ib(default=None, type=bool)
+    max_properties = attr.ib(default=None, type=int)  # type: ignore
+    min_properties = attr.ib(default=None, type=int)  # type: ignore
+    enum = attr.ib(default=None, type=List)
     type = attr.ib(default=None, type=str)
-    all_of = None
-    one_of = None
-    any_of = None
+    all_of = attr.ib(default=None, type=List["Schema"])
+    one_of = attr.ib(default=None, type=List["Schema"])
+    any_of = attr.ib(default=None, type=List["Schema"])
     _not = None  # type: ignore
     items = attr.ib(default=None)
     properties = attr.ib(default=None, type=dict, init=False)
-    additional_properties = None
+    additional_properties = attr.ib(type=bool, default=None)
     description = attr.ib(default=None, type=str)
     format = attr.ib(default=None, type=str)
     default = None
-    nullable = None
-    discriminator = None
-    read_only = None
-    write_only = None
+    nullable = attr.ib(default=None, type=bool)
+    discriminator = attr.ib(default=None, type=Discriminator)
+    read_only = attr.ib(default=None, type=bool)
+    write_only = attr.ib(default=None, type=bool)
     xml = None
     external_docs = None
-    example = None
     deprecated = None
 
     def q_not(self):
@@ -116,11 +126,13 @@ class Schema(ModelMixin):
 
 @attr.s
 class Boolean(Schema):
+    example = attr.ib(default=None, type=bool)
     type = attr.ib(default="boolean", init=False)
 
 
 @attr.s
 class String(Schema):
+    example = attr.ib(default=None, type=str)
     type = attr.ib(default="string", init=False)
 
 
@@ -131,20 +143,21 @@ class Email(String):
 
 
 @attr.s
-class Int32(Schema):
+class Number(Schema):
+    example = attr.ib(default=None, type=float)
+    type = attr.ib(default="number", init=False)
+
+
+@attr.s
+class Integer(Number):
     type = attr.ib(default="integer", init=False)
-    format = attr.ib(default="int32", init=False)
+    format = attr.ib(default="int32", type=str)
+    example = attr.ib(default=None, type=int)
     minimum = attr.ib(default=0, type=int)
 
 
 @attr.s
-class Number(Int32):
-    type = attr.ib(default="number", init=False)
-    format = attr.ib(default=None, init=False)
-
-
-@attr.s
-class Int64(Int32):
+class Int64(Integer):
     format = attr.ib(default="int64", init=False)
 
 
@@ -170,6 +183,7 @@ class MultipartFormData:
 @attr.s
 class Object(Schema):
     type = attr.ib(default="object", init=False)
+    required = attr.ib(default=[], type=list)
 
 
 @attr.s
@@ -203,10 +217,15 @@ class ContentMixin(object):
 
 @attr.s
 class SchemaFactory(object):
+    """ Converts an object into a json schema and returns a reference
 
-    ref_base = attr.ib(default="#/components/schemas", init=False)
+    Properties:
+        ref_base (str): json schema reference base, defaults to `#/components/schema`
+        components (dict[class, dict]): class and schema representation
+    """
+
+    ref_base = attr.ib(default="#/components/schemas")
     components = attr.ib(init=False, default={})
-    class_map = attr.ib(init=False, default={})
 
     def parse_data_fields(self, cls, fields):
         """ Parses classes implemented using either py37 dataclasses or attrs
@@ -222,14 +241,14 @@ class SchemaFactory(object):
             fields = fields.values()
         for props in fields:
             field_type = props.type or type(props.default) if props.default else str
-            self.class_map[cls.__name__][props.name] = self.get_schema(field_type)
+            CLASS_MAP[cls.__name__][props.name] = self.get_schema(field_type)
 
     def from_type(self, cls):
 
-        if cls.__name__ in self.class_map:
-            return self.class_map[cls.__name__]
+        if cls.__name__ in CLASS_MAP:
+            return CLASS_MAP[cls.__name__]
 
-        self.class_map[cls.__name__] = {}
+        CLASS_MAP[cls.__name__] = {}
         annotations = cls.__annotations__ if hasattr(cls, "__annotations__") else {}
         members = inspect.getmembers(cls)
         for field, member in members:
@@ -244,11 +263,12 @@ class SchemaFactory(object):
             ):
                 field_type = type(member) if member else annotations.get(field)
                 field_type = field_type or str
-                self.class_map[cls.__name__][field] = self.get_schema(field_type)
+                CLASS_MAP[cls.__name__][field] = self.get_schema(field_type)
 
-        return self.class_map[cls.__name__]
+        return CLASS_MAP[cls.__name__]
 
     def get_schema(self, cls, description=None):
+
         # handle schema derivatives
         if isinstance(cls, Schema):
             cls.description = description or cls.description
@@ -270,6 +290,7 @@ class SchemaFactory(object):
         if cls in SCHEMA_TYPES_MAP:
             schema_class = SCHEMA_TYPES_MAP[cls]
             return schema_class()
+
         # collection based typing
         if hasattr(cls, "__origin__"):
             origin = cls.__origin__
@@ -278,10 +299,24 @@ class SchemaFactory(object):
                 arg_schema = self.get_schema(args)
                 return Array(items=arg_schema, description=description)
             if origin in [dict, Dict]:
-                pass
+                return Object(additional_properties=True)
 
-        sch = Object()
-        sch.properties = self.from_type(cls)
+        if isinstance(cls, enum.EnumMeta):
+            enums = []
+            for c in cls.__members__.values():
+                v = c._value_
+                enums.append(v)
+                if v:
+                    sch_typ = SCHEMA_TYPES_MAP.get(type(v))
+                    sch = sch_typ(enum=enums)
+                else:
+                    sch = Schema(enum=enums)
+        # handle custom jo objects
+        elif hasattr(cls, "jo_schema"):
+            sch = cls.jo_schema()
+        else:
+            sch = Object()
+            sch.properties = self.from_type(cls)
         self.components[cls.__name__] = sch
         return Schema(
             ref="{}/{}".format(self.ref_base, cls.__name__), description=inspect.getdoc(cls)
@@ -289,7 +324,7 @@ class SchemaFactory(object):
 
 
 SCHEMA_TYPES_MAP = {
-    int: Int32,
+    int: Integer,
     str: String,
     bool: Boolean,
     dict: Object,
@@ -299,4 +334,5 @@ SCHEMA_TYPES_MAP = {
     AnyStr: String,
     ByteString: BinaryString,
 }
+CLASS_MAP = {}
 schema_factory = SchemaFactory()

@@ -3,8 +3,8 @@ import typing as t
 
 import pytest
 
-from flaskdoc.schema import SchemaFactory
-from tests.schema import models
+from flaskdoc.jo.schema import SchemaFactory
+from tests.jo import models
 
 
 @pytest.fixture()
@@ -19,7 +19,7 @@ def test_to_schema(schema_factory):
 
 @pytest.mark.skipif(sys.version_info < (3, 6), reason="requires python3.6 or higher")
 def test_to_schema_py36(schema_factory):
-    from tests.schema.py36models import SoakedBean
+    from tests.jo.py36models import SoakedBean
 
     schema = schema_factory.get_schema(SoakedBean)
     assert schema.ref == "#/components/schemas/SoakedBean"
@@ -49,7 +49,7 @@ def test_primitives_to_schema(schema_factory, cls, exp, form):
         (str, dict(type="string")),
         (int, dict(type="integer", format="int32", minimum=0)),
         (bool, dict(type="boolean")),
-        (float, dict(type="number", minimum=0)),
+        (float, dict(type="number")),
         (t.ByteString, dict(type="string", format="binary")),
         (dict, dict(type="object")),
         (t.List[str], dict(type="array", items=dict(type="string"))),
@@ -80,3 +80,8 @@ def test_primitives_to_schema(schema_factory, cls, exp, form):
 def test_primitive_to_dict(schema_factory, cls, exp):
     schema = schema_factory.get_schema(cls)
     assert schema.to_dict() == exp
+
+
+def test_jo_models(schema_factory):
+    schema = schema_factory.get_schema(models.Lemons)
+    assert schema, "Not implemented"
