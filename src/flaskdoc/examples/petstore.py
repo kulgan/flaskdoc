@@ -84,7 +84,7 @@ class ApiResponse(object):
             description="successful operation", content=jo.JsonType(schema=ApiResponse)
         )
     },
-    security={"pet_store": ["write:pets", "read:pets"]},
+    security=[{"pet_store": ["write:pets", "read:pets"]}],
 )
 @pet.route("/<int:petId>/uploadImage")
 def upload_image(petId):

@@ -22,10 +22,9 @@ class SwaggerDict(OrderedDict, DictMixin):
         super(SwaggerDict, self).__setitem__(key, value)
 
 
-@attr.s
 class ExtensionMixin(ModelMixin):
 
-    extensions = attr.ib(default=None, init=False)
+    extensions = None
 
     def add_extension(self, name, value):
         """ Allows extensions to the Swagger Schema.
@@ -795,7 +794,7 @@ class OAuth2SecurityScheme(SecurityScheme):
     _type = attr.ib(default=SecuritySchemeType.OAUTH2, init=False)
 
 
-class ImplicitOAuthFlow(object):
+class ImplicitOAuthFlow(ExtensionMixin):
     def __init__(self, authorization_url, scopes, token_url=None, refresh_url=None):
         self.implicit = OAuthFlow(
             authorization_url=authorization_url,
@@ -845,7 +844,6 @@ class OAuthFlow(ExtensionMixin):
     scopes = attr.ib(type={})
 
 
-@attr.s
 class OpenApi(ModelMixin):
     """ This is the root document object of the OpenAPI document.
 
@@ -856,14 +854,27 @@ class OpenApi(ModelMixin):
         paths (Paths): Paths definitions
     """
 
-    info = attr.ib(type=Info)
-    paths = attr.ib(type=Paths)
-    openapi = attr.ib(default="3.0.2")
-    tags = attr.ib(default=[], type=list)
-    servers = attr.ib(default=None, type=set)
-    security = attr.ib(default=[])
-    external_docs = attr.ib(default=None)
-    components = attr.ib(default={}, type=dict, init=False)
+    def __init__(
+        self,
+        info,
+        paths,
+        version="3.0.2",
+        tags=None,
+        servers=None,
+        external_docs=None,
+        components=None,
+        security=None,
+    ):
+        self.info = info
+        self.paths = paths
+        self.openapi = version
+        self.tags = tags or []
+        self.servers = servers or []
+        self.components = components or {}
+        self.external_docs = external_docs
+
+        if security:
+            self.components["security_schemes"] = security
 
     def add_tag(self, tag):
         """

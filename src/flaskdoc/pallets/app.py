@@ -64,7 +64,7 @@ class Flask(flask.Flask, SwaggerMixin):
             info_block.contact = contact_block
 
         self._doc = swagger.OpenApi(
-            openapi=self.open_api_version, info=info_block, paths=swagger.Paths(),
+            version=self.open_api_version, info=info_block, paths=swagger.Paths(),
         )
         self.add_url_rule("/openapi.json", view_func=self.register_json_path, methods=["GET"])
         self.add_url_rule("/openapi.yaml", view_func=self.register_yaml_path, methods=["GET"])
@@ -130,7 +130,7 @@ def register_openapi(app, info, openapi="3.0.3", servers=None, tags=None, securi
     app.openapi = swagger.OpenApi(
         info=info,
         paths=swagger.Paths(),
-        openapi=openapi,
+        version=openapi,
         servers=servers,
         tags=tags,
         security=security,
