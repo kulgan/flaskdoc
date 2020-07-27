@@ -6,8 +6,8 @@ from typing import Type, Union
 
 import attr
 
+from flaskdoc import jo
 from flaskdoc.core import ApiDecoratorMixin, DictMixin, ModelMixin
-from flaskdoc.jo.schema import ContentMixin, Schema, schema_factory
 from flaskdoc.swagger import validators
 
 logger = logging.getLogger(__name__)
@@ -95,7 +95,7 @@ class License(ExtensionMixin):
 
     This object MAY be extended with Specification Extensions.
 
-    Attributes:
+    Properties:
         name: REQUIRED. The license name used for the API.
         url: A URL to the license used for the API. MUST be in the format of a URL.
     """
@@ -115,10 +115,10 @@ class Contact(ExtensionMixin):
 
     This object MAY be extended with Specification Extensions.
 
-    Attributes:
-          name: The identifying name of the contact person/organization.
-          email: The email address of the contact person/organization. MUST be in the format of an email address.
-          url: The URL pointing to the contact information. MUST be in the format of a URL.
+    Properties:
+        name: The identifying name of the contact person/organization.
+        email: The email address of the contact person/organization. MUST be in the format of an email address.
+        url: The URL pointing to the contact information. MUST be in the format of a URL.
     """
 
     name = attr.ib(default=None, type=str)
@@ -138,7 +138,7 @@ class Info(ExtensionMixin):
     The metadata MAY be used by the clients if needed, and MAY be presented in editing or documentation generation
     tools for convenience. This object MAY be extended with Specification Extensions.
 
-    Attributes:
+    Properties:
         title: REQUIRED. The title of the API.
         version: REQUIRED. The version of the OpenAPI document (which is distinct from the OpenAPI Specification
                 version or the API implementation version).
@@ -162,7 +162,7 @@ class ServerVariable(ExtensionMixin):
 
     This object MAY be extended with Specification Extensions.
 
-    Attributes:
+    Properties:
         default: REQUIRED. The default value to use for substitution, which SHALL be sent if an alternate
                 value is not supplied. Note this behavior is different than the Schema Object's treatment of default
                 values, because in those cases parameter values are optional.
@@ -183,7 +183,7 @@ class Server(ExtensionMixin):
 
     This object MAY be extended with Specification Extensions.
 
-    Attributes:
+    Properties:
         url: REQUIRED. A URL to the target host. This URL supports Server Variables and MAY be relative, to indicate
             that the host location is relative to the location where the OpenAPI document is being served. Variable
             substitutions will be made when a variable is named in {brackets}.
@@ -281,7 +281,7 @@ class Example(ExtensionMixin):
 class MediaType(ModelMixin):
     """ Each Media Type Object provides schema and examples for the media type identified by its key. """
 
-    schema = attr.ib(default=None, type=Schema)
+    schema = attr.ib(default=None, type=jo.Schema)
     example = attr.ib(default=None)
     examples = attr.ib(default=None, type=dict)
     encoding = attr.ib(default=None, type=dict)
@@ -298,7 +298,7 @@ class MediaType(ModelMixin):
 
 
 @attr.s
-class RequestBody(ContentMixin, ExtensionMixin):
+class RequestBody(jo.ContentMixin, ExtensionMixin):
 
     description = attr.ib(default=None, type=str)
     required = attr.ib(default=False)
@@ -314,7 +314,7 @@ class Component(ExtensionMixin):
     This object MAY be extended with Specification Extensions. All the fixed fields declared above are objects that
     MUST use keys that match the regular expression: ^[a-zA-Z0-9\\.\\-_]+$.
 
-    Attributes:
+    Properties:
         schemas: An object to hold reusable Schema Objects.
     """
 
@@ -328,8 +328,9 @@ class Component(ExtensionMixin):
     links = attr.ib(default={})
     callbacks = attr.ib(default={})
 
-    def add_schema(self, schema_name: str, schema: Schema):
+    def add_schema(self, schema_name, schema):
         self.schemas[schema_name] = schema
+        return jo.Schema(ref="#/components/schemas/{name}".format(name=schema_name))
 
     def add_response(self, response_name: str, response):
         self.responses[response_name] = response
@@ -404,7 +405,7 @@ class Parameter(ModelMixin, ApiDecoratorMixin):
 
     def __attrs_post_init__(self):
         if self.schema:
-            self.schema = schema_factory.get_schema(self.schema)
+            self.schema = SCHEMA_FACTORY.get_schema(self.schema)
 
     def merge(self, parameter):
         if self.required is None:
@@ -464,7 +465,7 @@ class Link(ExtensionMixin):
 
 
 @attr.s
-class ResponseObject(ContentMixin, ExtensionMixin):
+class ResponseObject(jo.ContentMixin, ExtensionMixin):
     """
     Describes a single response from an API Operation, including design-time, static links to operations based on
     the response.
@@ -801,11 +802,11 @@ class OAuthFlow(ExtensionMixin):
 class OpenApi(ModelMixin):
     """ This is the root document object of the OpenAPI document.
 
-        OpenApi specs tree, contains the overall specs for the API
-        Arguments:
-            openapi (str): Open API version used by API
-            info (flaskdoc.swagger.info.Info): open api info object
-            paths (Paths): Paths definitions
+    OpenApi specs tree, contains the overall specs for the API
+    Properties:
+        openapi (str): Open API version used by API
+        info (flaskdoc.swagger.info.Info): open api info object
+        paths (Paths): Paths definitions
     """
 
     info = attr.ib(type=Info)
@@ -843,3 +844,6 @@ class OpenApi(ModelMixin):
         for r_url in paths:
             path_url = "{}{}{}".format(url_prefix, blp_prefix, r_url)
             self.paths.add(path_url, paths.get(r_url))
+
+
+SCHEMA_FACTORY = jo.SchemaFactory(ref_base="#/components/schemas")

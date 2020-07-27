@@ -11,7 +11,7 @@
         >> string.to_dict()
         {"type": "string", "description": "spoils"}
 
-    Also provides fully implemented mume types
+    Also provides fully implemented mime types
 """
 import collections
 import enum
@@ -217,8 +217,14 @@ class ContentMixin(object):
 
 @attr.s
 class SchemaFactory(object):
+    """ Converts an object into a json schema and returns a reference
 
-    ref_base = attr.ib(default="#/components/schemas", init=False)
+    Properties:
+        ref_base (str): json schema reference base, defaults to `#/components/schema`
+        components (dict[class, dict]): class and schema representation
+    """
+
+    ref_base = attr.ib(default="#/components/schemas")
     components = attr.ib(init=False, default={})
 
     def parse_data_fields(self, cls, fields):

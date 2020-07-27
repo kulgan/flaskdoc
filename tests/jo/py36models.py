@@ -1,6 +1,6 @@
 from typing import List, Set
 
-from tests.schema import models
+from tests.jo import models
 
 
 class SoakedBean(object):

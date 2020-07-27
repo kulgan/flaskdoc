@@ -5,6 +5,7 @@ from flaskdoc.swagger.models import (
     PATCH,
     POST,
     PUT,
+    SCHEMA_FACTORY,
     TRACE,
     XML,
     Component,

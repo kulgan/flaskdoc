@@ -2,6 +2,7 @@ from flaskdoc.jo.schema import (
     Array,
     BinaryString,
     Boolean,
+    ContentMixin,
     Discriminator,
     Email,
     Int64,
@@ -10,6 +11,7 @@ from flaskdoc.jo.schema import (
     Number,
     PlainText,
     Schema,
+    SchemaFactory,
     String,
 )
 from flaskdoc.jo.types import (
@@ -42,6 +44,7 @@ __all__ = [
     Array,
     Boolean,
     BinaryString,
+    ContentMixin,
     Schema,
     Int64,
     Integer,
@@ -50,4 +53,5 @@ __all__ = [
     Number,
     Discriminator,
     PlainText,
+    SchemaFactory,
 ]

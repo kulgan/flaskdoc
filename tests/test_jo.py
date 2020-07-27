@@ -4,7 +4,7 @@ import typing as t
 import pytest
 
 from flaskdoc.jo.schema import SchemaFactory
-from tests.schema import models
+from tests.jo import models
 
 
 @pytest.fixture()
@@ -19,7 +19,7 @@ def test_to_schema(schema_factory):
 
 @pytest.mark.skipif(sys.version_info < (3, 6), reason="requires python3.6 or higher")
 def test_to_schema_py36(schema_factory):
-    from tests.schema.py36models import SoakedBean
+    from tests.jo.py36models import SoakedBean
 
     schema = schema_factory.get_schema(SoakedBean)
     assert schema.ref == "#/components/schemas/SoakedBean"
