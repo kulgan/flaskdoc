@@ -1,3 +1,5 @@
+from enum import Enum
+
 import flask
 
 from flaskdoc import jo, swagger
@@ -59,6 +61,35 @@ class ApiResponse(object):
     message = jo.string()
 
 
+@jo.schema()
+class Category(object):
+    id = jo.integer(format="int64")
+    name = jo.string()
+
+
+class Status(Enum):
+    """ Pet status in the store """
+
+    available = "available"
+    pending = "pending"
+    sold = "sold"
+
+
+class Tag(object):
+    id = jo.integer(format="int64")
+    name = jo.string()
+
+
+@jo.schema()
+class Pet(object):
+    id = jo.integer(format="int64")
+    category = jo.object(item=Category)
+    name = jo.string(required=True, example="doggie")
+    photo_urls = jo.array(item=str, required=True)
+    status = jo.object(item=Status)
+    tags = jo.array(item=Tag)
+
+
 @swagger.POST(
     tags=["pet"],
     summary="uploads an image",
@@ -86,6 +117,40 @@ class ApiResponse(object):
     },
     security=[{"pet_store": ["write:pets", "read:pets"]}],
 )
-@pet.route("/<int:petId>/uploadImage")
+@pet.route("/<int:petId>/uploadImage", methods=["POST"])
 def upload_image(petId):
+    pass
+
+
+@swagger.PUT(
+    tags=["pet"],
+    summary="Update an existing pet",
+    operation_id="updatePet",
+    request_body=swagger.RequestBody(
+        content=[jo.JsonType(schema=Pet), jo.XmlType(schema=Pet)], required=True,
+    ),
+    responses={
+        "400": swagger.ResponseObject(description="Invalid ID supplied"),
+        "404": swagger.ResponseObject(description="Pet not found"),
+        "405": swagger.ResponseObject(description="Validation exception"),
+    },
+    security=[{"pet_store": ["write:pets", "read:pets"]}],
+)
+@pet.route("", methods=["PUT"])
+def update_pet():
+    pass
+
+
+@swagger.POST(
+    tags=["pet"],
+    summary="Add a new pet to the store",
+    operation_id="addPet",
+    request_body=swagger.RequestBody(
+        content=[jo.JsonType(schema=Pet), jo.XmlType(schema=Pet)], required=True,
+    ),
+    responses={"405": swagger.ResponseObject(description="Invalid input")},
+    security=[{"pet_store": ["write:pets", "read:pets"]}],
+)
+@pet.route("", methods=["POST"])
+def add_pet():
     pass

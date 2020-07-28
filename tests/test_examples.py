@@ -6,9 +6,9 @@ from openapi_spec_validator import validate_spec
 from flaskdoc.examples.app import make_app
 
 
-@pytest.fixture(params=["inventory", "petstore"])
-def app(request):
-    return make_app(name=request.param)
+@pytest.fixture
+def app():
+    return make_app(name="all")
 
 
 def test_examples_spec_is_valid(client):

@@ -14,6 +14,7 @@ from flaskdoc.jo.schema import (
     Schema,
     SchemaFactory,
     String,
+    XmlType,
 )
 from flaskdoc.jo.types import (
     all_of,
@@ -56,4 +57,5 @@ __all__ = [
     Discriminator,
     PlainText,
     SchemaFactory,
+    XmlType,
 ]

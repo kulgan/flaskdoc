@@ -32,6 +32,15 @@ def make_app(name="inventory"):
         servers = petstore.servers
         tags = petstore.tags
         security = petstore.security_schemes
+    else:
+        from flaskdoc.examples import inventory, petstore
+
+        app.register_blueprint(inventory.blp)
+        app.register_blueprint(petstore.pet)
+        info = petstore.info
+        servers = petstore.servers
+        tags = petstore.tags
+        security = petstore.security_schemes
 
     flaskdoc.register_openapi(
         app, info=info, servers=servers, tags=tags, security=security,

@@ -66,6 +66,11 @@ class MultipartForm(Content):
 
 
 @attr.s
+class XmlType(Content):
+    content_type = attr.ib(default="application/xml", init=False)
+
+
+@attr.s
 class Discriminator(ModelMixin):
     """ When request bodies or response payloads may be one of a number of different schemas, a discriminator object
     can be used to aid in serialization, deserialization, and validation. The discriminator is a specific object in a
@@ -158,7 +163,6 @@ class Integer(Number):
     type = attr.ib(default="integer", init=False)
     format = attr.ib(default="int32", type=str)
     example = attr.ib(default=None, type=int)
-    minimum = attr.ib(default=0, type=int)
 
 
 @attr.s
@@ -327,6 +331,9 @@ class SchemaFactory(object):
         return Schema(
             ref="{}/{}".format(self.ref_base, cls.__name__), description=inspect.getdoc(cls)
         )
+
+    def clear(self):
+        self.components = {}
 
 
 SCHEMA_TYPES_MAP = {
