@@ -75,6 +75,7 @@ class Status(Enum):
     sold = "sold"
 
 
+@jo.schema()
 class Tag(object):
     id = jo.integer(format="int64")
     name = jo.string()
