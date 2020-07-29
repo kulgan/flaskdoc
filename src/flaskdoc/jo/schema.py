@@ -116,7 +116,7 @@ class Schema(ModelMixin):
     additional_properties = attr.ib(type=bool, default=None)
     description = attr.ib(default=None, type=str)
     format = attr.ib(default=None, type=str)
-    default = None
+    default = attr.ib(default=None)
     nullable = attr.ib(default=None, type=bool)
     discriminator = attr.ib(default=None, type=Discriminator)
     read_only = attr.ib(default=None, type=bool)

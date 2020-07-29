@@ -1,4 +1,5 @@
 from flaskdoc.swagger.models import (
+    DELETE,
     GET,
     HEAD,
     OPTIONS,
