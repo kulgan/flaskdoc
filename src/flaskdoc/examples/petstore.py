@@ -4,21 +4,27 @@ from flaskdoc import jo, swagger
 from flaskdoc.examples.petstore_specs import (
     Pet,
     add_pet_spec,
+    create_with_array_spec,
+    create_with_list_spec,
     delete_by_id_spec,
     delete_order_by_id_spec,
+    delete_user_by_username_spec,
     find_by_status_spec,
     find_by_tags_spec,
     get_by_id_spec,
+    get_by_username_spec,
     get_order_by_id_spec,
     order_inventory_spec,
     place_order_spec,
     update_by_id_spec,
     update_pet_spec,
+    update_user_spec,
     upload_image_spec,
 )
 
 pet = flask.Blueprint("pet", __name__, url_prefix="/pet")
 store = flask.Blueprint("store", __name__, url_prefix="/store")
+user = flask.Blueprint("user", __name__, url_prefix="/user")
 info = swagger.Info(
     title="Swagger Petstore",
     version="1.0.5",
@@ -122,4 +128,24 @@ def order_by_id(order_id):
 @order_inventory_spec
 @store.route("/inventory", methods=["GET"])
 def get_inventory():
+    pass
+
+
+@create_with_array_spec
+@user.route("/createWithArray", methods=["POST"])
+def create_users_with_array():
+    pass
+
+
+@create_with_list_spec
+@user.route("/createWithList", methods=["POST"])
+def create_users_with_list():
+    pass
+
+
+@delete_user_by_username_spec
+@get_by_username_spec
+@update_user_spec
+@user.route("/<string:username>", methods=["GET", "PUT", "DELETE"])
+def by_username(username):
     pass

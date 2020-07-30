@@ -50,6 +50,7 @@ class Order(object):
     complete = jo.boolean()
 
 
+@jo.schema()
 class User(object):
     id = jo.integer(format="int64")
     username = jo.string()
@@ -301,4 +302,91 @@ order_inventory_spec = swagger.GET(
         )
     },
     security=[{"apiKey": [""]}],
+)
+
+
+create_with_array_spec = swagger.POST(
+    tags=["user"],
+    summary="Creates list off users with given input array",
+    operation_id="createUsersWithArrayInput",
+    request_body=swagger.RequestBody(
+        description="List of user object",
+        content=jo.JsonType(schema=jo.Array(items=User)),
+        required=True,
+    ),
+    responses={"200": swagger.ResponseObject(description="successful operation")},
+)
+
+
+create_with_list_spec = swagger.POST(
+    tags=["user"],
+    summary="Creates list off users with given input array",
+    operation_id="createUsersWithListInput",
+    request_body=swagger.RequestBody(
+        description="List of user object",
+        content=jo.JsonType(schema=jo.Array(items=User)),
+        required=True,
+    ),
+    responses={"200": swagger.ResponseObject(description="successful operation")},
+)
+
+
+get_by_username_spec = swagger.GET(
+    tags=["user"],
+    summary="Get user by user name",
+    operation_id="getUserByName",
+    parameters=[
+        swagger.PathParameter(
+            name="username",
+            description="The name that needs to be fetched, Use user1 for testing.",
+            schema=jo.String(),
+        )
+    ],
+    responses={
+        "200": swagger.ResponseObject(
+            description="successful operation",
+            content=[jo.JsonType(schema=User), jo.XmlType(schema=User)],
+        ),
+        "400": swagger.ResponseObject(description="Invalid username supplied"),
+        "404": swagger.ResponseObject(description="User not found"),
+    },
+)
+
+update_user_spec = swagger.PUT(
+    tags=["user"],
+    summary="Updated user",
+    description="This can only be done by the logged in user.",
+    parameters=[
+        swagger.PathParameter(
+            name="username",
+            description="The name that needs to be fetched, Use user1 for testing.",
+            schema=jo.String(),
+        )
+    ],
+    request_body=swagger.RequestBody(
+        description="Updated user object", content=jo.JsonType(User),
+    ),
+    responses={
+        "400": swagger.ResponseObject(description="Invalid ID supplied"),
+        "404": swagger.ResponseObject(description="Order not found"),
+    },
+)
+
+
+delete_user_by_username_spec = swagger.DELETE(
+    tags=["user"],
+    summary="Delete user",
+    description="this can only be done by the logged in user.",
+    operation_id="deleteUser",
+    parameters=[
+        swagger.PathParameter(
+            name="username",
+            description="The name that needs to be fetched, Use user1 for testing.",
+            schema=jo.String(),
+        )
+    ],
+    responses={
+        "400": swagger.ResponseObject(description="Invalid ID supplied"),
+        "404": swagger.ResponseObject(description="Order not found"),
+    },
 )

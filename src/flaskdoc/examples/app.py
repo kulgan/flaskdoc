@@ -29,6 +29,7 @@ def make_app(name="inventory"):
 
         app.register_blueprint(petstore.pet)
         app.register_blueprint(petstore.store)
+        app.register_blueprint(petstore.user)
         info = petstore.info
         servers = petstore.servers
         tags = petstore.tags
