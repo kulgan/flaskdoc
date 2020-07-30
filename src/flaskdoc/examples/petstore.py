@@ -14,6 +14,7 @@ from flaskdoc.examples.petstore_specs import (
     get_by_id_spec,
     get_by_username_spec,
     get_order_by_id_spec,
+    login_spec,
     order_inventory_spec,
     place_order_spec,
     update_by_id_spec,
@@ -148,4 +149,10 @@ def create_users_with_list():
 @update_user_spec
 @user.route("/<string:username>", methods=["GET", "PUT", "DELETE"])
 def by_username(username):
+    pass
+
+
+@login_spec
+@user.route("/login", methods=["GET"])
+def login():
     pass

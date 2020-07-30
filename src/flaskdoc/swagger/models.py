@@ -445,6 +445,13 @@ class CookieParameter(Parameter):
 
 
 @attr.s
+class Header(HeaderParameter):
+
+    name = attr.ib(default=None, init=False)
+    _in = attr.ib(default=None, init=False)
+
+
+@attr.s
 class Link(ExtensionMixin):
     """
     The Link object represents a possible design-time link for a response. The presence of a link does not guarantee

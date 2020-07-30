@@ -390,3 +390,39 @@ delete_user_by_username_spec = swagger.DELETE(
         "404": swagger.ResponseObject(description="Order not found"),
     },
 )
+
+
+login_spec = swagger.GET(
+    tags=["user"],
+    summary="Logs user into the system",
+    operation_id="loginUser",
+    parameters=[
+        swagger.QueryParameter(
+            name="username",
+            description="The name that needs to be fetched, Use user1 for testing.",
+            schema=jo.String(),
+        ),
+        swagger.QueryParameter(
+            name="password",
+            description="The password for login in clear text",
+            required=True,
+            schema=jo.String(),
+        ),
+    ],
+    responses={
+        "200": swagger.ResponseObject(
+            description="successful operation",
+            headers={
+                "X-Rate-Limit": swagger.Header(
+                    description="calls oer hour allowed by user", schema=jo.Integer()
+                ),
+                "X-Expires-After": swagger.Header(
+                    description="date in UTC when token expires",
+                    schema=jo.String(format="date-time"),
+                ),
+            },
+            content=[jo.JsonType(schema=str), jo.XmlType(schema=str)],
+        ),
+        "400": swagger.ResponseObject(description="Invalid username/password supplied"),
+    },
+)
