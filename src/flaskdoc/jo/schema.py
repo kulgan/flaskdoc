@@ -106,7 +106,7 @@ class Schema(ModelMixin):
     max_properties = attr.ib(default=None, type=int)  # type: ignore
     min_properties = attr.ib(default=None, type=int)  # type: ignore
     enum = attr.ib(default=None, type=List)
-    type = attr.ib(default=None, type=str)
+    type = attr.ib(default="object", type=str)
     all_of = attr.ib(default=None, type=List["Schema"])
     one_of = attr.ib(default=None, type=List["Schema"])
     any_of = attr.ib(default=None, type=List["Schema"])

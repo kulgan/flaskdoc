@@ -300,5 +300,5 @@ order_inventory_spec = swagger.GET(
             content=jo.JsonType(schema=jo.Schema(additional_properties=jo.Integer())),
         )
     },
-    security={"apiKey", [""]},
+    security=[{"apiKey": [""]}],
 )
