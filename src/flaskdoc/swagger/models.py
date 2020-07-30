@@ -434,7 +434,7 @@ class QueryParameter(Parameter):
 class HeaderParameter(Parameter):
 
     _in = attr.ib(default=ParameterLocation.HEADER, init=False)
-    _styl = attr.ib(default=Style.SIMPLE, init=False)
+    _style = attr.ib(default=Style.SIMPLE, init=False)
 
 
 @attr.s

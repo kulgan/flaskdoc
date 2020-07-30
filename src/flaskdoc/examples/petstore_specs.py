@@ -129,7 +129,7 @@ find_by_status_spec = swagger.GET(
             explode=True,
             required=True,
             description="Status values need to be considered for filter",
-            schema=jo.Array(items=Status, default="available"),
+            schema=jo.Array(items=jo.String(enum=Status._member_names_, default="available")),
         )
     ],
     responses={
@@ -297,7 +297,7 @@ order_inventory_spec = swagger.GET(
     responses={
         "200": swagger.ResponseObject(
             description="successful operation",
-            content=jo.JsonType(schema=jo.Schema(additional_properties=jo.Integer())),
+            content=jo.JsonType(schema=jo.Object(additional_properties=jo.Integer())),
         )
     },
     security=[{"apiKey": [""]}],

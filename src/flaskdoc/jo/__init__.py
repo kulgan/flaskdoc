@@ -10,6 +10,7 @@ from flaskdoc.jo.schema import (
     Integer,
     JsonType,
     Number,
+    Object,
     PlainText,
     Schema,
     SchemaFactory,
@@ -58,4 +59,5 @@ __all__ = [
     PlainText,
     SchemaFactory,
     XmlType,
+    Object,
 ]
