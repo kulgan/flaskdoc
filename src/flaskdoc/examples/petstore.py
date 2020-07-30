@@ -1,10 +1,24 @@
-from enum import Enum
-
 import flask
 
 from flaskdoc import jo, swagger
+from flaskdoc.examples.petstore_specs import (
+    Pet,
+    add_pet_spec,
+    delete_by_id_spec,
+    delete_order_by_id_spec,
+    find_by_status_spec,
+    find_by_tags_spec,
+    get_by_id_spec,
+    get_order_by_id_spec,
+    order_inventory_spec,
+    place_order_spec,
+    update_by_id_spec,
+    update_pet_spec,
+    upload_image_spec,
+)
 
-pet = flask.Blueprint("petstore", __name__, url_prefix="/pet")
+pet = flask.Blueprint("pet", __name__, url_prefix="/pet")
+store = flask.Blueprint("store", __name__, url_prefix="/store")
 info = swagger.Info(
     title="Swagger Petstore",
     version="1.0.5",
@@ -44,7 +58,7 @@ tags = [
 ]
 
 security_schemes = {
-    "apikey": swagger.ApiKeySecurityScheme(name="apikey"),
+    "api_key": swagger.ApiKeySecurityScheme(name="api_key"),
     "petstore_auth": swagger.OAuth2SecurityScheme(
         flows=swagger.ImplicitOAuthFlow(
             authorization_url="https://petstore.swagger.io/oauth/authorize",
@@ -54,232 +68,58 @@ security_schemes = {
 }
 
 
-@jo.schema()
-class ApiResponse(object):
-    code = jo.integer()
-    type = jo.string()
-    message = jo.string()
-
-
-@jo.schema()
-class Category(object):
-    id = jo.integer(format="int64")
-    name = jo.string()
-
-
-class Status(Enum):
-    """ Pet status in the store """
-
-    available = "available"
-    pending = "pending"
-    sold = "sold"
-
-
-@jo.schema()
-class Tag(object):
-    id = jo.integer(format="int64")
-    name = jo.string()
-
-
-@jo.schema()
-class Pet(object):
-    id = jo.integer(format="int64")
-    category = jo.object(item=Category)
-    name = jo.string(required=True, example="doggie")
-    photo_urls = jo.array(item=str, required=True)
-    status = jo.object(item=Status)
-    tags = jo.array(item=Tag)
-
-
-@swagger.POST(
-    tags=["pet"],
-    summary="uploads an image",
-    operation_id="uploadFile",
-    parameters=[
-        swagger.PathParameter(name="petId", description="ID of pet to update", schema=jo.Int64())
-    ],
-    request_body=swagger.RequestBody(
-        content=jo.Content(
-            content_type="multipart/form-data",
-            schema=jo.Schema(
-                properties=dict(
-                    file=jo.BinaryString(description="file to upload"),
-                    additional_metadata=jo.String(
-                        description="additional data to pass to server"
-                    ),
-                )
-            ),
-        )
-    ),
-    responses={
-        "200": swagger.ResponseObject(
-            description="successful operation", content=jo.JsonType(schema=ApiResponse)
-        )
-    },
-    security=[{"petstoreAuth": ["write:pets", "read:pets"]}],
-)
+@upload_image_spec
 @pet.route("/<int:petId>/uploadImage", methods=["POST"])
 def upload_image(petId):
     pass
 
 
-@swagger.PUT(
-    tags=["pet"],
-    summary="Update an existing pet",
-    operation_id="updatePet",
-    request_body=swagger.RequestBody(
-        content=[jo.JsonType(schema=Pet), jo.XmlType(schema=Pet)], required=True,
-    ),
-    responses={
-        "400": swagger.ResponseObject(description="Invalid ID supplied"),
-        "404": swagger.ResponseObject(description="Pet not found"),
-        "405": swagger.ResponseObject(description="Validation exception"),
-    },
-    security=[{"petstoreAuth": ["write:pets", "read:pets"]}],
-)
+@update_pet_spec
 @pet.route("", methods=["PUT"])
 def update_pet():
     pass
 
 
-@swagger.POST(
-    tags=["pet"],
-    summary="Add a new pet to the store",
-    operation_id="addPet",
-    request_body=swagger.RequestBody(
-        content=[jo.JsonType(schema=Pet), jo.XmlType(schema=Pet)], required=True,
-    ),
-    responses={"405": swagger.ResponseObject(description="Invalid input")},
-    security=[{"petStoreAuth": ["write:pets", "read:pets"]}],
-)
+@add_pet_spec
 @pet.route("", methods=["POST"])
 def add_pet():
     pass
 
 
-@swagger.GET(
-    tags=["pet"],
-    summary="Finds Pets by status",
-    description="Multiple status values can be provided with comma separated strings",
-    operation_id="findPetsByStatus",
-    parameters=[
-        swagger.QueryParameter(
-            name="status",
-            explode=True,
-            required=True,
-            description="Status values need to be considered for filter",
-            schema=jo.Array(items=Status, default="available"),
-        )
-    ],
-    responses={
-        "200": swagger.ResponseObject(
-            description="Successful operation",
-            content=[
-                jo.JsonType(schema=jo.Array(items=Pet)),
-                jo.XmlType(schema=jo.Array(items=Pet)),
-            ],
-        ),
-        "400": swagger.ResponseObject(description="Invalid status value"),
-    },
-    security=[{"petstoreAuth": ["write:pets", "read:pets"]}],
-)
+@find_by_status_spec
 @pet.route("/findByStatus", methods=["GET"])
 def find_by_status():
     return flask.jsonify([Pet(name="high")])
 
 
-@swagger.GET(
-    tags=["pet"],
-    summary="Finds Pets by tags",
-    description="Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing",
-    operation_id="findPetsByTags",
-    parameters=[
-        swagger.QueryParameter(
-            name="tags",
-            explode=True,
-            required=True,
-            description="Status values need to be considered for filter",
-            schema=jo.Array(items=str),
-        )
-    ],
-    responses={
-        "200": swagger.ResponseObject(
-            description="Successful operation",
-            content=[
-                jo.JsonType(schema=jo.Array(items=Pet)),
-                jo.XmlType(schema=jo.Array(items=Pet)),
-            ],
-        ),
-        "400": swagger.ResponseObject(description="Invalid status value"),
-    },
-    security=[{"petstoreAuth": ["write:pets", "read:pets"]}],
-)
+@find_by_tags_spec
 @pet.route("/findByTags", methods=["GET"])
 def find_by_tags():
     pass
 
 
-@swagger.GET(
-    tags=["pet"],
-    summary="Find pet by ID",
-    description="Returns a single pet",
-    operation_id="getPetById",
-    parameters=[
-        swagger.PathParameter(name="petId", description="ID of pet to return", schema=jo.Int64(),)
-    ],
-    responses={
-        "200": swagger.ResponseObject(
-            description="Successful operation",
-            content=[
-                jo.JsonType(schema=jo.Array(items=Pet)),
-                jo.XmlType(schema=jo.Array(items=Pet)),
-            ],
-        ),
-        "400": swagger.ResponseObject(description="Invalid ID supplied"),
-        "404": swagger.ResponseObject(description="Pet not found"),
-    },
-    security=[{"apikey": []}],
-)
-@swagger.POST(
-    tags=["pet"],
-    summary="Updates a pet in the store with form data",
-    operation_id="updatePetWithForm",
-    parameters=[
-        swagger.PathParameter(
-            name="petId", description="ID of pet that needs to be updated", schema=jo.Int64(),
-        )
-    ],
-    request_body=swagger.RequestBody(
-        content=jo.Content(
-            content_type="application/x-www-form-urlencoded",
-            schema=jo.Schema(
-                properties=dict(
-                    name=jo.String(description="Updated name of the pet"),
-                    status=jo.String(description="Updated status of the pet",),
-                )
-            ),
-        )
-    ),
-    responses={"405": swagger.ResponseObject(description="Invalid input")},
-    security=[{"petstoreAuth": ["write:pets", "read:pets"]}],
-    deprecated=True,
-)
-@swagger.DELETE(
-    tags=["pet"],
-    summary="Deletes a pet",
-    operation_id="deletePet",
-    parameters=[
-        swagger.HeaderParameter(name="apikey", schema=jo.String(),),
-        swagger.PathParameter(
-            name="petId", description="ID of pet that needs to be updated", schema=jo.Int64(),
-        ),
-    ],
-    responses={
-        "400": swagger.ResponseObject(description="Invalid ID supplied"),
-        "404": swagger.ResponseObject(description="Pet not found"),
-    },
-    security=[{"petstoreAuth": ["write:pets", "read:pets"]}],
-)
-@pet.route("/<int:petId>", methods=["GET", "POST"])
-def get_by_id(petId):
+@get_by_id_spec
+@update_by_id_spec
+@delete_by_id_spec
+@pet.route("/<int:petId>", methods=["GET", "POST", "DELETE"])
+def by_id(petId):
+    pass
+
+
+@place_order_spec
+@store.route("/order", methods=["POST"])
+def place_order():
+    pass
+
+
+@get_order_by_id_spec
+@delete_order_by_id_spec
+@store.route("/order/<int:order_id>", methods=["GET", "DELETE"])
+def order_by_id(order_id):
+    pass
+
+
+@order_inventory_spec
+@store.route("/inventory", methods=["GET"])
+def get_inventory():
     pass

@@ -103,12 +103,14 @@ def integer(
     read_only=None,
     write_only=None,
     example=None,
+    description=None,
 ):
     sc = Integer(
         format=format,
         minimum=minimum,
         maximum=maximum,
-        example=None,
+        example=example,
+        description=description,
         read_only=read_only,
         write_only=write_only,
         multiple_of=multiple_of,
@@ -150,6 +152,6 @@ def array(
     return attr.ib(type=list, default=default, metadata={JO_SCHEMA: sc, JO_REQUIRED: required})
 
 
-def object(item, default=None, required=None):
-    sc = schema_factory.get_schema(item)
+def object(item, default=None, required=None, description=None):
+    sc = schema_factory.get_schema(item, description=description)
     return attr.ib(type=item, default=default, metadata={JO_SCHEMA: sc, JO_REQUIRED: required})
