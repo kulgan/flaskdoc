@@ -11,8 +11,14 @@ def flaskdoc():
 
 
 @click.command(name="start")
-def start_examples():
-    run_examples()
+@click.option(
+    "--name",
+    "-n",
+    type=click.Choice(["inventory", "petstore", "all"], case_sensitive=False),
+    default="inventory",
+)
+def start_examples(name):
+    run_examples(example=name)
 
 
 flaskdoc.add_command(start_examples)

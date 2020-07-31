@@ -60,6 +60,16 @@ class PlainText(Content):
     content_type = attr.ib(default="text/plain", init=False)
 
 
+class MultipartForm(Content):
+
+    content_type = "multipart/form-data"
+
+
+@attr.s
+class XmlType(Content):
+    content_type = attr.ib(default="application/xml", init=False)
+
+
 @attr.s
 class Discriminator(ModelMixin):
     """ When request bodies or response payloads may be one of a number of different schemas, a discriminator object
@@ -102,11 +112,11 @@ class Schema(ModelMixin):
     any_of = attr.ib(default=None, type=List["Schema"])
     _not = None  # type: ignore
     items = attr.ib(default=None)
-    properties = attr.ib(default=None, type=dict, init=False)
+    properties = attr.ib(default=None, type=dict)
     additional_properties = attr.ib(type=bool, default=None)
     description = attr.ib(default=None, type=str)
     format = attr.ib(default=None, type=str)
-    default = None
+    default = attr.ib(default=None)
     nullable = attr.ib(default=None, type=bool)
     discriminator = attr.ib(default=None, type=Discriminator)
     read_only = attr.ib(default=None, type=bool)
@@ -153,7 +163,6 @@ class Integer(Number):
     type = attr.ib(default="integer", init=False)
     format = attr.ib(default="int32", type=str)
     example = attr.ib(default=None, type=int)
-    minimum = attr.ib(default=0, type=int)
 
 
 @attr.s
@@ -176,8 +185,9 @@ class Image(BinaryString):
     pass
 
 
+@attr.s
 class MultipartFormData:
-    pass
+    file = BinaryString()
 
 
 @attr.s
@@ -321,6 +331,9 @@ class SchemaFactory(object):
         return Schema(
             ref="{}/{}".format(self.ref_base, cls.__name__), description=inspect.getdoc(cls)
         )
+
+    def clear(self):
+        self.components = {}
 
 
 SCHEMA_TYPES_MAP = {

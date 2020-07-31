@@ -3,6 +3,19 @@ import flask
 from flaskdoc import jo, swagger
 
 blp = flask.Blueprint("inventory", __name__, url_prefix="/inventory")
+info = swagger.Info(
+    title="Test",
+    version="1.2.2",
+    contact=swagger.Contact(
+        name="Rowland", email="r.ogwara@gmail.com", url="https://github.com/kulgan"
+    ),
+    license=swagger.License(name="Apache 2.0", url="https://www.example.com/license"),
+)
+servers = [swagger.Server(url="http://localhost:15172")]
+tags = [
+    swagger.Tag(name="admin", description="Secured Admin-Only calls"),
+    swagger.Tag(name="developers", description="Operations available to regular developers"),
+]
 
 
 @jo.schema()

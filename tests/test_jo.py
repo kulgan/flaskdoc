@@ -47,7 +47,7 @@ def test_primitives_to_schema(schema_factory, cls, exp, form):
     "cls, exp",
     [
         (str, dict(type="string")),
-        (int, dict(type="integer", format="int32", minimum=0)),
+        (int, dict(type="integer", format="int32")),
         (bool, dict(type="boolean")),
         (float, dict(type="number")),
         (t.ByteString, dict(type="string", format="binary")),

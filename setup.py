@@ -40,6 +40,7 @@ setup(
     extras_require={
         "dev": [
             "black; python_version >= '3.6'",
+            "click",
             "coverage[toml]",
             "flake8",
             "openapi-spec-validator",

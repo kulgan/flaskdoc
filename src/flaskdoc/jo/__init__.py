@@ -2,6 +2,7 @@ from flaskdoc.jo.schema import (
     Array,
     BinaryString,
     Boolean,
+    Content,
     ContentMixin,
     Discriminator,
     Email,
@@ -9,10 +10,12 @@ from flaskdoc.jo.schema import (
     Integer,
     JsonType,
     Number,
+    Object,
     PlainText,
     Schema,
     SchemaFactory,
     String,
+    XmlType,
 )
 from flaskdoc.jo.types import (
     all_of,
@@ -44,6 +47,7 @@ __all__ = [
     Array,
     Boolean,
     BinaryString,
+    Content,
     ContentMixin,
     Schema,
     Int64,
@@ -54,4 +58,6 @@ __all__ = [
     Discriminator,
     PlainText,
     SchemaFactory,
+    XmlType,
+    Object,
 ]
