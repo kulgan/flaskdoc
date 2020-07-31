@@ -426,3 +426,27 @@ login_spec = swagger.GET(
         "400": swagger.ResponseObject(description="Invalid username/password supplied"),
     },
 )
+
+
+logout_spec = swagger.GET(
+    tags=["user"],
+    summary="Logs out current logged in user session",
+    operation_id="logoutUser",
+    responses=swagger.ResponsesObject(
+        default=swagger.ResponseObject(description="successful operation")
+    ),
+)
+
+
+create_user_spec = swagger.POST(
+    tags=["user"],
+    summary="Create user",
+    description="This can only be done by the logged in user",
+    operation_id="createUser",
+    request_body=swagger.RequestBody(
+        description="Created user object", content=jo.JsonType(schema=User), required=True,
+    ),
+    responses=swagger.ResponsesObject(
+        default=swagger.ResponseObject(description="successful operation")
+    ),
+)

@@ -4,6 +4,7 @@ from flaskdoc import jo, swagger
 from flaskdoc.examples.petstore_specs import (
     Pet,
     add_pet_spec,
+    create_user_spec,
     create_with_array_spec,
     create_with_list_spec,
     delete_by_id_spec,
@@ -15,6 +16,7 @@ from flaskdoc.examples.petstore_specs import (
     get_by_username_spec,
     get_order_by_id_spec,
     login_spec,
+    logout_spec,
     order_inventory_spec,
     place_order_spec,
     update_by_id_spec,
@@ -155,4 +157,16 @@ def by_username(username):
 @login_spec
 @user.route("/login", methods=["GET"])
 def login():
+    pass
+
+
+@logout_spec
+@user.route("/logout", methods=["GET"])
+def logout():
+    pass
+
+
+@create_user_spec
+@user.route("", methods=["POST"])
+def create_user():
     pass
