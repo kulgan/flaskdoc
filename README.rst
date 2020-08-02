@@ -10,6 +10,13 @@ which frees developers to focus on getting their services coded.
 Why flaskdoc
 ------------
 
+* Focus only on documentation and not introduce some fancy new way of using flask.
+* Easily add to existing code without needing to refactor of change the way the code has been written
+* Little or no learning curve, as long as a developer is comforatble using flask developers, they can use flaskdoc.
+  to learn quickly and not distract So developers focus on writing code
+* SwaggerUI integration for quickly testing and iterating through versions
+* Automatic data model to JSON Schema transformation that allows for finer grain configuration
+
 
 Getting Started
 ---------------
@@ -139,6 +146,11 @@ To run
 
     $ pip install flaskdoc[dev]
     $ flaskdoc start -n petstore
+
+Contributing
+------------
+
+Don't hesitate to create a `Github issue <https://github.com/kulgan/flaskdoc/issues>`__ for any bugs or suggestions
 
 .. |ci| image:: https://github.com/kulgan/flaskdoc/workflows/ci/badge.svg
     :target: https://github.com/kulgan/flaskdoc/
