@@ -14,19 +14,23 @@ Why flaskdoc
 Getting Started
 ---------------
 Install flaskdoc from pypi
+
 .. code-block::
 
     $ pip install flaskdoc
 
 To run examples you will need to install the dev extension
+
 .. code-block::
 
     $ pip install flaskdoc[dev]
 
 Define top level objects for you API
-.. literalinclude:: src/flaskdoc/examples/inventory.py
-    :lines: 1-5
-    :language: python
+
+.. include:: src/flaskdoc/examples/inventory.py
+   :start-line: 6
+   :end-line: 18
+   :code: python
 
 Register openapi using flaskdoc, this adds three routes to an existing flask app instance
 
