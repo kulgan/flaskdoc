@@ -25,15 +25,48 @@ To run examples you will need to install the dev extension
 
     $ pip install flaskdoc[dev]
 
-Define top level objects for you API
-
-.. include:: src/flaskdoc/examples/inventory.py
-   :start-line: 5
-   :end-line: 18
-   :code: python
-
 Register openapi using flaskdoc, this adds three routes to an existing flask app instance
 
+.. code-block:: python
+
+    import flask
+    from flaskdoc import register_openapi, swagger
+
+    app = flask.Flask()
+    # initialize app, add all the blueprints you care about
+
+    # Create top level OpenAPI objects
+    # the info object
+    info = swagger.Info(
+        title="Test",
+        version="1.2.2",
+        contact=swagger.Contact(
+            name="Rowland", email="r.ogwara@gmail.com", url="https://github.com/kulgan"
+        ),
+        license=swagger.License(name="Apache 2.0", url="https://www.example.com/license"),
+    )
+
+    # servers names and variables if necessary
+    servers = [swagger.Server(url="http://localhost:15172")]
+
+    # top level tags
+    tags = [
+        swagger.Tag(name="admin", description="Secured Admin-Only calls"),
+        swagger.Tag(name="developers", description="Operations available to regular developers"),
+    ]
+
+    security_schemes = {
+        "api_key": swagger.ApiKeySecurityScheme(name="api_key"),
+    }
+
+    # register spec
+    register_openapi(app, info=info, servers=servers, tags=tags, security=security_schemes)
+
+This adds the following endpoints to your list
+
+* /openapi.yaml
+* /openapi.json
+* /swagger-ui
 
 .. |ci| image:: https://github.com/kulgan/flaskdoc/workflows/ci/badge.svg
     :target: https://github.com/kulgan/flaskdoc/
