@@ -24,14 +24,9 @@ To run examples you will need to install the dev extension
     $ pip install flaskdoc[dev]
 
 Define top level objects for you API
-
-Info
-----
-
-.. literalinclude:: src.flaskdoc.examples.inventory.py
-    :linenos:
-    :start-line: 6
-
+.. literalinclude:: src/flaskdoc/examples/inventory.py
+    :lines: 1-5
+    :language: python
 
 Register openapi using flaskdoc, this adds three routes to an existing flask app instance
 
