@@ -28,7 +28,7 @@ To run examples you will need to install the dev extension
 Define top level objects for you API
 
 .. include:: src/flaskdoc/examples/inventory.py
-   :start-line: 6
+   :start-line: 5
    :end-line: 18
    :code: python
 
