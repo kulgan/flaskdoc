@@ -13,11 +13,21 @@ Why flaskdoc
 
 Getting Started
 ---------------
-Install flaskdoc from pypi
+For more detailed documentation visit
+
+Install
+"""""""
+from pypi
 
 .. code-block::
 
     $ pip install flaskdoc
+
+from github
+
+.. code-block::
+
+    $ pip install https://github.com/kulgan/flaskdoc/tarball/master
 
 To run examples you will need to install the dev extension
 
@@ -25,7 +35,10 @@ To run examples you will need to install the dev extension
 
     $ pip install flaskdoc[dev]
 
-Register openapi using flaskdoc, this adds three routes to an existing flask app instance
+Register OpenAPI
+""""""""""""""""
+Add top level openapi objects like `Info <https://swagger.io/specification/#info-object>`_,
+`Contact <https://swagger.io/specification/#contact-object>`_, License, Server
 
 .. code-block:: python
 
@@ -67,6 +80,65 @@ This adds the following endpoints to your list
 * /openapi.yaml
 * /openapi.json
 * /swagger-ui
+
+Document
+""""""""
+Now start documenting you flask routes
+
+A simple post example
+
+.. code-block:: python
+
+    @swagger.POST(
+        tags=["administrator"],
+        description="Posts an Echo",
+        responses={"201": swagger.ResponseObject(description="OK")},
+    )
+    @blp.route("/echo", methods=["POST"])
+    def post():
+        req = flask.request.get_json(force=True)
+        return flask.jsonify(req), 200
+
+A GET example with path parameter
+
+.. code-block:: python
+
+    @swagger.GET(
+        tags=["getEcho"],
+        operation_id="getEcho",
+        parameters=[swagger.PathParameter(name="sample", schema=str)],
+        description="Retrieve echos wit Get",
+        responses={
+            "200": swagger.ResponseObject(
+                description="Success", content=jo.PlainText(schema=jo.Email()),
+            )
+        },
+    )
+    @blp.route("/echo/<string:sample>", methods=["GET"])
+    def echo(sample: str):
+        """
+        Sample GET request
+        Returns: Echos back whatever was sent
+
+        """
+        return sample
+
+Run your app and visit `/swagger-ui` to see the generated openapi specs
+
+Running Examples
+================
+
+Two example projects are currently provided
+
+* inventory
+* petstore
+
+To run
+
+.. code-block:: bash
+
+    $ pip install flaskdoc[dev]
+    $ flaskdoc start -n petstore
 
 .. |ci| image:: https://github.com/kulgan/flaskdoc/workflows/ci/badge.svg
     :target: https://github.com/kulgan/flaskdoc/
