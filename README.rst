@@ -38,7 +38,7 @@ To run examples you will need to install the dev extension
 Register OpenAPI
 """"""""""""""""
 Add top level openapi objects like `Info <https://swagger.io/specification/#info-object>`_,
-`Contact <https://swagger.io/specification/#contact-object>`_, License, Server
+`Contact <https://swagger.io/specification/#contact-object>`_, `License <https://swagger.io/specification/#license-object>`_ etc
 
 .. code-block:: python
 
@@ -81,8 +81,8 @@ This adds the following endpoints to your list
 * /openapi.json
 * /swagger-ui
 
-Document
-""""""""
+Start Documenting
+"""""""""""""""""
 Now start documenting you flask routes
 
 A simple post example
@@ -130,8 +130,8 @@ Running Examples
 
 Two example projects are currently provided
 
-* inventory
-* petstore
+* `inventory <src/flaskdoc/examples/inventory.py>`_
+* `petstore <src/flaskdoc/examples/petstore.py>`_
 
 To run
 
