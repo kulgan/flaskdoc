@@ -96,6 +96,7 @@ A simple post example
 
 .. code-block:: python
 
+    blp = flask.Blueprint("Dummy", __name__, url_prefix="/v1")
     @swagger.POST(
         tags=["administrator"],
         description="Posts an Echo",
@@ -109,6 +110,8 @@ A simple post example
 A GET example with path parameter
 
 .. code-block:: python
+
+    blp = flask.Blueprint("Dummy", __name__, url_prefix="/v1")
 
     @swagger.GET(
         tags=["getEcho"],
