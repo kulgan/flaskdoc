@@ -4,7 +4,8 @@ sphinx:
   configuration: docs/source/conf.py
 
 formats:
-  - all
+  - epub
+  - pdf
 
 python:
   version: 3.7
