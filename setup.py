@@ -50,7 +50,8 @@ setup(
             "pytest-flask",
             "sphinx",
             "sphinxcontrib-napoleon",
-        ]
+        ],
+        "rtd": ["sphinx", "sphinx_rtd_theme", "sphinxcontrib-napoleon"],
     },
     setup_requires=["setuptools_scm"],
     project_urls={"source": "https://github.com/kulgan/flaskdoc"},
