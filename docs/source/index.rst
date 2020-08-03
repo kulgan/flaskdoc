@@ -10,7 +10,7 @@ User's Guide
 This section provides documentation on how to get started using flaskdoc in your application.
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
    :caption: Contents
 
    tutorial

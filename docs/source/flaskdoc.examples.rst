@@ -1,46 +1,46 @@
-flaskdoc.examples package
-=========================
+Examples
+========
 
-Submodules
-----------
+``flaskdoc`` includes example projects which was used extensively to test the usability of the project. To run examples
+``flaskdoc`` needs to be installed as dev using
 
-flaskdoc.examples.app module
-----------------------------
+.. code-block:: bash
 
-.. automodule:: flaskdoc.examples.app
-   :members:
-   :undoc-members:
-   :show-inheritance:
+    $ pip install flaskdoc[dev]
 
-flaskdoc.examples.inventory module
-----------------------------------
+Command Line Usage
+------------------
 
-.. automodule:: flaskdoc.examples.inventory
-   :members:
-   :undoc-members:
-   :show-inheritance:
+Flaskdoc comes with a basic command line tool for running examples that demonstrates the various capabilities of the
+project
 
-flaskdoc.examples.petstore module
----------------------------------
+Usage
+#####
+flaskdoc examples can be invoked as follows:
 
-.. automodule:: flaskdoc.examples.petstore
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. code-block:: bash
 
-flaskdoc.examples.petstore\_specs module
-----------------------------------------
+    $ flaskdoc start -n <example>
 
-.. automodule:: flaskdoc.examples.petstore_specs
-   :members:
-   :undoc-members:
-   :show-inheritance:
+Where example can either be petstore or inventory, use ``all`` to register all examples at once
+
+Pet Store
+---------
+
+Implements the standard petstore.swagger.io specification provided by swagger. To run petstore example:
+
+.. code-block:: bash
+
+    $ flaskdoc start -n petstore
 
 
-Module contents
----------------
+Inventory API
+-------------
+Implements the simple inventory api provided by swaggerhub. To run inventory example:
 
-.. automodule:: flaskdoc.examples
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. code-block:: bash
+
+    $ flaskdoc start -n inventory
+
+Visit http://localhost:{port}/swagger-ui to see the SwaggerUI or http://localhost:{port}/swagger-ui/redoc to see
+the redoc version
