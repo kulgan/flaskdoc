@@ -752,9 +752,11 @@ class SecuritySchemeType(enum.Enum):
 
 @attr.s
 class SecurityScheme(ExtensionMixin):
-    """ Defines a security scheme that can be used by the operations. Supported schemes are HTTP authentication,
-    an API key (either as a header or as a query parameter), OAuth2's common flows (implicit, password, application
-    and access code) as defined in RFC6749, and OpenID Connect Discovery. """
+    """ Defines a security scheme that can be used by the operations.
+
+    Supported schemes are HTTP authentication, an API key (either as a header or as a query parameter), OAuth2's
+    common flows (implicit, password, application and access code) as defined in RFC6749, and OpenID Connect Discovery.
+    """
 
     _type = attr.ib(type=str, init=False)
 
@@ -766,6 +768,17 @@ class SecurityScheme(ExtensionMixin):
 
 @attr.s
 class ApiKeySecurityScheme(SecurityScheme):
+    """ OpenAPI security scheme definition with type apiKey
+
+    Example:
+        Sample security requirements
+        .. code-block:: json
+
+            {
+                "api_key": []
+            }
+    """
+
     name = attr.ib(type=str)
     _type = attr.ib(default=SecuritySchemeType.API_KEY, init=False)
     _in = attr.ib(default=ParameterLocation.HEADER, init=False)
@@ -778,6 +791,8 @@ class ApiKeySecurityScheme(SecurityScheme):
 
 @attr.s
 class HttpSecurityScheme(SecurityScheme):
+    """ OpenAPI security scheme definition with type http """
+
     scheme = attr.ib(type="string")
     bearer_format = attr.ib(default="bearer")
     description = attr.ib(default=None, type=str)
@@ -786,6 +801,8 @@ class HttpSecurityScheme(SecurityScheme):
 
 @attr.s
 class OpenIDConnectScheme(SecurityScheme):
+    """ OpenAPI security scheme definition with type openidConnect """
+
     open_id_connect_url = attr.ib(type=str)
     _type = attr.ib(default=SecuritySchemeType.OPEN_ID_CONNECT, init=False)
 
@@ -797,11 +814,15 @@ class OpenIDConnectScheme(SecurityScheme):
 
 @attr.s
 class OAuth2SecurityScheme(SecurityScheme):
+    """ OpenAPI security scheme definition with type oauth2 """
+
     flows = attr.ib()
     _type = attr.ib(default=SecuritySchemeType.OAUTH2, init=False)
 
 
 class ImplicitOAuthFlow(ExtensionMixin):
+    """ Implicit OAuth2 Flow """
+
     def __init__(self, authorization_url, scopes, token_url=None, refresh_url=None):
         self.implicit = OAuthFlow(
             authorization_url=authorization_url,
@@ -812,6 +833,8 @@ class ImplicitOAuthFlow(ExtensionMixin):
 
 
 class AuthorizationCodeOAuthFlow(ExtensionMixin):
+    """ Authorization Code OAuth2 Flow """
+
     def __init__(self, authorization_url, token_url, scopes, refresh_url=None):
         self.authorization_code = OAuthFlow(
             authorization_url=authorization_url,
@@ -822,6 +845,8 @@ class AuthorizationCodeOAuthFlow(ExtensionMixin):
 
 
 class PasswordOAuthFlow(ExtensionMixin):
+    """ Password based OAuth2 Flow """
+
     def __init__(self, token_url, scopes, authorization_url=None, refresh_url=None):
         self.password = OAuthFlow(
             authorization_url=authorization_url,
@@ -832,6 +857,8 @@ class PasswordOAuthFlow(ExtensionMixin):
 
 
 class ClientCredentialsOAuthFlow(ExtensionMixin):
+    """ Client Credentials OAuth FLow """
+
     def __init__(self, token_url, scopes, authorization_url=None, refresh_url=None):
         self.clientCredentials = OAuthFlow(
             authorization_url=authorization_url,

@@ -1,41 +1,38 @@
-flaskdoc package
-================
+API Reference
+======================
 
-Subpackages
------------
+Provides full reference to ``flaskdoc's`` API
 
-.. toctree::
-   :maxdepth: 4
+.. contents::
 
-   flaskdoc.examples
-   flaskdoc.jo
-   flaskdoc.pallets
-   flaskdoc.swagger
-
-Submodules
-----------
-
-flaskdoc.cli module
--------------------
-
-.. automodule:: flaskdoc.cli
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-flaskdoc.core module
---------------------
-
+Core
+----
 .. automodule:: flaskdoc.core
    :members:
-   :undoc-members:
    :show-inheritance:
 
+.. py:module:: flaskdoc.jo
+JO
+--
+.. automodule:: flaskdoc.jo.types
+   :members:
+.. automodule:: flaskdoc.jo.schema
+   :members:
+
+.. py:module:: flaskdoc.swagger
+Swagger
+-------
+.. automodule:: flaskdoc.swagger.models
+   :members:
+   :show-inheritance:
+
+.. automodule:: flaskdoc.swagger.validator
+   :members:
+   :show-inheritance:
 
 Module contents
 ---------------
 
 .. automodule:: flaskdoc
    :members:
-   :undoc-members:
    :show-inheritance:

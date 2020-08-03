@@ -14,7 +14,9 @@ This section provides documentation on how to get started using flaskdoc in your
    :caption: Contents
 
    tutorial
-   flaskdoc.examples
+   examples
+   flaskdoc
+   changelog
 
 Quickstart
 -----------
