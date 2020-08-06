@@ -4,7 +4,7 @@ from setuptools import find_packages, setup
 
 here = path.abspath(path.dirname(__file__))
 
-with open(path.join(here, "README.md")) as f:
+with open(path.join(here, "README.rst")) as f:
     long_description = f.read()
 
 setup(
@@ -49,8 +49,10 @@ setup(
             "pytest-cov",
             "pytest-flask",
             "sphinx",
+            "sphinx_rtd_theme",
             "sphinxcontrib-napoleon",
-        ]
+        ],
+        "rtd": ["sphinx", "sphinxcontrib-napoleon"],
     },
     setup_requires=["setuptools_scm"],
     project_urls={"source": "https://github.com/kulgan/flaskdoc"},

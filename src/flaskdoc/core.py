@@ -1,3 +1,5 @@
+""" Internal only functions and classes used by both swagger and flask specific customizations """
+
 import collections
 import json
 
@@ -10,6 +12,7 @@ class DictMixin:
     """ General usage mixin for handling nested dictionary conversion. """
 
     def to_dict(self):
+        """ Converts object to dictionary """
         return self._parse_dict(self.__dict__)
 
     def _parse_dict(self, val):
@@ -37,6 +40,14 @@ class DictMixin:
 
 
 def camel_case(snake_case):
+    """ Converts snake case strings to camel case
+
+    Args:
+        snake_case (str): raw snake case string, eg `sample_text`
+
+    Returns:
+        str: camel cased string
+    """
     cpnts = snake_case.split("_")
     return cpnts[0] + "".join(x.title() for x in cpnts[1:])
 
@@ -60,6 +71,3 @@ class ModelMixin(DictMixin):
 
     def json(self, indent=2):
         return json.dumps(self.to_dict(), indent=indent)
-
-    def __repr__(self):
-        return self.json()

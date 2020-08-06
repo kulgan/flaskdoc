@@ -111,6 +111,11 @@ def register_swagger_ui(path="index.html"):
     return flask.send_from_directory(static_ui, path)
 
 
+@ui.route("/redoc", methods=["GET"])
+def redoc():
+    return flask.render_template("redoc.html")
+
+
 def register_openapi(app, info, openapi="3.0.3", servers=None, tags=None, security=None):
     """ Registers flaskdoc api specs to an existing flask app
 

@@ -1,31 +1,46 @@
-Welcome to flaskdoc's documentation!
-====================================
+flaskdoc
+========
 
-FlaskDoc is an extension of the puparley know  to programmatically compose openapi specifications for flask endpoints as a part of code
+|PyPi version| |Python version| |ci| |docs| |license|
+
+FlaskDoc allows developers to programmatically compose openapi specifications for flask endpoints as a part of code
 without needing to write a separate yaml file, and it comes with SwaggerUI embedded. Its main focus is on documentation
 which frees developers to focus on getting their services coded.
 
-User's Guide
+Why flaskdoc
 ------------
-This section provides documentation on how to get started using flaskdoc in your application.
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents
+* Focus only on documentation and not introduce some fancy new way of using flask.
+* Easily add to existing code without needing to refactor of change the way the code has been written
+* Little or no learning curve, as long as a developer is comforatble using flask developers, they can use flaskdoc.
+  to learn quickly and not distract So developers focus on writing code
+* SwaggerUI integration for quickly testing and iterating through versions
+* Automatic data model to JSON Schema transformation that allows for finer grain configuration
 
-   tutorial
-   examples
-   flaskdoc
-   changelog
 
-Quickstart
------------
-Install flaskdoc via ``pip`` or add to your project requirements/dependency
+Getting Started
+---------------
+For more detailed documentation visit
+
+Install
+"""""""
+from pypi
 
 .. code-block::
 
     $ pip install flaskdoc
 
+from github
+
+.. code-block::
+
+    $ pip install https://github.com/kulgan/flaskdoc/tarball/master
+
+To run examples you will need to install the dev extension
+
+.. code-block::
+
+    $ pip install flaskdoc[dev]
 
 Register OpenAPI
 """"""""""""""""
@@ -77,6 +92,8 @@ Start Documenting
 """""""""""""""""
 Now start documenting you flask routes
 
+A simple post example
+
 .. code-block:: python
 
     blp = flask.Blueprint("Dummy", __name__, url_prefix="/v1")
@@ -116,17 +133,43 @@ A GET example with path parameter
         """
         return sample
 
-Run your app and visit `/swagger-ui` to see the generated openapi specs.
+Run your app and visit `/swagger-ui` to see the generated openapi specs
+
+Running Examples
+================
+
+Two example projects are currently provided
+
+* `inventory <src/flaskdoc/examples/inventory.py>`_
+* `petstore <src/flaskdoc/examples/petstore.py>`_
+
+To run
+
+.. code-block:: bash
+
+    $ pip install flaskdoc[dev]
+    $ flaskdoc start -n petstore
 
 Contributing
 ------------
 
-Don't hesitate to create a `Github issue <https://github.com/kulgan/flaskdoc/issues>`__ for any **bugs** or
-**suggestions**.
+Don't hesitate to create a `Github issue <https://github.com/kulgan/flaskdoc/issues>`__ for any bugs or suggestions
 
-Indices and tables
-==================
+.. |ci| image:: https://github.com/kulgan/flaskdoc/workflows/ci/badge.svg
+    :target: https://github.com/kulgan/flaskdoc/
+    :alt: build
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. |PyPi version| image:: https://img.shields.io/pypi/v/flaskdoc.svg
+    :target: https://pypi.org/project/flaskdoc/
+    :alt: PyPi downloads
+
+.. |Python version| image:: https://img.shields.io/pypi/pyversions/flaskdoc.svg
+    :target: https://pypi.org/project/flaskdoc/
+    :alt: Python versions
+
+.. |license| image:: https://img.shields.io/pypi/l/flaskdoc.svg
+    :target: https://pypi.org/project/flaskdoc/
+    :alt: license
+.. |docs| image:: https://readthedocs.org/projects/flaskdoc/badge/?version=latest
+    :target: https://flaskdoc.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status

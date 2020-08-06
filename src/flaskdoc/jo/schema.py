@@ -1,17 +1,17 @@
-""" Provides implementations of JSON schema objects and a factory instance
+""" OpenAPI specific Json Schema Objects implementation and factory
 
     The Schema class conforms to openapi schema definition, also provides ready
     to use implementations for String, Number, Boolean etc, these objects can readily
     be converted to json schemas
 
     Examples:
-        >> string = String(description="spoils")
-        >> string.type
+        >>> string = String(description="spoils")
+        >>> string.description
         spoils
-        >> string.to_dict()
+        >>> string.to_dict()
         {"type": "string", "description": "spoils"}
 
-    Also provides fully implemented mime types
+    Also provides some common mime types like JsonType, XmlType
 """
 import collections
 import enum

@@ -1,3 +1,17 @@
+""" Craft models using json schema
+
+Example:
+    .. code-block::
+
+        from flaskdoc import jo
+
+        @jo.schema()
+        class Sample(object):
+            age = jo.int(required=True, minimum=18)
+            name = jo.string(required=True)
+
+"""
+
 import attr
 
 from flaskdoc.core import camel_case
@@ -17,6 +31,20 @@ JO_REQUIRED = "__jo__required__"
 
 
 def schema(additional_properties=False, required=None, min_properties=None, max_properties=None):
+    """ decorates a class automatically binding it to a Schema instance
+
+    This technically extends `attr.s` amd pulls out a schema in the process
+
+    Args:
+        additional_properties (bool): True if additional properties are allowed
+        required (bool): True if field is required
+        min_properties (int):  Minimum number of properties allowed
+        max_properties (int): Maximum number of properties allowed
+
+    Returns:
+        attr.s: and attr.s wrapped class
+    """
+
     def wraps(cls):
         req = required or []
         setattr(cls, "additional_properties", additional_properties)
