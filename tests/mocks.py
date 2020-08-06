@@ -1,6 +1,6 @@
 import flask
 
-from flaskdoc import jo, swagger
+from flaskdoc import swagger
 
 blp = flask.Blueprint("Dummy", __name__, url_prefix="/v1")
 
@@ -13,9 +13,9 @@ simple_get = swagger.GET(
             name="id",
             description="root id",
             allow_empty_value=True,
-            schema=jo.Schema(type="string", format="email",),
+            schema=swagger.Schema(type="string", format="email",),
         ),
-        swagger.QueryParameter(name="age", description="age of user", schema=jo.Integer()),
+        swagger.QueryParameter(name="age", description="age of user", schema=swagger.Integer()),
     ],
     responses={"200": swagger.ResponseObject(description="Echos whatever")},
 )
@@ -38,7 +38,7 @@ servers = [
     description="Retrieve echos wit Get",
     responses={
         "200": swagger.ResponseObject(
-            description="Success", content=jo.PlainText(schema=jo.Email()),
+            description="Success", content=swagger.PlainText(schema=swagger.Email()),
         )
     },
 )

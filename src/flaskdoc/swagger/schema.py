@@ -1,4 +1,4 @@
-""" OpenAPI specific Json Schema Objects implementation and factory
+"""" OpenAPI specific Json Schema Objects implementation and factory
 
     The Schema class conforms to openapi schema definition, also provides ready
     to use implementations for String, Number, Boolean etc, these objects can readily
@@ -22,63 +22,6 @@ from typing import AnyStr, ByteString, Dict, List, Set, Text, Union
 import attr
 
 from flaskdoc.core import ModelMixin
-
-
-@attr.s
-class Content(object):
-    """ A content container for response and request objects """
-
-    content_type = attr.ib(type=str)
-    schema = attr.ib(type=type)
-    description = attr.ib(default=None, type=str)
-
-    def to_schema(self):
-
-        # handle primitives
-        if self.schema in [str, int, bool, dict]:
-            schema_class = SCHEMA_TYPES_MAP[self.schema]
-            schema = schema_class()
-            schema.description = self.description or schema.description
-            return schema
-        # handle schema derivatives
-        if isinstance(self.schema, Schema):
-            self.schema.description = self.description or self.schema.description
-            return self.schema
-        # handle custom class types
-        return schema_factory.get_schema(self.schema)
-
-
-@attr.s
-class JsonType(Content):
-    """ mime type application/json content type """
-
-    content_type = attr.ib(default="application/json", init=False)
-
-
-@attr.s
-class PlainText(Content):
-    content_type = attr.ib(default="text/plain", init=False)
-
-
-class MultipartForm(Content):
-
-    content_type = "multipart/form-data"
-
-
-@attr.s
-class XmlType(Content):
-    content_type = attr.ib(default="application/xml", init=False)
-
-
-@attr.s
-class Discriminator(ModelMixin):
-    """ When request bodies or response payloads may be one of a number of different schemas, a discriminator object
-    can be used to aid in serialization, deserialization, and validation. The discriminator is a specific object in a
-    schema which is used to inform the consumer of the specification of an alternative schema based on the value
-    associated with it. """
-
-    property_name = attr.ib(type=str)
-    mapping = attr.ib(default=dict)
 
 
 @attr.s
@@ -118,12 +61,12 @@ class Schema(ModelMixin):
     format = attr.ib(default=None, type=str)
     default = attr.ib(default=None)
     nullable = attr.ib(default=None, type=bool)
-    discriminator = attr.ib(default=None, type=Discriminator)
+    discriminator = attr.ib(default=None, type="Discriminator")
     read_only = attr.ib(default=None, type=bool)
     write_only = attr.ib(default=None, type=bool)
-    xml = None
+    xml = attr.ib(default=None, type="XML")
     external_docs = None
-    deprecated = None
+    deprecated = attr.ib(default=None, type=bool)
 
     def q_not(self):
         return self._not
@@ -166,11 +109,6 @@ class Integer(Number):
 
 
 @attr.s
-class Int64(Integer):
-    format = attr.ib(default="int64", init=False)
-
-
-@attr.s
 class Base64String(String):
     format = attr.ib(default="base64", init=False)
 
@@ -181,19 +119,44 @@ class BinaryString(String):
 
 
 @attr.s
-class Image(BinaryString):
-    pass
-
-
-@attr.s
-class MultipartFormData:
-    file = BinaryString()
-
-
-@attr.s
 class Object(Schema):
     type = attr.ib(default="object", init=False)
     required = attr.ib(default=[], type=list)
+
+
+@attr.s
+class XML(object):
+    """ A metadata object that allows for more fine-tuned XML model definitions. When using arrays, XML element names
+    are not inferred (for singular/plural forms) and the name property SHOULD be used to add that information. See
+    examples for expected behavior.
+    """
+
+    name = attr.ib(default=None, type=str)
+    namespace = attr.ib(default=None, type=str)
+    prefix = attr.ib(default=None, type=str)
+    attribute = attr.ib(default=False)
+    wrapped = attr.ib(default=False)
+
+
+@attr.s
+class Discriminator(ModelMixin):
+    """ When request bodies or response payloads may be one of a number of different schemas, a discriminator object
+    can be used to aid in serialization, deserialization, and validation. The discriminator is a specific object in a
+    schema which is used to inform the consumer of the specification of an alternative schema based on the value
+    associated with it. """
+
+    property_name = attr.ib(type=str)
+    mapping = attr.ib(default=dict)
+
+
+@attr.s
+class Int64(Integer):
+    format = attr.ib(default="int64", init=False)
+
+
+@attr.s
+class Image(BinaryString):
+    pass
 
 
 @attr.s
@@ -205,24 +168,6 @@ class Array(Schema):
     def validate(self, _, items):
         if not items:
             raise ValueError("items must be specified for Array schema")
-
-
-@attr.s
-class ContentMixin(object):
-
-    content = attr.ib()  # type: Union[Content, List[Content]]
-
-    def __attrs_post_init__(self):
-
-        if not self.content:
-            return
-
-        if not isinstance(self.content, list):
-            self.content = [self.content]
-        cnt = defaultdict(dict)
-        for content in self.content:
-            cnt[content.content_type]["schema"] = content.to_schema()
-        self.content = cnt
 
 
 @attr.s
@@ -336,6 +281,57 @@ class SchemaFactory(object):
         self.components = {}
 
 
+@attr.s
+class Content(object):
+    """ A content container for response and request objects """
+
+    content_type = attr.ib(type=str)
+    schema = attr.ib(type=type)
+    description = attr.ib(default=None, type=str)
+
+    def to_schema(self):
+
+        # handle primitives
+        if self.schema in [str, int, bool, dict]:
+            schema_class = SCHEMA_TYPES_MAP[self.schema]
+            schema = schema_class()
+            schema.description = self.description or schema.description
+            return schema
+        # handle schema derivatives
+        if isinstance(self.schema, Schema):
+            self.schema.description = self.description or self.schema.description
+            return self.schema
+        # handle custom class types
+        return schema_factory.get_schema(self.schema)
+
+
+@attr.s
+class JsonType(Content):
+    """ mime type application/json content type """
+
+    content_type = attr.ib(default="application/json", init=False)
+
+
+@attr.s
+class PlainText(Content):
+    content_type = attr.ib(default="text/plain", init=False)
+
+
+class MultipartForm(Content):
+
+    content_type = "multipart/form-data"
+
+
+@attr.s
+class XmlType(Content):
+    content_type = attr.ib(default="application/xml", init=False)
+
+
+@attr.s
+class MultipartFormData:
+    file = BinaryString()
+
+
 SCHEMA_TYPES_MAP = {
     int: Integer,
     str: String,
@@ -349,3 +345,31 @@ SCHEMA_TYPES_MAP = {
 }
 CLASS_MAP = {}
 schema_factory = SchemaFactory()
+
+
+@attr.s
+class MediaType(ModelMixin):
+    """ Each Media Type Object provides schema and examples for the media type identified by its key. """
+
+    schema = attr.ib(default=None, type="Schema")
+    example = attr.ib(default=None)
+    examples = attr.ib(default=None, type=dict)
+    encoding = attr.ib(default=None, type=dict)
+
+
+@attr.s
+class ContentMixin(object):
+
+    content = attr.ib()  # type: Union[Content, List[Content]]
+
+    def __attrs_post_init__(self):
+
+        if not self.content:
+            return
+
+        if not isinstance(self.content, list):
+            self.content = [self.content]
+        cnt = defaultdict(dict)
+        for content in self.content:
+            cnt[content.content_type]["schema"] = content.to_schema()
+        self.content = cnt

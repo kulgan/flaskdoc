@@ -7,15 +7,14 @@ Example:
 
         @jo.schema()
         class Sample(object):
-            age = jo.int(required=True, minimum=18)
+            age = jo.integer(required=True, minimum=18)
             name = jo.string(required=True)
 
 """
-
 import attr
 
 from flaskdoc.core import camel_case
-from flaskdoc.jo.schema import (
+from flaskdoc.swagger.schema import (
     Array,
     Boolean,
     Integer,
@@ -76,27 +75,33 @@ def schema(additional_properties=False, required=None, min_properties=None, max_
 def string(
     default=None,
     required=None,
-    format=None,
+    str_format=None,
     min_length=None,
     max_length=None,
     enum=None,
     example=None,
+    description=None,
 ):
     sc = String(
-        format=format, min_length=min_length, max_length=max_length, enum=enum, example=example
+        format=str_format,
+        min_length=min_length,
+        max_length=max_length,
+        enum=enum,
+        example=example,
+        description=description,
     )
     return attr.ib(type=str, default=default, metadata={JO_SCHEMA: sc, JO_REQUIRED: required})
 
 
-def email(default=None, required=None):
-    return string(default, format="email", required=required)
+def email(default=None, required=None, description=None):
+    return string(default, str_format="email", required=required, description=description)
 
 
 def number(
     default=None,
     minimum=None,
     maximum=None,
-    format=None,
+    int_format=None,
     multiple_of=None,
     exclusive_min=None,
     exclusive_max=None,
@@ -104,9 +109,10 @@ def number(
     read_only=None,
     write_only=None,
     example=None,
+    description=None,
 ):
     sc = Number(
-        format=format,
+        format=int_format,
         minimum=minimum,
         maximum=maximum,
         example=example,
@@ -115,6 +121,7 @@ def number(
         multiple_of=multiple_of,
         exclusive_minimum=exclusive_min,
         exclusive_maximum=exclusive_max,
+        description=description,
     )
     return attr.ib(type=float, default=default, metadata={JO_SCHEMA: sc, JO_REQUIRED: required})
 
@@ -123,7 +130,7 @@ def integer(
     default=None,
     minimum=None,
     maximum=None,
-    format=None,
+    int_format=None,
     multiple_of=None,
     exclusive_min=None,
     exclusive_max=None,
@@ -134,7 +141,7 @@ def integer(
     description=None,
 ):
     sc = Integer(
-        format=format,
+        format=int_format,
         minimum=minimum,
         maximum=maximum,
         example=example,
@@ -148,15 +155,15 @@ def integer(
     return attr.ib(type=float, default=default, metadata={JO_SCHEMA: sc, JO_REQUIRED: required})
 
 
-def one_of(types, default=None, discriminator=None):
+def one_of(types, default=None, discriminator=None, description=None):
     items = [schema_factory.get_schema(cls) for cls in types]
-    sc = Schema(one_of=items, discriminator=discriminator)
+    sc = Schema(one_of=items, discriminator=discriminator, description=description)
     return attr.ib(type=list, default=default, metadata={JO_SCHEMA: sc})
 
 
-def all_of(types, default=None, discriminator=None):
+def all_of(types, default=None, discriminator=None, description=None):
     items = [schema_factory.get_schema(cls) for cls in types]
-    sc = Schema(all_of=items, discriminator=discriminator)
+    sc = Schema(all_of=items, discriminator=discriminator, description=description)
     return attr.ib(type=list, default=default, metadata={JO_SCHEMA: sc})
 
 
@@ -167,9 +174,9 @@ def any_of(types, default=None, discriminator=None):
 
 
 def boolean(
-    default=None, required=None, read_only=None, write_only=None,
+    default=None, required=None, read_only=None, write_only=None, description=None,
 ):
-    sc = Boolean(read_only=read_only, write_only=write_only)
+    sc = Boolean(read_only=read_only, write_only=write_only, description=description)
     return attr.ib(type=bool, default=default, metadata={JO_SCHEMA: sc, JO_REQUIRED: required})
 
 

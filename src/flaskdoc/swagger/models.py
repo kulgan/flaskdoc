@@ -6,9 +6,9 @@ from typing import Type, Union
 
 import attr
 
-from flaskdoc import jo
 from flaskdoc.core import ApiDecoratorMixin, DictMixin, ModelMixin
 from flaskdoc.swagger import validators
+from flaskdoc.swagger.schema import ContentMixin, schema_factory
 
 logger = logging.getLogger(__name__)
 
@@ -230,20 +230,6 @@ class ReferenceObject(ModelMixin):
 
 
 @attr.s
-class XML(ExtensionMixin):
-    """ A metadata object that allows for more fine-tuned XML model definitions. When using arrays, XML element names
-    are not inferred (for singular/plural forms) and the name property SHOULD be used to add that information. See
-    examples for expected behavior.
-    """
-
-    name = attr.ib(default=None, type=str)
-    namespace = attr.ib(default=None, type=str)
-    prefix = attr.ib(default=None, type=str)
-    attribute = attr.ib(default=False)
-    wrapped = attr.ib(default=False)
-
-
-@attr.s
 class ExternalDocumentation(ExtensionMixin):
     """ Allows referencing an external resource for extended documentation. """
 
@@ -277,27 +263,7 @@ class Example(ExtensionMixin):
 
 
 @attr.s
-class MediaType(ModelMixin):
-    """ Each Media Type Object provides schema and examples for the media type identified by its key. """
-
-    schema = attr.ib(default=None, type=jo.Schema)
-    example = attr.ib(default=None)
-    examples = attr.ib(default=None, type=dict)
-    encoding = attr.ib(default=None, type=dict)
-
-    def add_example(self, name: str, example: Union[Example, ReferenceObject]):
-        if self.examples is None:
-            self.examples = SwaggerDict()
-        self.examples[name] = example
-
-    def add_encoding(self, name: str, encoding: Encoding):
-        if self.encoding is None:
-            self.encoding = SwaggerDict()
-        self.encoding[name] = encoding
-
-
-@attr.s
-class RequestBody(jo.ContentMixin, ExtensionMixin):
+class RequestBody(ContentMixin, ExtensionMixin):
 
     description = attr.ib(default=None, type=str)
     required = attr.ib(default=False)
@@ -326,10 +292,6 @@ class Component(ExtensionMixin):
     security_schemes = attr.ib(default={})
     links = attr.ib(default={})
     callbacks = attr.ib(default={})
-
-    def add_schema(self, schema_name, schema):
-        self.schemas[schema_name] = schema
-        return jo.Schema(ref="#/components/schemas/{name}".format(name=schema_name))
 
     def add_response(self, response_name: str, response):
         self.responses[response_name] = response
@@ -404,7 +366,7 @@ class Parameter(ModelMixin, ApiDecoratorMixin):
 
     def __attrs_post_init__(self):
         if self.schema:
-            self.schema = SCHEMA_FACTORY.get_schema(self.schema)
+            self.schema = schema_factory.get_schema(self.schema)
 
     def merge(self, parameter):
         if self.required is None:
@@ -471,7 +433,7 @@ class Link(ExtensionMixin):
 
 
 @attr.s
-class ResponseObject(jo.ContentMixin, ExtensionMixin):
+class ResponseObject(ContentMixin, ExtensionMixin):
     """
     Describes a single response from an API Operation, including design-time, static links to operations based on
     the response.
@@ -486,11 +448,6 @@ class ResponseObject(jo.ContentMixin, ExtensionMixin):
         if self.headers is None:
             self.headers = SwaggerDict()
         self.headers[name] = header
-
-    def add_content(self, media_type: str, content: Union[MediaType, Type]):
-        if not self.content:
-            self.content = SwaggerDict()
-        self.content[media_type] = content
 
     def add_link(self, link_name: str, link: Union[Link, ReferenceObject]):
         if self.links is None:
@@ -936,6 +893,3 @@ class OpenApi(ModelMixin):
         for r_url in paths:
             path_url = "{}{}{}".format(url_prefix, blp_prefix, r_url)
             self.paths.add(path_url, paths.get(r_url))
-
-
-SCHEMA_FACTORY = jo.SchemaFactory(ref_base="#/components/schemas")
