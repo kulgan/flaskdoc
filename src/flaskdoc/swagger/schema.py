@@ -75,6 +75,8 @@ class Schema(ModelMixin):
         # register schema
         if self.items:
             self.items = schema_factory.get_schema(self.items)
+        if isinstance(self.xml, str):
+            self.xml = XML(name=self.xml)
 
 
 @attr.s
@@ -125,7 +127,7 @@ class Object(Schema):
 
 
 @attr.s
-class XML(object):
+class XML(ModelMixin):
     """ A metadata object that allows for more fine-tuned XML model definitions. When using arrays, XML element names
     are not inferred (for singular/plural forms) and the name property SHOULD be used to add that information. See
     examples for expected behavior.
@@ -134,8 +136,8 @@ class XML(object):
     name = attr.ib(default=None, type=str)
     namespace = attr.ib(default=None, type=str)
     prefix = attr.ib(default=None, type=str)
-    attribute = attr.ib(default=False)
-    wrapped = attr.ib(default=False)
+    attribute = attr.ib(default=None, type=bool)
+    wrapped = attr.ib(default=None, type=bool)
 
 
 @attr.s

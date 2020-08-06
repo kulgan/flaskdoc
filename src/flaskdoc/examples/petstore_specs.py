@@ -10,7 +10,7 @@ class ApiResponse(object):
     message = jo.string()
 
 
-@jo.schema()
+@jo.schema(xml="Category")
 class Category(object):
     id = jo.integer(int_format="int64")
     name = jo.string()
@@ -24,23 +24,25 @@ class Status(Enum):
     sold = "sold"
 
 
-@jo.schema()
+@jo.schema(xml="Tag")
 class Tag(object):
     id = jo.integer(int_format="int64")
     name = jo.string()
 
 
-@jo.schema()
+@jo.schema(xml="Pet")
 class Pet(object):
     id = jo.integer(int_format="int64")
     category = jo.object(item=Category)
     name = jo.string(required=True, example="doggie")
-    photo_urls = jo.array(item=str, required=True)
+    photo_urls = jo.array(
+        item=swagger.String(xml="photoUrl"), required=True, xml=swagger.XML(wrapped=True),
+    )
     status = jo.object(item=Status)
-    tags = jo.array(item=Tag)
+    tags = jo.array(item=Tag, xml=swagger.XML(wrapped=True))
 
 
-@jo.schema()
+@jo.schema(xml="Order")
 class Order(object):
     id = jo.integer(int_format="int64")
     pet_id = jo.integer(int_format="int64")
@@ -50,7 +52,7 @@ class Order(object):
     complete = jo.boolean()
 
 
-@jo.schema()
+@jo.schema(xml="User")
 class User(object):
     id = jo.integer(int_format="int64")
     username = jo.string()
@@ -175,6 +177,7 @@ find_by_tags_spec = swagger.GET(
         "400": swagger.ResponseObject(description="Invalid status value"),
     },
     security=[{"petstoreAuth": ["write:pets", "read:pets"]}],
+    deprecated=True,
 )
 
 
@@ -191,10 +194,7 @@ get_by_id_spec = swagger.GET(
     responses={
         "200": swagger.ResponseObject(
             description="Successful operation",
-            content=[
-                swagger.JsonType(schema=swagger.Array(items=Pet)),
-                swagger.XmlType(schema=swagger.Array(items=Pet)),
-            ],
+            content=[swagger.JsonType(schema=Pet), swagger.XmlType(schema=Pet)],
         ),
         "400": swagger.ResponseObject(description="Invalid ID supplied"),
         "404": swagger.ResponseObject(description="Pet not found"),
@@ -227,7 +227,6 @@ update_by_id_spec = swagger.POST(
     ),
     responses={"405": swagger.ResponseObject(description="Invalid input")},
     security=[{"petstoreAuth": ["write:pets", "read:pets"]}],
-    deprecated=True,
 )
 
 

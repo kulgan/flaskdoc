@@ -15,6 +15,7 @@ import attr
 
 from flaskdoc.core import camel_case
 from flaskdoc.swagger.schema import (
+    XML,
     Array,
     Boolean,
     Integer,
@@ -29,20 +30,24 @@ JO_SCHEMA = "__jo__"
 JO_REQUIRED = "__jo__required__"
 
 
-def schema(additional_properties=False, required=None, min_properties=None, max_properties=None):
+def schema(
+    additional_properties=None, required=None, min_properties=None, max_properties=None, xml=None
+):
     """ decorates a class automatically binding it to a Schema instance
 
-    This technically extends `attr.s` amd pulls out a schema in the process
+    This technically extends `attr.s` amd pulls out a Schema instance in the process
 
     Args:
         additional_properties (bool): True if additional properties are allowed
         required (bool): True if field is required
         min_properties (int):  Minimum number of properties allowed
         max_properties (int): Maximum number of properties allowed
+        xml (str|XML): xml related attributes
 
     Returns:
         attr.s: and attr.s wrapped class
     """
+    xml = XML(name=xml) if isinstance(xml, str) else xml
 
     def wraps(cls):
         req = required or []
@@ -54,6 +59,7 @@ def schema(additional_properties=False, required=None, min_properties=None, max_
                 required=req,
                 min_properties=min_properties,
                 max_properties=max_properties,
+                xml=xml,
             )
             sc.properties = {}
             attributes = cls.__attrs_attrs__
@@ -81,7 +87,9 @@ def string(
     enum=None,
     example=None,
     description=None,
+    xml=None,
 ):
+    xml = XML(name=xml) if isinstance(xml, str) else xml
     sc = String(
         format=str_format,
         min_length=min_length,
@@ -89,12 +97,15 @@ def string(
         enum=enum,
         example=example,
         description=description,
+        xml=xml,
     )
     return attr.ib(type=str, default=default, metadata={JO_SCHEMA: sc, JO_REQUIRED: required})
 
 
-def email(default=None, required=None, description=None):
-    return string(default, str_format="email", required=required, description=description)
+def email(default=None, required=None, description=None, xml=None):
+    return string(
+        default, str_format="email", required=required, description=description, xml=xml
+    )
 
 
 def number(
@@ -110,7 +121,9 @@ def number(
     write_only=None,
     example=None,
     description=None,
+    xml=None,
 ):
+    xml = XML(name=xml) if isinstance(xml, str) else xml
     sc = Number(
         format=int_format,
         minimum=minimum,
@@ -122,6 +135,7 @@ def number(
         exclusive_minimum=exclusive_min,
         exclusive_maximum=exclusive_max,
         description=description,
+        xml=xml,
     )
     return attr.ib(type=float, default=default, metadata={JO_SCHEMA: sc, JO_REQUIRED: required})
 
@@ -181,9 +195,17 @@ def boolean(
 
 
 def array(
-    item=None, default=None, min_items=None, max_items=None, unique_items=None, required=None
+    item=None,
+    default=None,
+    min_items=None,
+    max_items=None,
+    unique_items=None,
+    required=None,
+    xml=None,
 ):
-    sc = Array(items=item, min_items=min_items, max_items=max_items, unique_items=unique_items)
+    sc = Array(
+        items=item, min_items=min_items, max_items=max_items, unique_items=unique_items, xml=xml
+    )
     return attr.ib(type=list, default=default, metadata={JO_SCHEMA: sc, JO_REQUIRED: required})
 
 
