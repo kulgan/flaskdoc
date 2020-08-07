@@ -7,8 +7,11 @@ flaskdoc introspects native python objects and converts then into swagger approp
 be defined using either standard python classes, dataclasses or attrs. Flaskdoc will automatically convert them into
 json schema.
 
-Generic models
---------------
+Schema from Python Classes
+--------------------------
+.. note::
+    For native python classes like the example above, default values are used to decipher the types, else it defaults to
+    string. Finer control over types can be achieved using either python data classes or attrs or type annotations
 
 .. code-block:: python
 
@@ -41,8 +44,24 @@ Generic models
     #   "type": "object"
     # }
 
-For native python classes like the example above, default values are used to decipher the types, else it defaults to
-string. Finer control over types can be achieved using either python data classes or attrs or type annotations
+Schema using typing module
+--------------------------
+An example schema two array properties ``samples`` and ``squeezes`` and an integer property ``density``
+
+.. code-block:: python
+
+    class SoakedBean(object):
+
+        density: int = None
+        samples: List[Sample] = []
+        squeezes: Set[Squeezed] = {}
+
+
+Schema using attr classes
+-------------------------
+.. note::
+    With ``attr`` types are deciphered using the ``type`` parameter of ``attr.ib`` if available, else if defaults to the
+    type of the default value. If that is also not available it defaults to string.
 
 .. code-block:: python
 
@@ -120,14 +139,42 @@ string. Finer control over types can be achieved using either python data classe
     #  "type": "object"
     # }
 
+Schema with dataclasses (>=py3.7)
+---------------------------------
+.. code-block:: python
+
+    @dataclass
+    class SoakedBean(object):
+
+        density: int = None
+        samples: List[Sample] = []
+        squeezes: Set[Squeezed] = {}
 
 
 jo (json objects) models
 ------------------------
 
-jo is part of flaskdoc builtin functions for defining complex json schema representation from simple/plain/native
-python data types. It wraps around `attr` to enable developer provided schema constraints to properties in classes.
+.. note::
+    A drawback with defining schemas using the techniques described above is that there is no way to specify property
+    constraints, eg max value for ints or minlength for strings.
 
------
+jo is part of flaskdoc builtin functions that allows for adding constraints to native python classes. It makes it
+possible to define complex json schema representation from simple/plain/native python data types. It wraps around `attr`
+to enable developer provided schema constraints to properties in classes.
+
+.. code-block:: python
+
+    from flaskdoc import jo
+
+    @jo.schema(xml="SoakedBean")
+    class SoakedBean(object):
+
+        density = jo.integer(default=10, minimum=9, maximum=10)
+        samples = jo.array(item=Sample, min_items=1, xml="Samples")
+        squeezes = jo.array(item=Squeezed, min_items=1, unique_items=True, xml="Squeezes")
+
+    # models can be used as normal data objects
+    bean = SoakedBean(density=12, samples=[Sample()], squeezes=[Squeezed()])
+
 .. automodule:: flaskdoc.jo
    :members:

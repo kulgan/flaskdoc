@@ -1,14 +1,5 @@
 """ Craft models using json schema
 
-Example:
-    .. code-block::
-
-        from flaskdoc import jo
-
-        @jo.schema()
-        class Sample(object):
-            age = jo.integer(required=True, minimum=18)
-            name = jo.string(required=True)
 
 """
 import attr
@@ -45,6 +36,17 @@ def schema(
 
     Returns:
         attr.s: and attr.s wrapped class
+
+    Example:
+        .. code-block::
+
+            from flaskdoc import jo
+
+            @jo.schema(xml="Sample")
+            class Sample(object):
+                age = jo.integer(required=True, minimum=18)
+                name = jo.string(required=True)
+
     """
 
     def wraps(cls):
@@ -188,6 +190,17 @@ def integer(
 
 
 def one_of(types, default=None, discriminator=None, description=None):
+    """ Applies to properties and complies with JSON schema oneOf property
+
+    Args:
+        types (list[type]): list of types that will be allowed
+        default (object): default object instance that must be one of the allowed types
+        discriminator:
+        description (str): summary of property
+
+    Returns:
+        attr.ib: field instance
+    """
     items = [schema_factory.get_schema(cls) for cls in types]
     sc = Schema(one_of=items, discriminator=discriminator, description=description)
     return attr.ib(type=list, default=default, metadata={JO_SCHEMA: sc})
@@ -208,6 +221,19 @@ def any_of(types, default=None, discriminator=None):
 def boolean(
     default=None, required=None, read_only=None, write_only=None, description=None, xml=None,
 ):
+    """ Boolean schema data type
+
+    Args:
+        default:
+        required (bool):
+        read_only (bool):
+        write_only (bool):
+        description (str): summary/description
+        xml: XML name or XML object instance
+
+    Returns:
+        attr.ib:
+    """
     sc = Boolean(read_only=read_only, write_only=write_only, description=description, xml=xml)
     return attr.ib(type=bool, default=default, metadata={JO_SCHEMA: sc, JO_REQUIRED: required})
 
@@ -221,6 +247,7 @@ def array(
     required=None,
     xml=None,
 ):
+    """ Array data type """
     sc = Array(
         items=item, min_items=min_items, max_items=max_items, unique_items=unique_items, xml=xml
     )
@@ -228,5 +255,7 @@ def array(
 
 
 def object(item, default=None, required=None, description=None):
+    """ Raw object data type """
+
     sc = schema_factory.get_schema(item, description=description)
     return attr.ib(type=item, default=default, metadata={JO_SCHEMA: sc, JO_REQUIRED: required})
