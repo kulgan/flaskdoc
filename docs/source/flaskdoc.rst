@@ -7,8 +7,8 @@ Provides full reference to ``flaskdoc's`` API
    :maxdepth: 2
    :caption: Contents
 
-   jo
    swagger
+   models
 
 core
 ----

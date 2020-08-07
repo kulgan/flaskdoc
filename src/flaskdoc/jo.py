@@ -14,8 +14,7 @@ Example:
 import attr
 
 from flaskdoc.core import camel_case
-from flaskdoc.swagger.schema import (
-    XML,
+from flaskdoc.swagger import (
     Array,
     Boolean,
     Integer,
@@ -42,12 +41,11 @@ def schema(
         required (bool): True if field is required
         min_properties (int):  Minimum number of properties allowed
         max_properties (int): Maximum number of properties allowed
-        xml (str|XML): xml related attributes
+        xml (str|flaskdoc.swagger.XML): swagger XML object instance or string representing the name of the XML field
 
     Returns:
         attr.s: and attr.s wrapped class
     """
-    xml = XML(name=xml) if isinstance(xml, str) else xml
 
     def wraps(cls):
         req = required or []
@@ -89,7 +87,22 @@ def string(
     description=None,
     xml=None,
 ):
-    xml = XML(name=xml) if isinstance(xml, str) else xml
+    """ Creates a json schema of type string
+
+    Args:
+        default (str): default value
+        required (bool): True if it should be required in the schema
+        str_format (str): string format, can be uuid, email, binary etc
+        min_length (int): minimum length of the string
+        max_length (int): maximum length of the strin
+        enum (enum.Enum): represent schema as an enum instead of free text
+        example (str): Examole string
+        description (str): Property description
+        xml (str|flaskdoc.swagger.XML): xml name of XML object instance
+
+    Returns:
+        attr.ib: field definition
+    """
     sc = String(
         format=str_format,
         min_length=min_length,
@@ -123,7 +136,8 @@ def number(
     description=None,
     xml=None,
 ):
-    xml = XML(name=xml) if isinstance(xml, str) else xml
+    """ Create a schema of type number"""
+
     sc = Number(
         format=int_format,
         minimum=minimum,
@@ -153,7 +167,10 @@ def integer(
     write_only=None,
     example=None,
     description=None,
+    xml=None,
 ):
+    """ Create a schema of type integer """
+
     sc = Integer(
         format=int_format,
         minimum=minimum,
@@ -165,6 +182,7 @@ def integer(
         multiple_of=multiple_of,
         exclusive_minimum=exclusive_min,
         exclusive_maximum=exclusive_max,
+        xml=xml,
     )
     return attr.ib(type=float, default=default, metadata={JO_SCHEMA: sc, JO_REQUIRED: required})
 
@@ -188,9 +206,9 @@ def any_of(types, default=None, discriminator=None):
 
 
 def boolean(
-    default=None, required=None, read_only=None, write_only=None, description=None,
+    default=None, required=None, read_only=None, write_only=None, description=None, xml=None,
 ):
-    sc = Boolean(read_only=read_only, write_only=write_only, description=description)
+    sc = Boolean(read_only=read_only, write_only=write_only, description=description, xml=xml)
     return attr.ib(type=bool, default=default, metadata={JO_SCHEMA: sc, JO_REQUIRED: required})
 
 

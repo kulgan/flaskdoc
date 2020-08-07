@@ -2,7 +2,7 @@
 import enum
 import logging
 from collections import OrderedDict
-from typing import Type, Union
+from typing import Union
 
 import attr
 

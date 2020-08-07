@@ -134,18 +134,13 @@ find_by_status_spec = swagger.GET(
             explode=True,
             required=True,
             description="Status values need to be considered for filter",
-            schema=swagger.Array(
-                items=swagger.String(enum=Status._member_names_, default="available")
-            ),
+            schema=[swagger.String(enum=Status._member_names_, default="available")],
         )
     ],
     responses={
         "200": swagger.ResponseObject(
             description="Successful operation",
-            content=[
-                swagger.JsonType(schema=swagger.Array(items=Pet)),
-                swagger.XmlType(schema=swagger.Array(items=Pet)),
-            ],
+            content=[swagger.JsonType(schema=[Pet]), swagger.XmlType(schema=[Pet])],
         ),
         "400": swagger.ResponseObject(description="Invalid status value"),
     },
@@ -325,9 +320,7 @@ create_with_array_spec = swagger.POST(
     summary="Creates list off users with given input array",
     operation_id="createUsersWithArrayInput",
     request_body=swagger.RequestBody(
-        description="List of user object",
-        content=swagger.JsonType(schema=swagger.Array(items=User)),
-        required=True,
+        description="List of user object", content=swagger.JsonType(schema=[User]), required=True,
     ),
     responses={"200": swagger.ResponseObject(description="successful operation")},
 )
@@ -338,9 +331,7 @@ create_with_list_spec = swagger.POST(
     summary="Creates list off users with given input array",
     operation_id="createUsersWithListInput",
     request_body=swagger.RequestBody(
-        description="List of user object",
-        content=swagger.JsonType(schema=swagger.Array(items=User)),
-        required=True,
+        description="List of user object", content=swagger.JsonType(schema=[User]), required=True,
     ),
     responses={"200": swagger.ResponseObject(description="successful operation")},
 )

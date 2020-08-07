@@ -8,8 +8,8 @@ Examples
 
     $ pip install flaskdoc[dev]
 
-Command Line Usage
-------------------
+Running Examples
+----------------
 
 Flaskdoc comes with a basic command line tool for running examples that demonstrates the various capabilities of the
 project
@@ -24,8 +24,8 @@ flaskdoc examples can be invoked as follows:
 
 Where example can either be petstore or inventory, use ``all`` to register all examples at once
 
-Pet Store
----------
+Petstore Example
+----------------
 
 Implements the standard petstore.swagger.io specification provided by swagger. To run petstore example:
 
@@ -34,8 +34,8 @@ Implements the standard petstore.swagger.io specification provided by swagger. T
     $ flaskdoc start -n petstore
 
 
-Inventory API
--------------
+Inventory Example
+-----------------
 Implements the simple inventory api provided by swaggerhub. To run inventory example:
 
 .. code-block:: bash

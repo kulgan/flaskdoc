@@ -103,3 +103,47 @@ Simple POST
     def post():
         req = flask.request.get_json(force=True)
         return flask.jsonify(req), 200
+
+
+Data Models
+-----------
+Flaskdoc includes a framework agnostic way of automatically converting native python classes into swagger compatible
+json schema. See :ref:`jo-data-models` for more information.
+
+.. code-block:: python
+
+    import flask
+    from flaskdoc import swagger
+
+    ts = flask.Blueprint(__name__)
+
+    class OakTown:
+    """ Sample class without any special annotations """
+
+        oaks = None
+        smugs = 1  # type: int
+        snux = "2"  # type: str
+
+
+    @swagger.GET(
+      tags=["listOaks"],
+      summary="Lists all towns with oaks",
+      responses={
+        "200": swagger.JsonType(schema=[OakTown])
+      }
+    )
+    @ts.route("/list", methods=["GET"])
+    def list_oaks():
+        return []
+
+
+    @swagger.POST(
+      tags=["createTown],
+      summary="Create a new OakTown",
+      request_body=swagger.RequestBody(
+        content=[swagger.JsonType(schema=OakTown), swagger.XmlType(schema=OakTown)]
+      )
+    )
+    @ts.route("", methods=["POST"]
+    def create_town():
+        return OakTown())

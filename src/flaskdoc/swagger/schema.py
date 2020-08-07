@@ -182,7 +182,7 @@ class SchemaFactory(object):
     """
 
     ref_base = attr.ib(default="#/components/schemas")
-    components = attr.ib(init=False, default={})
+    schemas = attr.ib(init=False, default={})
 
     def parse_data_fields(self, cls, fields):
         """ Parses classes implemented using either py37 dataclasses or attrs
@@ -274,13 +274,13 @@ class SchemaFactory(object):
         else:
             sch = Object()
             sch.properties = self.from_type(cls)
-        self.components[cls.__name__] = sch
+        self.schemas[cls.__name__] = sch
         return Schema(
             ref="{}/{}".format(self.ref_base, cls.__name__), description=inspect.getdoc(cls)
         )
 
     def clear(self):
-        self.components = {}
+        self.schemas = {}
 
 
 @attr.s

@@ -27,9 +27,9 @@ class OakTown:
     """ Sample class without any special annotations """
 
     oaks = None
-    smugs = 0  # type: int
+    smugs = 1  # type: int
     snux = "2"  # type: str
-    sample = Sample(palo=1, soap=SoapStar(meal=1.2))
+    # sample = Sample(palo=1, soap=SoapStar(meal=1.2))
 
 
 class Squeezed:
