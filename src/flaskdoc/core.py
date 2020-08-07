@@ -13,6 +13,7 @@ class DictMixin:
 
     def to_dict(self):
         """ Converts object to dictionary """
+
         return self._parse_dict(self.__dict__)
 
     def _parse_dict(self, val):

@@ -207,12 +207,16 @@ def one_of(types, default=None, discriminator=None, description=None):
 
 
 def all_of(types, default=None, discriminator=None, description=None):
+    """ JSON schema allOf """
+
     items = [schema_factory.get_schema(cls) for cls in types]
     sc = Schema(all_of=items, discriminator=discriminator, description=description)
     return attr.ib(type=list, default=default, metadata={JO_SCHEMA: sc})
 
 
 def any_of(types, default=None, discriminator=None):
+    """ JSON schema anyOf """
+
     items = [schema_factory.get_schema(cls) for cls in types]
     sc = Schema(any_of=items, discriminator=discriminator)
     return attr.ib(type=list, default=default, metadata={JO_SCHEMA: sc})
