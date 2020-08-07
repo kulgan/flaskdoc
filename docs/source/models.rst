@@ -7,6 +7,9 @@ flaskdoc introspects native python objects and converts then into swagger approp
 be defined using either standard python classes, dataclasses or attrs. Flaskdoc will automatically convert them into
 json schema.
 
+Generic models
+--------------
+
 .. code-block:: python
 
     from flaskdoc.schema import SchemaFactory
@@ -120,7 +123,7 @@ string. Finer control over types can be achieved using either python data classe
 
 
 jo (json objects) models
-========================
+------------------------
 
 jo is part of flaskdoc builtin functions for defining complex json schema representation from simple/plain/native
 python data types. It wraps around `attr` to enable developer provided schema constraints to properties in classes.
