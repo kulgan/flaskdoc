@@ -12,6 +12,6 @@ def app():
 
 
 def test_examples_spec_is_valid(client):
-    r = client.get("/openapi.json")
+    r = client.get("/docs/openapi.json")
     print(json.dumps(r.json, indent=2))
     validate_spec(r.json)
