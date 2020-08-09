@@ -25,6 +25,7 @@ setup(
     package_data={
         "flaskdoc": [
             "static/*.css",
+            "static/*.css.map",
             "static/*.png",
             "static/*.js",
             "static/*.js.map",
