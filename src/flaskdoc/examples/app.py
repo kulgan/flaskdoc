@@ -45,7 +45,7 @@ def make_app(name="inventory"):
         security = petstore.security_schemes
 
     flaskdoc.register_openapi(
-        app, info=info, servers=servers, tags=tags, security=security, docs_path="/docs"
+        app, info=info, servers=servers, tags=tags, security=security,
     )
     return app
 

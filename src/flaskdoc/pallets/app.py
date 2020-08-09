@@ -18,6 +18,8 @@ ui = flask.Blueprint(
     "swagger-ui", __name__, static_folder=static_ui, template_folder=static_templates,
 )
 
+CONFIG = {}
+
 
 class Flask(flask.Flask, SwaggerMixin):
     def __init__(
@@ -103,6 +105,13 @@ def register_yaml_path():
     return flask.Response(yaml.safe_dump(json.loads(fk)), mimetype="application/yaml")
 
 
+def register_docs_ui(path="default.html"):
+    if path == "default.html":
+        template = "redoc.html" if CONFIG["use_redoc"] else "index.html"
+        return flask.render_template(template)
+    return flask.send_from_directory(static_ui, path)
+
+
 def register_openapi(
     app,
     info,
@@ -126,19 +135,15 @@ def register_openapi(
         use_redoc (bool): disable normal swagger ui and use redoc ui instead
     """
     docs_path = docs_path or "/docs"
-    ui.add_url_rule("/openapi.json", view_func=register_json_path, methods=["GET"])
-    ui.add_url_rule("/openapi.yaml", view_func=register_yaml_path, methods=["GET"])
-
-    def register_docs_ui(path="default.html"):
-        if path == "default.html":
-            template = "redoc.html" if use_redoc else "index.html"
-            return flask.render_template(template, path=docs_path)
-        return flask.send_from_directory(static_ui, path)
+    CONFIG["use_redoc"] = use_redoc
 
     ui.add_url_rule("/", view_func=register_docs_ui, methods=["GET"])
-    ui.add_url_rule("<path:path>", view_func=register_docs_ui, methods=["GET"])
-
+    ui.add_url_rule("/<path:path>", view_func=register_docs_ui, methods=["GET"])
+    ui.add_url_rule("/openapi.json", view_func=register_json_path, methods=["GET"])
+    ui.add_url_rule("/openapi.yaml", view_func=register_yaml_path, methods=["GET"])
     app.register_blueprint(ui, url_prefix=docs_path)
+
+    # app.register_blueprint(ui, url_prefix=docs_path)
     app.openapi = swagger.OpenApi(
         info=info,
         paths=swagger.Paths(),

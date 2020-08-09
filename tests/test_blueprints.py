@@ -22,19 +22,19 @@ def test_registered_openapi(client):
     """ Tests the endpoints for downloading openapi spec was registered """
 
     # test availability of /openapi.json
-    response = client.get("/openapi.json")
+    response = client.get("/docs/openapi.json")
     api_docs = response.json
 
     info_block = api_docs["info"]
     assert info_block["contact"]["email"] == "r.ogwara@gmail.com"
 
-    response = client.get("/openapi.yaml")
+    response = client.get("/docs/openapi.yaml")
     api_docs = yaml.safe_load(response.data)
     info_block = api_docs["info"]
     assert info_block["contact"]["email"] == "r.ogwara@gmail.com"
 
 
 def test_mocks_spec_is_valid(client):
-    r = client.get("/openapi.json")
+    r = client.get("/docs/openapi.json")
     print(json.dumps(r.json, indent=2))
     validate_spec(r.json)
