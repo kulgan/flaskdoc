@@ -23,7 +23,13 @@ setup(
     packages=find_packages(where="src"),
     zip_safe=True,
     package_data={
-        "flaskdoc": ["static/*.css", "static/*.png", "static/*.js", "templates/*.html"]
+        "flaskdoc": [
+            "static/*.css",
+            "static/*.png",
+            "static/*.js",
+            "static/*.js.map",
+            "templates/*.html",
+        ]
     },
     classifiers=[
         "Development Status :: 3 - Alpha",

@@ -1,6 +1,5 @@
 from typing import List, Set
 
-from flaskdoc.swagger import schema_factory
 from tests.jo import models
 
 

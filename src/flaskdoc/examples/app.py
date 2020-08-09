@@ -1,6 +1,7 @@
 import flask
 
 import flaskdoc
+from flaskdoc.pallets.app import CONFIG
 
 
 class AppConfig:
@@ -47,6 +48,7 @@ def make_app(name="inventory"):
     flaskdoc.register_openapi(
         app, info=info, servers=servers, tags=tags, security=security,
     )
+    CONFIG["path"] = ""
     return app
 
 
