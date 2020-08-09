@@ -59,9 +59,11 @@ Under the hood, flaskdoc simply does a:
 
 .. code-block:: python
 
-    app.add_url_rule("/openapi.json", view_func=register_json_path, methods=["GET"])
-    app.add_url_rule("/openapi.yaml", view_func=register_yaml_path, methods=["GET"])
-    app.register_blueprint(ui, url_prefix="/swagger-ui")
+    ui.add_url_rule("/", view_func=register_docs_ui, methods=["GET"])
+    ui.add_url_rule("/<path:path>", view_func=register_docs_ui, methods=["GET"])
+    ui.add_url_rule("/openapi.json", view_func=register_json_path, methods=["GET"])
+    ui.add_url_rule("/openapi.yaml", view_func=register_yaml_path, methods=["GET"])
+    app.register_blueprint(ui, url_prefix=docs_path)
 
 
 Step 3. Start Documenting
