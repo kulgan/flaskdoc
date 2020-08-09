@@ -176,6 +176,8 @@ Don't hesitate to create a `Github issue <https://github.com/kulgan/flaskdoc/iss
 
 .. |code quality| image:: https://app.codacy.com/project/badge/Grade/2dafebf021354a42aa62b11d6ab42654
     :target: https://www.codacy.com/manual/kulgan/flaskdoc?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=kulgan/flaskdoc&amp;utm_campaign=Badge_Grade
+    :alt: Code Quality
 
-.. |coverage| image:: https://app.codacy.com/project/badge/Grade/2dafebf021354a42aa62b11d6ab42654
-    :target: https://www.codacy.com/manual/kulgan/flaskdoc?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=kulgan/flaskdoc&amp;utm_campaign=Badge_Grade
+.. |coverage| image:: https://app.codacy.com/project/badge/Coverage/2dafebf021354a42aa62b11d6ab42654
+    :target: https://www.codacy.com/manual/kulgan/flaskdoc?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=kulgan/flaskdoc&amp;utm_campaign=Badge_Coverage
+    :alt: Coverage
