@@ -1,6 +1,10 @@
 flaskdoc
 ========
 
+.. image:: https://api.codacy.com/project/badge/Grade/cad3d0eb30494d248a32cef5ecfdce8f
+   :alt: Codacy Badge
+   :target: https://app.codacy.com/manual/kulgan/flaskdoc?utm_source=github.com&utm_medium=referral&utm_content=kulgan/flaskdoc&utm_campaign=Badge_Grade_Settings
+
 |PyPi version| |Python version| |ci| |docs| |license|
 
 FlaskDoc allows developers to programmatically compose openapi specifications for flask endpoints as a part of code
