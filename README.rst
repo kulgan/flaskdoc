@@ -1,7 +1,7 @@
 flaskdoc
 ========
 
-|PyPi version| |Python version| |ci| |docs| |license|
+|PyPi version| |Python version| |ci| |docs| |license| |coverage| |code quality|
 
 FlaskDoc allows developers to programmatically compose openapi specifications for flask endpoints as a part of code
 without needing to write a separate yaml file, and it comes with SwaggerUI embedded. Its main focus is on documentation
@@ -173,3 +173,9 @@ Don't hesitate to create a `Github issue <https://github.com/kulgan/flaskdoc/iss
 .. |docs| image:: https://readthedocs.org/projects/flaskdoc/badge/?version=latest
     :target: https://flaskdoc.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
+
+.. |code quality| image:: https://app.codacy.com/project/badge/Grade/2dafebf021354a42aa62b11d6ab42654
+    :target: https://www.codacy.com/manual/kulgan/flaskdoc?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=kulgan/flaskdoc&amp;utm_campaign=Badge_Grade
+
+.. |coverage| image:: https://app.codacy.com/project/badge/Grade/2dafebf021354a42aa62b11d6ab42654
+    :target: https://www.codacy.com/manual/kulgan/flaskdoc?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=kulgan/flaskdoc&amp;utm_campaign=Badge_Grade
