@@ -108,7 +108,7 @@ def register_yaml_path():
 def register_docs_ui(path="default.html"):
     if path == "default.html":
         template = "redoc.html" if CONFIG["use_redoc"] else "index.html"
-        return flask.render_template(template)
+        return flask.render_template(template, path=CONFIG["path"])
     return flask.send_from_directory(static_ui, path)
 
 
@@ -122,20 +122,20 @@ def register_openapi(
         info (swagger.Info): OpenAPI info block
         servers (list[swagger.Server]): list of servers used for testing
         tags (list[swagger.Tag]): list of tags with name and description
-        security (list[swagger.SecurityScheme]): security schemes to apply
+        security (dict[str, swagger.SecurityScheme]): security schemes to apply
         docs_path (str): custom path name for the swagger ui docs, defaults to docs
         use_redoc (bool): disable normal swagger ui and use redoc ui instead
     """
-    docs_path = docs_path or "/docs"
+    docs_path = docs_path or "docs"
     CONFIG["use_redoc"] = use_redoc
+    CONFIG["path"] = docs_path
 
     ui.add_url_rule("/", view_func=register_docs_ui, methods=["GET"])
     ui.add_url_rule("/<path:path>", view_func=register_docs_ui, methods=["GET"])
     ui.add_url_rule("/openapi.json", view_func=register_json_path, methods=["GET"])
     ui.add_url_rule("/openapi.yaml", view_func=register_yaml_path, methods=["GET"])
-    app.register_blueprint(ui, url_prefix=docs_path)
 
-    # app.register_blueprint(ui, url_prefix=docs_path)
+    app.register_blueprint(ui, url_prefix=docs_path)
     app.openapi = swagger.OpenApi(
         info=info,
         paths=swagger.Paths(),

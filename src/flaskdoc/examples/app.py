@@ -1,6 +1,7 @@
 import flask
 
 import flaskdoc
+from flaskdoc.pallets.app import CONFIG
 
 
 class AppConfig:
@@ -47,6 +48,9 @@ def make_app(name="inventory"):
     flaskdoc.register_openapi(
         app, info=info, servers=servers, tags=tags, security=security,
     )
+
+    # examples somehow appends an extra docs in the url path, use this force it to empty
+    CONFIG["path"] = ""
     return app
 
 
