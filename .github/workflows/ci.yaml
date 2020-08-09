@@ -25,7 +25,9 @@ jobs:
         if: matrix.python == 3.8
         run: tox -e lint
       - name: Run Tests
-        run: tox -e py
+        env:
+          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+        run: tox -e py,coverage
   publish:
     needs: build
     if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
