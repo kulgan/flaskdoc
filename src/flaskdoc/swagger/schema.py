@@ -78,6 +78,19 @@ class Schema(ModelMixin):
         if isinstance(self.xml, str):
             self.xml = XML(name=self.xml)
 
+        # resolve properties
+        self._resolve_properties()
+
+    def _resolve_properties(self):
+        if self.properties:
+            props = {}
+            for k, v in self.properties.items():
+                if not isinstance(v, Schema):
+                    props[k] = schema_factory.get_schema(v)
+                else:
+                    props[k] = v
+            self.properties = props
+
 
 @attr.s
 class Boolean(Schema):
