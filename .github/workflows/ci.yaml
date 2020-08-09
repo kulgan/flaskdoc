@@ -21,13 +21,13 @@ jobs:
       - name: Install
         run: |
           pip install tox
-      - name: Linting
-        if: matrix.python == 3.8
-        run: tox -e lint
       - name: Run Tests
+        run: tox -e py
+      - name: Linting & Coverage report
         env:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
-        run: tox -e py,coverage
+        if: matrix.python == 3.8
+        run: tox -e lint,coverage
   publish:
     needs: build
     if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
