@@ -849,7 +849,7 @@ class OpenApi(ModelMixin):
         self,
         info,
         paths,
-        version="3.0.2",
+        version="3.0.3",
         tags=None,
         servers=None,
         external_docs=None,
