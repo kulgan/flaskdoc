@@ -7,7 +7,7 @@ info = swagger.Info(
     title="Test",
     version="1.2.2",
     contact=swagger.Contact(
-        name="Rowland", email="r.ogwara@gmail.com", url="https://github.com/kulgan"
+        name="Rowland", email="r.ogra@daemonmailer" "+++.com", url="https://github.com/kulgan"
     ),
     license=swagger.License(name="Apache 2.0", url="https://www.example.com/license"),
 )
@@ -22,16 +22,18 @@ tags = [
 class Manufacturer(object):
     name = jo.string(example="ACME Corporation", required=True)
     phone = jo.string(example="408-867-5309")
-    homepage = jo.string(format="url", example="https://www.acme-corp.com")
+    homepage = jo.string(str_format="url", example="https://www.acme-corp.com")
 
 
 @jo.schema()
 class InventoryItem(object):
-    id = jo.string(format="uuid", example="d290f1ee-6c54-4b01-90e6-d701748f0851", required=True)
+    id = jo.string(
+        str_format="uuid", example="d290f1ee-6c54-4b01-90e6-d701748f0851", required=True
+    )
     name = jo.string(example="Widget Adapter", required=True)
     manufacturer = jo.object(item=Manufacturer, required=True)
     release_date = jo.string(
-        format="date-time", example="2016-08-29T09:12:33.001Z", required=True
+        str_format="date-time", example="2016-08-29T09:12:33.001Z", required=True
     )
 
 
@@ -52,14 +54,14 @@ search_inventory_docs = swagger.GET(
         ),
         swagger.QueryParameter(
             name="limit",
-            schema=jo.Integer(maximum=50),
+            schema=swagger.Integer(maximum=50),
             description="maximum number of records to return",
         ),
     ],
     responses={
         "200": swagger.ResponseObject(
             description="search results matching criteria",
-            content=jo.JsonType(schema=[InventoryItem]),
+            content=swagger.JsonType(schema=[InventoryItem]),
         ),
         "400": swagger.ResponseObject(description="bad input parameter"),
     },
@@ -72,7 +74,7 @@ add_inventory_docs = swagger.POST(
     summary="adds an inventory item",
     description="adds an item to the system",
     request_body=swagger.RequestBody(
-        content=jo.JsonType(schema=InventoryItem), description="Inventory item to add",
+        content=swagger.JsonType(schema=InventoryItem), description="Inventory item to add",
     ),
     responses={
         "201": swagger.ResponseObject(description="item created"),

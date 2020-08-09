@@ -161,7 +161,7 @@ def get_api_docs(app):
             pi = parse_specs(rule, spec, api)
             pi.description = docs
             api.paths.add(plugins.parse_flask_rule(rule.rule), pi)
-    api.components["schemas"] = swagger.SCHEMA_FACTORY.components
+    api.components["schemas"] = swagger.schema_factory.schemas
     return 1
 
 

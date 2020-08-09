@@ -10,9 +10,9 @@ class ApiResponse(object):
     message = jo.string()
 
 
-@jo.schema()
+@jo.schema(xml="Category")
 class Category(object):
-    id = jo.integer(format="int64")
+    id = jo.integer(int_format="int64")
     name = jo.string()
 
 
@@ -24,42 +24,44 @@ class Status(Enum):
     sold = "sold"
 
 
-@jo.schema()
+@jo.schema(xml="Tag")
 class Tag(object):
-    id = jo.integer(format="int64")
+    id = jo.integer(int_format="int64")
     name = jo.string()
 
 
-@jo.schema()
+@jo.schema(xml="Pet")
 class Pet(object):
-    id = jo.integer(format="int64")
+    id = jo.integer(int_format="int64")
     category = jo.object(item=Category)
     name = jo.string(required=True, example="doggie")
-    photo_urls = jo.array(item=str, required=True)
+    photo_urls = jo.array(
+        item=swagger.String(xml="photoUrl"), required=True, xml=swagger.XML(wrapped=True),
+    )
     status = jo.object(item=Status)
-    tags = jo.array(item=Tag)
+    tags = jo.array(item=Tag, xml=swagger.XML(wrapped=True))
 
 
-@jo.schema()
+@jo.schema(xml="Order")
 class Order(object):
-    id = jo.integer(format="int64")
-    pet_id = jo.integer(format="int64")
-    quantity = jo.integer(format="int32")
-    ship_date = jo.string(format="date-time")
+    id = jo.integer(int_format="int64")
+    pet_id = jo.integer(int_format="int64")
+    quantity = jo.integer(int_format="int32")
+    ship_date = jo.string(str_format="date-time")
     status = jo.object(item=Status, description="Order Status")
     complete = jo.boolean()
 
 
-@jo.schema()
+@jo.schema(xml="User")
 class User(object):
-    id = jo.integer(format="int64")
+    id = jo.integer(int_format="int64")
     username = jo.string()
     first_name = jo.string()
     last_name = jo.string()
     email = jo.email()
     password = jo.string()
     phone = jo.string()
-    user_status = jo.integer(format="int32", description="User status")
+    user_status = jo.integer(int_format="int32", description="User status")
 
 
 upload_image_spec = swagger.POST(
@@ -67,15 +69,17 @@ upload_image_spec = swagger.POST(
     summary="uploads an image",
     operation_id="uploadFile",
     parameters=[
-        swagger.PathParameter(name="petId", description="ID of pet to update", schema=jo.Int64())
+        swagger.PathParameter(
+            name="petId", description="ID of pet to update", schema=swagger.Int64(),
+        )
     ],
     request_body=swagger.RequestBody(
-        content=jo.Content(
+        content=swagger.Content(
             content_type="multipart/form-data",
-            schema=jo.Schema(
+            schema=swagger.Schema(
                 properties=dict(
-                    file=jo.BinaryString(description="file to upload"),
-                    additional_metadata=jo.String(
+                    file=swagger.BinaryString(description="file to upload"),
+                    additional_metadata=swagger.String(
                         description="additional data to pass to server"
                     ),
                 )
@@ -84,7 +88,7 @@ upload_image_spec = swagger.POST(
     ),
     responses={
         "200": swagger.ResponseObject(
-            description="successful operation", content=jo.JsonType(schema=ApiResponse)
+            description="successful operation", content=swagger.JsonType(schema=ApiResponse),
         )
     },
     security=[{"petstoreAuth": ["write:pets", "read:pets"]}],
@@ -96,7 +100,7 @@ update_pet_spec = swagger.PUT(
     summary="Update an existing pet",
     operation_id="updatePet",
     request_body=swagger.RequestBody(
-        content=[jo.JsonType(schema=Pet), jo.XmlType(schema=Pet)], required=True,
+        content=[swagger.JsonType(schema=Pet), swagger.XmlType(schema=Pet)], required=True,
     ),
     responses={
         "400": swagger.ResponseObject(description="Invalid ID supplied"),
@@ -112,7 +116,7 @@ add_pet_spec = swagger.POST(
     summary="Add a new pet to the store",
     operation_id="addPet",
     request_body=swagger.RequestBody(
-        content=[jo.JsonType(schema=Pet), jo.XmlType(schema=Pet)], required=True,
+        content=[swagger.JsonType(schema=Pet), swagger.XmlType(schema=Pet)], required=True,
     ),
     responses={"405": swagger.ResponseObject(description="Invalid input")},
     security=[{"petStoreAuth": ["write:pets", "read:pets"]}],
@@ -130,16 +134,13 @@ find_by_status_spec = swagger.GET(
             explode=True,
             required=True,
             description="Status values need to be considered for filter",
-            schema=jo.Array(items=jo.String(enum=Status._member_names_, default="available")),
+            schema=[swagger.String(enum=Status._member_names_, default="available")],
         )
     ],
     responses={
         "200": swagger.ResponseObject(
             description="Successful operation",
-            content=[
-                jo.JsonType(schema=jo.Array(items=Pet)),
-                jo.XmlType(schema=jo.Array(items=Pet)),
-            ],
+            content=[swagger.JsonType(schema=[Pet]), swagger.XmlType(schema=[Pet])],
         ),
         "400": swagger.ResponseObject(description="Invalid status value"),
     },
@@ -157,20 +158,21 @@ find_by_tags_spec = swagger.GET(
             explode=True,
             required=True,
             description="Status values need to be considered for filter",
-            schema=jo.Array(items=str),
+            schema=swagger.Array(items=str),
         )
     ],
     responses={
         "200": swagger.ResponseObject(
             description="Successful operation",
             content=[
-                jo.JsonType(schema=jo.Array(items=Pet)),
-                jo.XmlType(schema=jo.Array(items=Pet)),
+                swagger.JsonType(schema=swagger.Array(items=Pet)),
+                swagger.XmlType(schema=swagger.Array(items=Pet)),
             ],
         ),
         "400": swagger.ResponseObject(description="Invalid status value"),
     },
     security=[{"petstoreAuth": ["write:pets", "read:pets"]}],
+    deprecated=True,
 )
 
 
@@ -180,15 +182,14 @@ get_by_id_spec = swagger.GET(
     description="Returns a single pet",
     operation_id="getPetById",
     parameters=[
-        swagger.PathParameter(name="petId", description="ID of pet to return", schema=jo.Int64(),)
+        swagger.PathParameter(
+            name="petId", description="ID of pet to return", schema=swagger.Int64(),
+        )
     ],
     responses={
         "200": swagger.ResponseObject(
             description="Successful operation",
-            content=[
-                jo.JsonType(schema=jo.Array(items=Pet)),
-                jo.XmlType(schema=jo.Array(items=Pet)),
-            ],
+            content=[swagger.JsonType(schema=Pet), swagger.XmlType(schema=Pet)],
         ),
         "400": swagger.ResponseObject(description="Invalid ID supplied"),
         "404": swagger.ResponseObject(description="Pet not found"),
@@ -203,23 +204,24 @@ update_by_id_spec = swagger.POST(
     operation_id="updatePetWithForm",
     parameters=[
         swagger.PathParameter(
-            name="petId", description="ID of pet that needs to be updated", schema=jo.Int64(),
+            name="petId",
+            description="ID of pet that needs to be updated",
+            schema=swagger.Int64(),
         )
     ],
     request_body=swagger.RequestBody(
-        content=jo.Content(
+        content=swagger.Content(
             content_type="application/x-www-form-urlencoded",
-            schema=jo.Schema(
+            schema=swagger.Schema(
                 properties=dict(
-                    name=jo.String(description="Updated name of the pet"),
-                    status=jo.String(description="Updated status of the pet",),
+                    name=swagger.String(description="Updated name of the pet"),
+                    status=swagger.String(description="Updated status of the pet"),
                 )
             ),
         )
     ),
     responses={"405": swagger.ResponseObject(description="Invalid input")},
     security=[{"petstoreAuth": ["write:pets", "read:pets"]}],
-    deprecated=True,
 )
 
 
@@ -228,9 +230,11 @@ delete_by_id_spec = swagger.DELETE(
     summary="Deletes a pet",
     operation_id="deletePet",
     parameters=[
-        swagger.HeaderParameter(name="api_key", schema=jo.String()),
+        swagger.HeaderParameter(name="api_key", schema=swagger.String()),
         swagger.PathParameter(
-            name="petId", description="ID of pet that needs to be updated", schema=jo.Int64(),
+            name="petId",
+            description="ID of pet that needs to be updated",
+            schema=swagger.Int64(),
         ),
     ],
     responses={
@@ -247,13 +251,13 @@ place_order_spec = swagger.POST(
     operation_id="placeOrder",
     request_body=swagger.RequestBody(
         description="order placed for purchasing the pet",
-        content=jo.JsonType(schema=Order),
+        content=swagger.JsonType(schema=Order),
         required=True,
     ),
     responses={
         "200": swagger.ResponseObject(
             description="successful operation",
-            content=[jo.JsonType(schema=Order), jo.XmlType(schema=Order)],
+            content=[swagger.JsonType(schema=Order), swagger.XmlType(schema=Order)],
         ),
         "400": swagger.ResponseObject(description="Invalid ID supplied"),
     },
@@ -265,11 +269,13 @@ get_order_by_id_spec = swagger.GET(
     summary="Find purchase order by ID",
     description="For valid response try integer IDs with value >+ 1 and <= 10. Other values will generate exceptions",
     operation_id="getOrderById",
-    parameters=[swagger.PathParameter(name="orderId", schema=jo.Int64(maximum=10, minimum=1))],
+    parameters=[
+        swagger.PathParameter(name="orderId", schema=swagger.Int64(maximum=10, minimum=1))
+    ],
     responses={
         "200": swagger.ResponseObject(
             description="successful operation",
-            content=[jo.JsonType(schema=Order), jo.XmlType(schema=Order)],
+            content=[swagger.JsonType(schema=Order), swagger.XmlType(schema=Order)],
         ),
         "400": swagger.ResponseObject(description="Invalid ID supplied"),
         "404": swagger.ResponseObject(description="Order not found"),
@@ -283,7 +289,9 @@ delete_order_by_id_spec = swagger.DELETE(
     description="For valid response try integer IDs with positive integer value. "
     "Negative or non-integer values will generat API errors",
     operation_id="deleteOrder",
-    parameters=[swagger.PathParameter(name="orderId", schema=jo.Int64(maximum=10, minimum=1))],
+    parameters=[
+        swagger.PathParameter(name="orderId", schema=swagger.Int64(maximum=10, minimum=1))
+    ],
     responses={
         "400": swagger.ResponseObject(description="Invalid ID supplied"),
         "404": swagger.ResponseObject(description="Order not found"),
@@ -298,7 +306,9 @@ order_inventory_spec = swagger.GET(
     responses={
         "200": swagger.ResponseObject(
             description="successful operation",
-            content=jo.JsonType(schema=jo.Object(additional_properties=jo.Integer())),
+            content=swagger.JsonType(
+                schema=swagger.Object(additional_properties=swagger.Integer())
+            ),
         )
     },
     security=[{"apiKey": [""]}],
@@ -310,9 +320,7 @@ create_with_array_spec = swagger.POST(
     summary="Creates list off users with given input array",
     operation_id="createUsersWithArrayInput",
     request_body=swagger.RequestBody(
-        description="List of user object",
-        content=jo.JsonType(schema=jo.Array(items=User)),
-        required=True,
+        description="List of user object", content=swagger.JsonType(schema=[User]), required=True,
     ),
     responses={"200": swagger.ResponseObject(description="successful operation")},
 )
@@ -323,9 +331,7 @@ create_with_list_spec = swagger.POST(
     summary="Creates list off users with given input array",
     operation_id="createUsersWithListInput",
     request_body=swagger.RequestBody(
-        description="List of user object",
-        content=jo.JsonType(schema=jo.Array(items=User)),
-        required=True,
+        description="List of user object", content=swagger.JsonType(schema=[User]), required=True,
     ),
     responses={"200": swagger.ResponseObject(description="successful operation")},
 )
@@ -339,13 +345,13 @@ get_by_username_spec = swagger.GET(
         swagger.PathParameter(
             name="username",
             description="The name that needs to be fetched, Use user1 for testing.",
-            schema=jo.String(),
+            schema=swagger.String(),
         )
     ],
     responses={
         "200": swagger.ResponseObject(
             description="successful operation",
-            content=[jo.JsonType(schema=User), jo.XmlType(schema=User)],
+            content=[swagger.JsonType(schema=User), swagger.XmlType(schema=User)],
         ),
         "400": swagger.ResponseObject(description="Invalid username supplied"),
         "404": swagger.ResponseObject(description="User not found"),
@@ -360,11 +366,11 @@ update_user_spec = swagger.PUT(
         swagger.PathParameter(
             name="username",
             description="The name that needs to be fetched, Use user1 for testing.",
-            schema=jo.String(),
+            schema=swagger.String(),
         )
     ],
     request_body=swagger.RequestBody(
-        description="Updated user object", content=jo.JsonType(User),
+        description="Updated user object", content=swagger.JsonType(User),
     ),
     responses={
         "400": swagger.ResponseObject(description="Invalid ID supplied"),
@@ -382,7 +388,7 @@ delete_user_by_username_spec = swagger.DELETE(
         swagger.PathParameter(
             name="username",
             description="The name that needs to be fetched, Use user1 for testing.",
-            schema=jo.String(),
+            schema=swagger.String(),
         )
     ],
     responses={
@@ -400,13 +406,13 @@ login_spec = swagger.GET(
         swagger.QueryParameter(
             name="username",
             description="The name that needs to be fetched, Use user1 for testing.",
-            schema=jo.String(),
+            schema=swagger.String(),
         ),
         swagger.QueryParameter(
             name="password",
             description="The password for login in clear text",
             required=True,
-            schema=jo.String(),
+            schema=swagger.String(),
         ),
     ],
     responses={
@@ -414,14 +420,14 @@ login_spec = swagger.GET(
             description="successful operation",
             headers={
                 "X-Rate-Limit": swagger.Header(
-                    description="calls oer hour allowed by user", schema=jo.Integer()
+                    description="calls oer hour allowed by user", schema=swagger.Integer(),
                 ),
                 "X-Expires-After": swagger.Header(
                     description="date in UTC when token expires",
-                    schema=jo.String(format="date-time"),
+                    schema=swagger.String(format="date-time"),
                 ),
             },
-            content=[jo.JsonType(schema=str), jo.XmlType(schema=str)],
+            content=[swagger.JsonType(schema=str), swagger.XmlType(schema=str)],
         ),
         "400": swagger.ResponseObject(description="Invalid username/password supplied"),
     },
@@ -444,7 +450,7 @@ create_user_spec = swagger.POST(
     description="This can only be done by the logged in user",
     operation_id="createUser",
     request_body=swagger.RequestBody(
-        description="Created user object", content=jo.JsonType(schema=User), required=True,
+        description="Created user object", content=swagger.JsonType(schema=User), required=True,
     ),
     responses=swagger.ResponsesObject(
         default=swagger.ResponseObject(description="successful operation")

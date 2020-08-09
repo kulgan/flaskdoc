@@ -27,9 +27,9 @@ class OakTown:
     """ Sample class without any special annotations """
 
     oaks = None
-    smugs = 0  # type: int
+    smugs = 1  # type: int
     snux = "2"  # type: str
-    sample = Sample(palo=1, soap=SoapStar(meal=1.2))
+    # sample = Sample(palo=1, soap=SoapStar(meal=1.2))
 
 
 class Squeezed:
@@ -50,7 +50,7 @@ class Color(Enum):
 
 @jo.schema()
 class Lemons(object):
-    name = jo.string(format="uuid", required=True, enum=[None, "a", "b"])
+    name = jo.string(str_format="uuid", required=True, enum=[None, "a", "b"])
     size = jo.integer(maximum=1000)
     flows = jo.one_of(types=[Squeezed, OakTown])
     samples = jo.array(item=Sample, required=True, min_items=1)

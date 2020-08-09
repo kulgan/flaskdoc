@@ -1,11 +1,6 @@
-flaskdoc.swagger package
-========================
-
-Submodules
-----------
-
-flaskdoc.swagger.models module
-------------------------------
+Swagger Models
+==============
+Swagger models implementations
 
 .. automodule:: flaskdoc.swagger.models
    :members:
@@ -16,15 +11,6 @@ flaskdoc.swagger.validators module
 ----------------------------------
 
 .. automodule:: flaskdoc.swagger.validators
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: flaskdoc.swagger
    :members:
    :undoc-members:
    :show-inheritance:

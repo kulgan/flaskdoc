@@ -13,6 +13,7 @@ class DictMixin:
 
     def to_dict(self):
         """ Converts object to dictionary """
+
         return self._parse_dict(self.__dict__)
 
     def _parse_dict(self, val):
@@ -34,8 +35,11 @@ class DictMixin:
             return val.to_dict()
         if isinstance(val, list):
             return [self._to_dict(v) for v in val]
-        if isinstance(val, collections.Mapping) or hasattr(val, "__dict__"):
+        if isinstance(val, collections.Mapping):
             return self._parse_dict(val)
+        if hasattr(val, "__dict__"):
+            return self._parse_dict(val.__dict__)
+
         return val
 
 

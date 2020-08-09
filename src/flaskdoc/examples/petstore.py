@@ -1,6 +1,6 @@
 import flask
 
-from flaskdoc import jo, swagger
+from flaskdoc import swagger
 from flaskdoc.examples.petstore_specs import (
     Pet,
     add_pet_spec,
