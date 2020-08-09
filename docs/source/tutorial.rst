@@ -14,7 +14,12 @@ Step 2. Configure
 -----------------
 Register flaskdoc with your flask ``app`` instance. This requires top level openapi models like Info, Server, Tags etc.
 These should match your api's expectations.
-Flaskdoc exposes swagger specific models via ``flaskdoc.swagger`` so
+Flaskdoc exposes swagger specific models via ``flaskdoc.swagger``
+
+.. note::
+    default url is ``/docs``, this can be customized by setting the `docs_path` parameter of `register_openapi`.
+    You can also use `Redoc <https://github.com/Redocly/redoc>`_ instead of the default swagger ui, by setting the
+    `use_redoc` parameter to True.
 
 .. code-block:: python
 
@@ -57,6 +62,7 @@ Under the hood, flaskdoc simply does a:
     app.add_url_rule("/openapi.json", view_func=register_json_path, methods=["GET"])
     app.add_url_rule("/openapi.yaml", view_func=register_yaml_path, methods=["GET"])
     app.register_blueprint(ui, url_prefix="/swagger-ui")
+
 
 Step 3. Start Documenting
 -------------------------

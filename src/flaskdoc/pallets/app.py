@@ -103,20 +103,16 @@ def register_yaml_path():
     return flask.Response(yaml.safe_dump(json.loads(fk)), mimetype="application/yaml")
 
 
-@ui.route("/")
-@ui.route("/<path:path>")
-def register_swagger_ui(path="index.html"):
-    if path == "index.html":
-        return flask.render_template(path)
-    return flask.send_from_directory(static_ui, path)
-
-
-@ui.route("/redoc", methods=["GET"])
-def redoc():
-    return flask.render_template("redoc.html")
-
-
-def register_openapi(app, info, openapi="3.0.3", servers=None, tags=None, security=None):
+def register_openapi(
+    app,
+    info,
+    openapi="3.0.3",
+    servers=None,
+    tags=None,
+    security=None,
+    docs_path="/docs",
+    use_redoc=False,
+):
     """ Registers flaskdoc api specs to an existing flask app
 
     Args:
@@ -126,12 +122,23 @@ def register_openapi(app, info, openapi="3.0.3", servers=None, tags=None, securi
         servers (list[swagger.Server]): list of servers used for testing
         tags (list[swagger.Tag]): list of tags with name and description
         security (list[swagger.SecurityScheme]): security schemes to apply
-    Returns:
-
+        docs_path (str): custom path name for the swagger ui docs, defaults to docs
+        use_redoc (bool): disable normal swagger ui and use redoc ui instead
     """
-    app.add_url_rule("/openapi.json", view_func=register_json_path, methods=["GET"])
-    app.add_url_rule("/openapi.yaml", view_func=register_yaml_path, methods=["GET"])
-    app.register_blueprint(ui, url_prefix="/swagger-ui")
+    docs_path = docs_path or "/docs"
+    ui.add_url_rule("/openapi.json", view_func=register_json_path, methods=["GET"])
+    ui.add_url_rule("/openapi.yaml", view_func=register_yaml_path, methods=["GET"])
+
+    def register_docs_ui(path="default.html"):
+        if path == "default.html":
+            template = "redoc.html" if use_redoc else "index.html"
+            return flask.render_template(template, path=docs_path)
+        return flask.send_from_directory(static_ui, path)
+
+    ui.add_url_rule("/", view_func=register_docs_ui, methods=["GET"])
+    ui.add_url_rule("<path:path>", view_func=register_docs_ui, methods=["GET"])
+
+    app.register_blueprint(ui, url_prefix=docs_path)
     app.openapi = swagger.OpenApi(
         info=info,
         paths=swagger.Paths(),
