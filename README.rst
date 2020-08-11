@@ -20,7 +20,7 @@ Why flaskdoc
 
 Getting Started
 ---------------
-For more detailed documentation visit
+Visit `documentation <https://flaskdoc.readthedocs.io>`_ page for more details.
 
 Install
 """""""

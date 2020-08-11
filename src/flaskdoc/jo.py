@@ -21,7 +21,12 @@ JO_REQUIRED = "__jo__required__"
 
 
 def schema(
-    additional_properties=None, required=None, min_properties=None, max_properties=None, xml=None
+    additional_properties=None,
+    required=None,
+    min_properties=None,
+    max_properties=None,
+    xml=None,
+    camel_case_props=False,
 ):
     """ decorates a class automatically binding it to a Schema instance
 
@@ -33,7 +38,7 @@ def schema(
         min_properties (int):  Minimum number of properties allowed
         max_properties (int): Maximum number of properties allowed
         xml (str|flaskdoc.swagger.XML): swagger XML object instance or string representing the name of the XML field
-
+        camel_case_props (bool): If True model properties are converted to camel case
     Returns:
         attr.s: and attr.s wrapped class
 
@@ -66,7 +71,7 @@ def schema(
             for attrib in attributes:
                 psc = attrib.metadata[JO_SCHEMA]
                 is_required = attrib.metadata.get(JO_REQUIRED, False)
-                field_name = camel_case(attrib.name)
+                field_name = camel_case(attrib.name) if camel_case_props else attrib.name
                 if is_required and field_name not in sc.required:
                     sc.required.append(field_name)
                 sc.properties[attrib.name] = psc

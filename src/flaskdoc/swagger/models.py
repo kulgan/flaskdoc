@@ -485,7 +485,7 @@ class Tag(ModelMixin, ApiDecoratorMixin):
 
 
 @attr.s
-class Operation(ExtensionMixin, ApiDecoratorMixin):
+class Operation(ModelMixin, ApiDecoratorMixin):
     """ Describes a single API operation on a path. """
 
     responses = attr.ib(type=dict)
@@ -628,48 +628,56 @@ class Paths(ContainerModel):
         super(Paths, self).add(relative_url, path_item)
 
 
+@attr.s
 class GET(Operation):
     @property
     def http_method(self):
         return HttpMethod.GET
 
 
+@attr.s
 class POST(Operation):
     @property
     def http_method(self):
         return HttpMethod.POST
 
 
+@attr.s
 class PUT(Operation):
     @property
     def http_method(self):
         return HttpMethod.PUT
 
 
+@attr.s
 class HEAD(Operation):
     @property
     def http_method(self):
         return HttpMethod.HEAD
 
 
+@attr.s
 class OPTIONS(Operation):
     @property
     def http_method(self):
         return HttpMethod.OPTIONS
 
 
+@attr.s
 class PATCH(Operation):
     @property
     def http_method(self):
         return HttpMethod.PATCH
 
 
+@attr.s
 class TRACE(Operation):
     @property
     def http_method(self):
         return HttpMethod.TRACE
 
 
+@attr.s
 class DELETE(Operation):
     @property
     def http_method(self):
@@ -865,7 +873,7 @@ class OpenApi(ModelMixin):
         self.external_docs = external_docs
 
         if security:
-            self.components["security_schemes"] = security
+            self.components["securitySchemes"] = security
 
     def add_tag(self, tag):
         """
@@ -893,3 +901,8 @@ class OpenApi(ModelMixin):
         for r_url in paths:
             path_url = "{}{}{}".format(url_prefix, blp_prefix, r_url)
             self.paths.add(path_url, paths.get(r_url))
+
+
+if __name__ == "__main__":
+    inf = License(name="Xd")
+    print(inf)
