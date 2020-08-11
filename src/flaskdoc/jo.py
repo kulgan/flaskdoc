@@ -74,7 +74,7 @@ def schema(
                 field_name = camel_case(attrib.name) if camel_case_props else attrib.name
                 if is_required and field_name not in sc.required:
                     sc.required.append(field_name)
-                sc.properties[attrib.name] = psc
+                sc.properties[field_name] = psc
             return sc
 
         setattr(cls, "jo_schema", classmethod(jo_schema))

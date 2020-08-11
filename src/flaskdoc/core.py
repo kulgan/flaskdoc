@@ -26,7 +26,8 @@ class DictMixin:
             if k.startswith("__") or k == "_camel_case_fields_":
                 # skip private properties
                 continue
-            if k == "extensions" or (v not in [True, False] and not v):
+            # skip extensions and None values
+            if k == "extensions" or v is None:
                 continue
             # map ref
             if k == "ref":

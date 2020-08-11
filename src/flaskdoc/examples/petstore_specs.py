@@ -30,7 +30,7 @@ class Tag(object):
     name = jo.string()
 
 
-@jo.schema(xml="Pet")
+@jo.schema(xml="Pet", camel_case_props=True)
 class Pet(object):
     id = jo.integer(int_format="int64")
     category = jo.object(item=Category)
@@ -42,7 +42,7 @@ class Pet(object):
     tags = jo.array(item=Tag, xml=swagger.XML(wrapped=True))
 
 
-@jo.schema(xml="Order")
+@jo.schema(xml="Order", camel_case_props=True)
 class Order(object):
     id = jo.integer(int_format="int64")
     pet_id = jo.integer(int_format="int64")
@@ -52,7 +52,7 @@ class Order(object):
     complete = jo.boolean()
 
 
-@jo.schema(xml="User")
+@jo.schema(xml="User", camel_case_props=True)
 class User(object):
     id = jo.integer(int_format="int64")
     username = jo.string()
@@ -91,7 +91,7 @@ upload_image_spec = swagger.POST(
             description="successful operation", content=swagger.JsonType(schema=ApiResponse),
         )
     },
-    security=[{"petstoreAuth": ["write:pets", "read:pets"]}],
+    security=[{"petstore_auth": ["write:pets", "read:pets"]}],
 )
 
 
@@ -107,7 +107,7 @@ update_pet_spec = swagger.PUT(
         "404": swagger.ResponseObject(description="Pet not found"),
         "405": swagger.ResponseObject(description="Validation exception"),
     },
-    security=[{"petstoreAuth": ["write:pets", "read:pets"]}],
+    security=[{"petstore_auth": ["write:pets", "read:pets"]}],
 )
 
 
@@ -119,7 +119,7 @@ add_pet_spec = swagger.POST(
         content=[swagger.JsonType(schema=Pet), swagger.XmlType(schema=Pet)], required=True,
     ),
     responses={"405": swagger.ResponseObject(description="Invalid input")},
-    security=[{"petStoreAuth": ["write:pets", "read:pets"]}],
+    security=[{"petstore_auth": ["write:pets", "read:pets"]}],
 )
 
 
@@ -144,7 +144,7 @@ find_by_status_spec = swagger.GET(
         ),
         "400": swagger.ResponseObject(description="Invalid status value"),
     },
-    security=[{"petstoreAuth": ["write:pets", "read:pets"]}],
+    security=[{"petstore_auth": ["write:pets", "read:pets"]}],
 )
 
 find_by_tags_spec = swagger.GET(
@@ -171,7 +171,7 @@ find_by_tags_spec = swagger.GET(
         ),
         "400": swagger.ResponseObject(description="Invalid status value"),
     },
-    security=[{"petstoreAuth": ["write:pets", "read:pets"]}],
+    security=[{"petstore_auth": ["write:pets", "read:pets"]}],
     deprecated=True,
 )
 
@@ -194,7 +194,7 @@ get_by_id_spec = swagger.GET(
         "400": swagger.ResponseObject(description="Invalid ID supplied"),
         "404": swagger.ResponseObject(description="Pet not found"),
     },
-    security=[{"apiKey": [""]}],
+    security=[{"api_key": []}],
 )
 
 
@@ -221,7 +221,7 @@ update_by_id_spec = swagger.POST(
         )
     ),
     responses={"405": swagger.ResponseObject(description="Invalid input")},
-    security=[{"petstoreAuth": ["write:pets", "read:pets"]}],
+    security=[{"petstore_auth": ["write:pets", "read:pets"]}],
 )
 
 
@@ -241,7 +241,7 @@ delete_by_id_spec = swagger.DELETE(
         "400": swagger.ResponseObject(description="Invalid ID supplied"),
         "404": swagger.ResponseObject(description="Pet not found"),
     },
-    security=[{"petstoreAuth": ["write:pets", "read:pets"]}],
+    security=[{"petstore_auth": ["write:pets", "read:pets"]}],
 )
 
 
@@ -311,7 +311,7 @@ order_inventory_spec = swagger.GET(
             ),
         )
     },
-    security=[{"apiKey": [""]}],
+    security=[{"api_key": []}],
 )
 
 

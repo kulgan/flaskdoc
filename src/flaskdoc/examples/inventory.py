@@ -25,7 +25,7 @@ class Manufacturer(object):
     homepage = jo.string(str_format="url", example="https://www.acme-corp.com")
 
 
-@jo.schema()
+@jo.schema(camel_case_props=True)
 class InventoryItem(object):
     id = jo.string(
         str_format="uuid", example="d290f1ee-6c54-4b01-90e6-d701748f0851", required=True
