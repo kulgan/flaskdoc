@@ -6,7 +6,7 @@ from typing import Union
 
 import attr
 
-from flaskdoc.core import ApiDecoratorMixin, DictMixin, ModelMixin
+from flaskdoc.core import ApiDecoratorMixin, DictMixin, ExtensionMixin, ModelMixin
 from flaskdoc.swagger import validators
 from flaskdoc.swagger.schema import ContentMixin, schema_factory
 
@@ -20,49 +20,6 @@ class SwaggerDict(OrderedDict, DictMixin):
         if value not in [False, True] and not value:
             return
         super(SwaggerDict, self).__setitem__(key, value)
-
-
-class ExtensionMixin(ModelMixin):
-
-    extensions = attr.ib(default={})
-
-    def add_extension(self, name, value):
-        """ Allows extensions to the Swagger Schema.
-
-        The field name MUST begin with x-, for example, x-internal-id. The value can be null, a primitive,
-        an array or an object.
-        Args:
-            name (str): custom extension name, must begin with x-
-            value (Any): value, can be None, any object or list
-        Returns:
-            ModelMixin: for chaining
-        Raises:
-            ValueError: if key name is invalid
-        """
-        self.validate_extension_name(name)
-        if not self.extensions:
-            self.extensions = SwaggerDict()
-        self.extensions[name] = value
-        return self
-
-    @staticmethod
-    def validate_extension_name(value):
-        """
-        Validates a custom extension name
-        Args:
-            value (str): custom extension name
-        Raises:
-            ValueError: if key name is invalid
-        """
-        if value and not value.startswith("x-"):
-            raise ValueError("Custom extension must start with x-")
-
-    @extensions.validator
-    def validate(self, _, ext):
-        """ Validates the name of all provided extensions """
-        if ext:
-            for k in ext:
-                self.validate_extension_name(k)
 
 
 @attr.s
@@ -247,37 +204,10 @@ class ExternalDocumentation(ExtensionMixin):
 
 
 @attr.s
-class Encoding(ExtensionMixin):
-    """ A single encoding definition applied to a single schema property. """
-
-    content_type = attr.ib(type=str)
-    headers = attr.ib(default=None, type=SwaggerDict)
-    style = attr.ib(default=None, type=Style)
-    explode = attr.ib(default=True)
-    allow_reserved = attr.ib(default=False)
-    extensions = attr.ib(default={})
-
-    def add_header(self, name, header):
-        if not self.headers:
-            self.headers = SwaggerDict()
-        self.headers[name] = header
-
-
-@attr.s
-class Example(ExtensionMixin):
-
-    summary = attr.ib(default=None, type=str)
-    description = attr.ib(default=None, type=str)
-    value = attr.ib(default=None)
-    external_value = attr.ib(default=None, type=str)
-    extensions = attr.ib(default={})
-
-
-@attr.s
 class RequestBody(ContentMixin, ExtensionMixin):
 
     description = attr.ib(default=None, type=str)
-    required = attr.ib(default=False)
+    required = attr.ib(default=None)
     extensions = attr.ib(default={})
 
 

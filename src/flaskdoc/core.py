@@ -20,7 +20,6 @@ class DictMixin:
 
     def _parse_dict(self, val):
         parsed = {}
-        # print(val)
         convert_to_came_case = val.get("_camel_case_fields_", False)
         for k, v in val.items():
             if k.startswith("__") or k == "_camel_case_fields_":
@@ -94,3 +93,46 @@ class ModelMixin(DictMixin):
 
     def convert_props(self, to_camel_case=True):
         self._camel_case_fields_ = to_camel_case
+
+
+class ExtensionMixin(ModelMixin):
+
+    extensions = attr.ib(default={})
+
+    def add_extension(self, name, value):
+        """ Allows extensions to the Swagger Schema.
+
+        The field name MUST begin with x-, for example, x-internal-id. The value can be null, a primitive,
+        an array or an object.
+        Args:
+            name (str): custom extension name, must begin with x-
+            value (Any): value, can be None, any object or list
+        Returns:
+            ModelMixin: for chaining
+        Raises:
+            ValueError: if key name is invalid
+        """
+        self.validate_extension_name(name)
+        if not self.extensions:
+            self.extensions = {}
+        self.extensions[name] = value
+        return self
+
+    @staticmethod
+    def validate_extension_name(value):
+        """
+        Validates a custom extension name
+        Args:
+            value (str): custom extension name
+        Raises:
+            ValueError: if key name is invalid
+        """
+        if value and not value.startswith("x-"):
+            raise ValueError("Custom extension must start with x-")
+
+    @extensions.validator
+    def validate(self, _, ext):
+        """ Validates the name of all provided extensions """
+        if ext:
+            for k in ext:
+                self.validate_extension_name(k)

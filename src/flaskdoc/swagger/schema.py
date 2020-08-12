@@ -21,7 +21,7 @@ from typing import AnyStr, ByteString, Dict, List, Set, Text, Union
 
 import attr
 
-from flaskdoc.core import ModelMixin
+from flaskdoc.core import ExtensionMixin, ModelMixin
 
 
 @attr.s
@@ -297,12 +297,13 @@ class SchemaFactory(object):
 
 
 @attr.s
-class Content(object):
-    """ A content container for response and request objects """
+class MediaType(ModelMixin):
+    """ Each Media Type Object provides schema and examples for the media type identified by its key. """
 
     content_type = attr.ib(type=str)
-    schema = attr.ib(type=type)
-    description = attr.ib(default=None, type=str)
+    schema = attr.ib(default=None, type="Schema")
+    example = attr.ib(default=None)
+    examples = attr.ib(default=None, type=dict)
 
     def to_schema(self):
 
@@ -310,35 +311,53 @@ class Content(object):
         if self.schema in [str, int, bool, dict]:
             schema_class = SCHEMA_TYPES_MAP[self.schema]
             schema = schema_class()
-            schema.description = self.description or schema.description
             return schema
         # handle schema derivatives
         if isinstance(self.schema, Schema):
-            self.schema.description = self.description or self.schema.description
             return self.schema
         # handle custom class types
         return schema_factory.get_schema(self.schema)
 
+    def to_dict(self):
+        return dict(schema=self.to_schema(), example=self.example, examples=self.examples,)
+
 
 @attr.s
-class JsonType(Content):
+class JsonType(MediaType):
     """ mime type application/json content type """
 
     content_type = attr.ib(default="application/json", init=False)
 
 
 @attr.s
-class PlainText(Content):
+class PlainText(MediaType):
     content_type = attr.ib(default="text/plain", init=False)
 
 
-class MultipartForm(Content):
+@attr.s
+class UrlEncodedFormType(MediaType):
+    content_type = attr.ib(default="application/x-www-form-urlencoded", init=False)
+    encoding = attr.ib(default=None, type=Dict[str, "Encoding"])
 
-    content_type = "multipart/form-data"
+    def to_dict(self):
+        d = super(UrlEncodedFormType, self).to_dict()
+        d["encoding"] = self.encoding
+        return d
 
 
 @attr.s
-class XmlType(Content):
+class MultipartType(UrlEncodedFormType):
+
+    content_type = attr.ib(default="multipart/form-data")
+
+    @content_type.validator
+    def validate(self, _, ctype: str):
+        if not ctype.startswith("multipart"):
+            raise ValueError("Multipart type must start with multipart")
+
+
+@attr.s
+class XmlType(MediaType):
     content_type = attr.ib(default="application/xml", init=False)
 
 
@@ -363,19 +382,9 @@ schema_factory = SchemaFactory()
 
 
 @attr.s
-class MediaType(ModelMixin):
-    """ Each Media Type Object provides schema and examples for the media type identified by its key. """
-
-    schema = attr.ib(default=None, type="Schema")
-    example = attr.ib(default=None)
-    examples = attr.ib(default=None, type=dict)
-    encoding = attr.ib(default=None, type=dict)
-
-
-@attr.s
 class ContentMixin(object):
 
-    content = attr.ib()  # type: Union[Content, List[Content]]
+    content = attr.ib()  # type: Union[MediaType, List[MediaType]]
 
     def __attrs_post_init__(self):
 
@@ -386,5 +395,32 @@ class ContentMixin(object):
             self.content = [self.content]
         cnt = defaultdict(dict)
         for content in self.content:
-            cnt[content.content_type]["schema"] = content.to_schema()
+            cnt[content.content_type] = content.to_dict()
         self.content = cnt
+
+
+@attr.s
+class Encoding(ExtensionMixin):
+    """ A single encoding definition applied to a single schema property. """
+
+    content_type = attr.ib(type=str)
+    headers = attr.ib(default=None, type=dict)
+    style = attr.ib(default=None, type="Style")
+    explode = attr.ib(default=True)
+    allow_reserved = attr.ib(default=False)
+    extensions = attr.ib(default={})
+
+    def add_header(self, name, header):
+        if not self.headers:
+            self.headers = {}
+        self.headers[name] = header
+
+
+@attr.s
+class Example(ExtensionMixin):
+
+    summary = attr.ib(default=None, type=str)
+    description = attr.ib(default=None, type=str)
+    value = attr.ib(default=None)
+    external_value = attr.ib(default=None, type=str)
+    extensions = attr.ib(default={})
