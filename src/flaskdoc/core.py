@@ -11,7 +11,7 @@ from flaskdoc.pallets import plugins
 class DictMixin:
     """ General usage mixin for handling nested dictionary conversion. """
 
-    # _camel_case_fields_ = False
+    _camel_case_fields_ = False
 
     def to_dict(self):
         """ Converts object to dictionary """
@@ -26,7 +26,7 @@ class DictMixin:
             if k.startswith("__") or k == "_camel_case_fields_":
                 # skip private properties
                 continue
-            # skipNone values
+            # skip None values
             if v is None:
                 continue
             if k == "extensions":

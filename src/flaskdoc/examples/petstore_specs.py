@@ -117,7 +117,9 @@ add_pet_spec = swagger.POST(
     summary="Add a new pet to the store",
     operation_id="addPet",
     request_body=swagger.RequestBody(
-        content=[swagger.JsonType(schema=Pet), swagger.XmlType(schema=Pet)], required=True,
+        content=[swagger.JsonType(schema=Pet), swagger.XmlType(schema=Pet)],
+        required=True,
+        extensions={"x-required": True},
     ),
     responses={"405": swagger.ResponseObject(description="Invalid input")},
     security=[{"petstore_auth": ["write:pets", "read:pets"]}],
