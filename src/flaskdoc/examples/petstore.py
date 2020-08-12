@@ -123,8 +123,8 @@ def place_order():
 
 @get_order_by_id_spec
 @delete_order_by_id_spec
-@store.route("/order/<int:order_id>", methods=["GET", "DELETE"])
-def order_by_id(order_id):
+@store.route("/order/<int:orderId>", methods=["GET", "DELETE"])
+def order_by_id(orderId):
     pass
 
 

@@ -176,5 +176,6 @@ to enable developer provided schema constraints to properties in classes.
     # models can be used as normal data objects
     bean = SoakedBean(density=12, samples=[Sample()], squeezes=[Squeezed()])
 
+Model properties can be automatically converted to camel case by setting the camel_case_fields property of `jo.schema`
 .. automodule:: flaskdoc.jo
    :members:

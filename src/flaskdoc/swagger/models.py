@@ -24,7 +24,7 @@ class SwaggerDict(OrderedDict, DictMixin):
 
 class ExtensionMixin(ModelMixin):
 
-    extensions = None
+    extensions = attr.ib(default={})
 
     def add_extension(self, name, value):
         """ Allows extensions to the Swagger Schema.
@@ -57,11 +57,12 @@ class ExtensionMixin(ModelMixin):
         if value and not value.startswith("x-"):
             raise ValueError("Custom extension must start with x-")
 
-    def to_dict(self):
-        di = super(ExtensionMixin, self).to_dict()
-        if self.extensions:
-            di.update(self.extensions)
-        return di
+    @extensions.validator
+    def validate(self, _, ext):
+        """ Validates the name of all provided extensions """
+        if ext:
+            for k in ext:
+                self.validate_extension_name(k)
 
 
 @attr.s
@@ -101,6 +102,7 @@ class License(ExtensionMixin):
 
     name = attr.ib(type=str)
     url = attr.ib(default=None, type=str)
+    extensions = attr.ib(default={})
 
     @url.validator
     def validate(self, _, url):
@@ -123,6 +125,7 @@ class Contact(ExtensionMixin):
     name = attr.ib(default=None, type=str)
     email = attr.ib(default=None, type=str)
     url = attr.ib(default=None, type=str)
+    extensions = attr.ib(default={})
 
     @url.validator
     def validate(self, _, url):
@@ -153,6 +156,7 @@ class Info(ExtensionMixin):
     terms_of_service = attr.ib(default=None, type=str)
     contact = attr.ib(default=None, type=Contact)
     license = attr.ib(default=None, type=License)
+    extensions = attr.ib(default={})
 
 
 @attr.s
@@ -174,6 +178,7 @@ class ServerVariable(ExtensionMixin):
     default = attr.ib(type=str)
     enum = attr.ib(default=None, type=list)
     description = attr.ib(default=None, type=str)
+    extensions = attr.ib(default={})
 
 
 @attr.s
@@ -194,7 +199,8 @@ class Server(ExtensionMixin):
 
     url = attr.ib(type=str)
     description = attr.ib(default=None, type=str)
-    variables = attr.ib(default={}, type=str)
+    variables = attr.ib(default=None, type=dict)
+    extensions = attr.ib(default={})
 
     def add_variable(self, name: str, variable: ServerVariable):
         """ Adds a server variable
@@ -202,6 +208,8 @@ class Server(ExtensionMixin):
             name: variable name
             variable: Server variable instance
         """
+        if not self.variables:
+            self.variables = {}
         self.variables[name] = variable
 
 
@@ -235,6 +243,7 @@ class ExternalDocumentation(ExtensionMixin):
 
     url = attr.ib(type=str)
     description = attr.ib(default=None, type=str)
+    extensions = attr.ib(default={})
 
 
 @attr.s
@@ -242,10 +251,11 @@ class Encoding(ExtensionMixin):
     """ A single encoding definition applied to a single schema property. """
 
     content_type = attr.ib(type=str)
-    headers = attr.ib(default=SwaggerDict())
+    headers = attr.ib(default=None, type=SwaggerDict)
     style = attr.ib(default=None, type=Style)
     explode = attr.ib(default=True)
     allow_reserved = attr.ib(default=False)
+    extensions = attr.ib(default={})
 
     def add_header(self, name, header):
         if not self.headers:
@@ -260,6 +270,7 @@ class Example(ExtensionMixin):
     description = attr.ib(default=None, type=str)
     value = attr.ib(default=None)
     external_value = attr.ib(default=None, type=str)
+    extensions = attr.ib(default={})
 
 
 @attr.s
@@ -267,6 +278,7 @@ class RequestBody(ContentMixin, ExtensionMixin):
 
     description = attr.ib(default=None, type=str)
     required = attr.ib(default=False)
+    extensions = attr.ib(default={})
 
 
 @attr.s
@@ -284,14 +296,15 @@ class Component(ExtensionMixin):
     """
 
     schemas = attr.ib(default={})
-    responses = attr.ib(default={})
-    parameters = attr.ib(default={})
-    examples = attr.ib(default={})
+    responses = attr.ib(default=None, type=dict)
+    parameters = attr.ib(default=None, type=dict)
+    examples = attr.ib(default=None, type=dict)
     request_bodies = attr.ib(default={})
     headers = attr.ib(default={})
     security_schemes = attr.ib(default={})
     links = attr.ib(default={})
     callbacks = attr.ib(default={})
+    extensions = attr.ib(default={})
 
     def add_response(self, response_name: str, response):
         self.responses[response_name] = response
@@ -336,7 +349,7 @@ class ParameterLocation(enum.Enum):
 
 
 @attr.s
-class Parameter(ModelMixin, ApiDecoratorMixin):
+class Parameter(ExtensionMixin, ApiDecoratorMixin):
     """
     Describes a single operation parameter.
     A unique parameter is defined by a combination of a name and location.
@@ -350,11 +363,12 @@ class Parameter(ModelMixin, ApiDecoratorMixin):
     allow_empty_value = attr.ib(default=None)
     allow_reserved = attr.ib(default=None)
     schema = attr.ib(default=None)
-    content = attr.ib(default={})
+    content = attr.ib(default=None)
     explode = attr.ib(default=None)
     _style = attr.ib(default=None, type=Style, init=False)
     example = attr.ib(default=None)
-    examples = attr.ib(default=SwaggerDict())
+    examples = attr.ib(default=None, type=dict)
+    extensions = attr.ib(default={})
 
     @property
     def q_in(self):
@@ -430,6 +444,7 @@ class Link(ExtensionMixin):
     parameters = attr.ib(default=None, type=SwaggerDict)
     request_body = attr.ib(default=None)
     server = attr.ib(default=None, type=Server)
+    extensions = attr.ib(default={})
 
 
 @attr.s
@@ -443,6 +458,7 @@ class ResponseObject(ContentMixin, ExtensionMixin):
     content = attr.ib(default=None, type=SwaggerDict)
     headers = attr.ib(default=None, type=SwaggerDict)
     links = attr.ib(default=None, type=SwaggerDict)
+    extensions = attr.ib(default={})
 
     def add_header(self, name: str, header: Union[ReferenceObject, HeaderParameter]):
         if self.headers is None:
@@ -467,18 +483,20 @@ class ResponsesObject(ExtensionMixin):
     """
 
     default = attr.ib(default=None, type=ResponseObject)
-    responses = attr.ib(default=SwaggerDict())
+    responses = attr.ib(default=None, type=dict)
+    extensions = attr.ib(default={})
 
     def add_response(self, status_code: str, response: ResponseObject):
         self.responses[status_code] = response
 
 
 @attr.s
-class Tag(ModelMixin, ApiDecoratorMixin):
+class Tag(ExtensionMixin, ApiDecoratorMixin):
 
     name = attr.ib(type=str)
     description = attr.ib(default=None, type=str)
     external_docs = attr.ib(default=None, type=ExternalDocumentation)
+    extensions = attr.ib(default={})
 
     def external_doc(self, url, description=None):
         self.external_docs = ExternalDocumentation(url=url, description=description)
@@ -489,7 +507,7 @@ class Operation(ExtensionMixin, ApiDecoratorMixin):
     """ Describes a single API operation on a path. """
 
     responses = attr.ib(type=dict)
-    tags = attr.ib(default=[], type=list)
+    tags = attr.ib(default=None, type=list)
     summary = attr.ib(default=None, type=str)
     description = attr.ib(default=None, type=str)
     external_docs = attr.ib(default=None, type=ExternalDocumentation)
@@ -500,6 +518,7 @@ class Operation(ExtensionMixin, ApiDecoratorMixin):
     deprecated = attr.ib(default=None)
     security = attr.ib(default=None, type=list)
     servers = attr.ib(default=None, type=list)
+    extensions = attr.ib(default={})
 
     @property
     def http_method(self):
@@ -534,7 +553,7 @@ class Operation(ExtensionMixin, ApiDecoratorMixin):
 
 
 @attr.s
-class PathItem(ModelMixin):
+class PathItem(ExtensionMixin):
     """
     Describes the operations available on a single path. A Path Item MAY be empty, due to ACL constraints. The
     path itself is still exposed to the documentation viewer but they will not know which operations and parameters
@@ -545,8 +564,8 @@ class PathItem(ModelMixin):
     summary = attr.ib(default=None, type=str)
     description = attr.ib(default=None, type=str)
 
-    servers = attr.ib(default=[], type=list)
-    parameters = attr.ib(default=[], type=list)
+    servers = attr.ib(default=None, type=list)
+    parameters = attr.ib(default=None, type=list)
 
     get = attr.ib(default=None, type=Operation)
     delete = attr.ib(default=None, type=Operation)
@@ -556,6 +575,7 @@ class PathItem(ModelMixin):
     post = attr.ib(default=None, type=Operation)
     put = attr.ib(default=None, type=Operation)
     trace = attr.ib(default=None, type=Operation)
+    extensions = attr.ib(default={})
 
     def add_operation(self, operation):
         """
@@ -591,10 +611,10 @@ class PathItem(ModelMixin):
         Args:
             path_item (PathItem): PathItem instance to merge
         """
-        for server in path_item.servers:
+        for server in path_item.servers or []:
             self.add_server(server)
 
-        for param in path_item.parameters:
+        for param in path_item.parameters or []:
             self.add_parameter(param)
 
         self.get = path_item.get or self.get
@@ -628,48 +648,56 @@ class Paths(ContainerModel):
         super(Paths, self).add(relative_url, path_item)
 
 
+@attr.s
 class GET(Operation):
     @property
     def http_method(self):
         return HttpMethod.GET
 
 
+@attr.s
 class POST(Operation):
     @property
     def http_method(self):
         return HttpMethod.POST
 
 
+@attr.s
 class PUT(Operation):
     @property
     def http_method(self):
         return HttpMethod.PUT
 
 
+@attr.s
 class HEAD(Operation):
     @property
     def http_method(self):
         return HttpMethod.HEAD
 
 
+@attr.s
 class OPTIONS(Operation):
     @property
     def http_method(self):
         return HttpMethod.OPTIONS
 
 
+@attr.s
 class PATCH(Operation):
     @property
     def http_method(self):
         return HttpMethod.PATCH
 
 
+@attr.s
 class TRACE(Operation):
     @property
     def http_method(self):
         return HttpMethod.TRACE
 
 
+@attr.s
 class DELETE(Operation):
     @property
     def http_method(self):
@@ -740,6 +768,7 @@ class ApiKeySecurityScheme(SecurityScheme):
     _type = attr.ib(default=SecuritySchemeType.API_KEY, init=False)
     _in = attr.ib(default=ParameterLocation.HEADER, init=False)
     description = attr.ib(default=None, type=str)
+    extensions = attr.ib(default={})
 
     @property
     def q_in(self):
@@ -754,6 +783,7 @@ class HttpSecurityScheme(SecurityScheme):
     bearer_format = attr.ib(default="bearer")
     description = attr.ib(default=None, type=str)
     _type = attr.ib(default=SecuritySchemeType.HTTP, init=False)
+    extensions = attr.ib(default={})
 
 
 @attr.s
@@ -762,6 +792,7 @@ class OpenIDConnectScheme(SecurityScheme):
 
     open_id_connect_url = attr.ib(type=str)
     _type = attr.ib(default=SecuritySchemeType.OPEN_ID_CONNECT, init=False)
+    extensions = attr.ib(default={})
 
     @open_id_connect_url.validator
     def validate(self, _, url):
@@ -775,6 +806,7 @@ class OAuth2SecurityScheme(SecurityScheme):
 
     flows = attr.ib()
     _type = attr.ib(default=SecuritySchemeType.OAUTH2, init=False)
+    extensions = attr.ib(default={})
 
 
 class ImplicitOAuthFlow(ExtensionMixin):
@@ -792,36 +824,43 @@ class ImplicitOAuthFlow(ExtensionMixin):
 class AuthorizationCodeOAuthFlow(ExtensionMixin):
     """ Authorization Code OAuth2 Flow """
 
-    def __init__(self, authorization_url, token_url, scopes, refresh_url=None):
+    def __init__(self, authorization_url, token_url, scopes, refresh_url=None, extensions=None):
         self.authorization_code = OAuthFlow(
             authorization_url=authorization_url,
             token_url=token_url,
             refresh_url=refresh_url,
             scopes=scopes,
+            extensions=extensions,
         )
 
 
 class PasswordOAuthFlow(ExtensionMixin):
     """ Password based OAuth2 Flow """
 
-    def __init__(self, token_url, scopes, authorization_url=None, refresh_url=None):
+    def __init__(
+        self, token_url, scopes, authorization_url=None, refresh_url=None, extensions=None
+    ):
         self.password = OAuthFlow(
             authorization_url=authorization_url,
             token_url=token_url,
             refresh_url=refresh_url,
             scopes=scopes,
+            extensions=extensions,
         )
 
 
 class ClientCredentialsOAuthFlow(ExtensionMixin):
     """ Client Credentials OAuth FLow """
 
-    def __init__(self, token_url, scopes, authorization_url=None, refresh_url=None):
+    def __init__(
+        self, token_url, scopes, authorization_url=None, refresh_url=None, extensions=None
+    ):
         self.clientCredentials = OAuthFlow(
             authorization_url=authorization_url,
             token_url=token_url,
             refresh_url=refresh_url,
             scopes=scopes,
+            extensions=extensions,
         )
 
 
@@ -833,6 +872,7 @@ class OAuthFlow(ExtensionMixin):
     token_url = attr.ib(type=str)
     refresh_url = attr.ib(type=str)
     scopes = attr.ib(type={})
+    extensions = attr.ib(default={})
 
 
 class OpenApi(ModelMixin):
@@ -865,7 +905,7 @@ class OpenApi(ModelMixin):
         self.external_docs = external_docs
 
         if security:
-            self.components["security_schemes"] = security
+            self.components["securitySchemes"] = security
 
     def add_tag(self, tag):
         """

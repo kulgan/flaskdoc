@@ -35,11 +35,19 @@ def make_app(name="inventory"):
         servers = petstore.servers
         tags = petstore.tags
         security = petstore.security_schemes
+    elif name == "mocks":
+        from flaskdoc.examples import mocks
+
+        app.register_blueprint(mocks.blp)
+        info = mocks.info
+        tags = mocks.tags
+        servers = mocks.servers
     else:
-        from flaskdoc.examples import inventory, petstore
+        from flaskdoc.examples import inventory, mocks, petstore
 
         app.register_blueprint(inventory.blp)
         app.register_blueprint(petstore.pet)
+        app.register_blueprint(mocks.blp)
         info = petstore.info
         servers = petstore.servers
         tags = petstore.tags
