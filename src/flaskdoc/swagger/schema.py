@@ -136,7 +136,7 @@ class BinaryString(String):
 @attr.s
 class Object(Schema):
     type = attr.ib(default="object", init=False)
-    required = attr.ib(default=[], type=list)
+    required = attr.ib(default=None, type=list)
 
 
 @attr.s
@@ -269,18 +269,20 @@ class SchemaFactory(object):
                 arg_schema = self.get_schema(args)
                 return Array(items=arg_schema, description=description)
             if origin in [dict, Dict]:
-                return Object(additional_properties=True)
+                return Object(additional_properties=True, description=description)
 
         if isinstance(cls, enum.EnumMeta):
             enums = []
+            sch = None
             for c in cls.__members__.values():
                 v = c._value_
                 enums.append(v)
                 if v:
                     sch_typ = SCHEMA_TYPES_MAP.get(type(v))
-                    sch = sch_typ(enum=enums)
-                else:
-                    sch = Schema(enum=enums)
+                    sch = sch_typ(enum=enums, description=description)
+                    break
+            if not sch:
+                sch = Schema(enum=enums, description=description)
         # handle custom jo objects
         elif hasattr(cls, "jo_schema"):
             sch = cls.jo_schema()
@@ -288,9 +290,7 @@ class SchemaFactory(object):
             sch = Object()
             sch.properties = self.from_type(cls)
         self.schemas[cls.__name__] = sch
-        return Schema(
-            ref="{}/{}".format(self.ref_base, cls.__name__), description=inspect.getdoc(cls)
-        )
+        return Schema(ref="{}/{}".format(self.ref_base, cls.__name__))
 
     def clear(self):
         self.schemas = {}

@@ -24,7 +24,7 @@ class SwaggerDict(OrderedDict, DictMixin):
 
 class ExtensionMixin(ModelMixin):
 
-    extensions = None
+    extensions = attr.ib(default={})
 
     def add_extension(self, name, value):
         """ Allows extensions to the Swagger Schema.
@@ -57,11 +57,18 @@ class ExtensionMixin(ModelMixin):
         if value and not value.startswith("x-"):
             raise ValueError("Custom extension must start with x-")
 
-    def to_dict(self):
-        di = super(ExtensionMixin, self).to_dict()
-        if self.extensions:
-            di.update(self.extensions)
-        return di
+    @extensions.validator
+    def validate(self, _, ext):
+        """ Validates the name of all provided extensions """
+        if ext:
+            for k in ext:
+                self.validate_extension_name(k)
+
+    # def to_dict(self):
+    #     di = super(ExtensionMixin, self).to_dict()
+    #     if self.extensions:
+    #         di.update(self.extensions)
+    #     return di
 
 
 @attr.s
@@ -101,6 +108,7 @@ class License(ExtensionMixin):
 
     name = attr.ib(type=str)
     url = attr.ib(default=None, type=str)
+    extensions = attr.ib(default={})
 
     @url.validator
     def validate(self, _, url):
@@ -123,6 +131,7 @@ class Contact(ExtensionMixin):
     name = attr.ib(default=None, type=str)
     email = attr.ib(default=None, type=str)
     url = attr.ib(default=None, type=str)
+    extensions = attr.ib(default={})
 
     @url.validator
     def validate(self, _, url):
@@ -194,7 +203,7 @@ class Server(ExtensionMixin):
 
     url = attr.ib(type=str)
     description = attr.ib(default=None, type=str)
-    variables = attr.ib(default={}, type=str)
+    variables = attr.ib(default=None, type=dict)
 
     def add_variable(self, name: str, variable: ServerVariable):
         """ Adds a server variable
@@ -202,6 +211,8 @@ class Server(ExtensionMixin):
             name: variable name
             variable: Server variable instance
         """
+        if not self.variables:
+            self.variables = {}
         self.variables[name] = variable
 
 
@@ -242,7 +253,7 @@ class Encoding(ExtensionMixin):
     """ A single encoding definition applied to a single schema property. """
 
     content_type = attr.ib(type=str)
-    headers = attr.ib(default=SwaggerDict())
+    headers = attr.ib(default=None, type=SwaggerDict)
     style = attr.ib(default=None, type=Style)
     explode = attr.ib(default=True)
     allow_reserved = attr.ib(default=False)
@@ -284,9 +295,9 @@ class Component(ExtensionMixin):
     """
 
     schemas = attr.ib(default={})
-    responses = attr.ib(default={})
-    parameters = attr.ib(default={})
-    examples = attr.ib(default={})
+    responses = attr.ib(default=None, type=dict)
+    parameters = attr.ib(default=None, type=dict)
+    examples = attr.ib(default=None, type=dict)
     request_bodies = attr.ib(default={})
     headers = attr.ib(default={})
     security_schemes = attr.ib(default={})
@@ -350,11 +361,11 @@ class Parameter(ModelMixin, ApiDecoratorMixin):
     allow_empty_value = attr.ib(default=None)
     allow_reserved = attr.ib(default=None)
     schema = attr.ib(default=None)
-    content = attr.ib(default={})
+    content = attr.ib(default=None)
     explode = attr.ib(default=None)
     _style = attr.ib(default=None, type=Style, init=False)
     example = attr.ib(default=None)
-    examples = attr.ib(default=SwaggerDict())
+    examples = attr.ib(default=None, type=dict)
 
     @property
     def q_in(self):
@@ -467,7 +478,7 @@ class ResponsesObject(ExtensionMixin):
     """
 
     default = attr.ib(default=None, type=ResponseObject)
-    responses = attr.ib(default=SwaggerDict())
+    responses = attr.ib(default=None, type=dict)
 
     def add_response(self, status_code: str, response: ResponseObject):
         self.responses[status_code] = response
@@ -485,11 +496,11 @@ class Tag(ModelMixin, ApiDecoratorMixin):
 
 
 @attr.s
-class Operation(ModelMixin, ApiDecoratorMixin):
+class Operation(ExtensionMixin, ApiDecoratorMixin):
     """ Describes a single API operation on a path. """
 
     responses = attr.ib(type=dict)
-    tags = attr.ib(default=[], type=list)
+    tags = attr.ib(default=None, type=list)
     summary = attr.ib(default=None, type=str)
     description = attr.ib(default=None, type=str)
     external_docs = attr.ib(default=None, type=ExternalDocumentation)
@@ -500,6 +511,7 @@ class Operation(ModelMixin, ApiDecoratorMixin):
     deprecated = attr.ib(default=None)
     security = attr.ib(default=None, type=list)
     servers = attr.ib(default=None, type=list)
+    extensions = attr.ib(default={})
 
     @property
     def http_method(self):
@@ -545,8 +557,8 @@ class PathItem(ModelMixin):
     summary = attr.ib(default=None, type=str)
     description = attr.ib(default=None, type=str)
 
-    servers = attr.ib(default=[], type=list)
-    parameters = attr.ib(default=[], type=list)
+    servers = attr.ib(default=None, type=list)
+    parameters = attr.ib(default=None, type=list)
 
     get = attr.ib(default=None, type=Operation)
     delete = attr.ib(default=None, type=Operation)
@@ -591,10 +603,10 @@ class PathItem(ModelMixin):
         Args:
             path_item (PathItem): PathItem instance to merge
         """
-        for server in path_item.servers:
+        for server in path_item.servers or []:
             self.add_server(server)
 
-        for param in path_item.parameters:
+        for param in path_item.parameters or []:
             self.add_parameter(param)
 
         self.get = path_item.get or self.get
@@ -901,8 +913,3 @@ class OpenApi(ModelMixin):
         for r_url in paths:
             path_url = "{}{}{}".format(url_prefix, blp_prefix, r_url)
             self.paths.add(path_url, paths.get(r_url))
-
-
-if __name__ == "__main__":
-    inf = License(name="Xd")
-    print(inf)

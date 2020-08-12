@@ -34,7 +34,7 @@ def schema(
 
     Args:
         additional_properties (bool): True if additional properties are allowed
-        required (bool): True if field is required
+        required (list[str]): list of required property names
         min_properties (int):  Minimum number of properties allowed
         max_properties (int): Maximum number of properties allowed
         xml (str|flaskdoc.swagger.XML): swagger XML object instance or string representing the name of the XML field
@@ -61,7 +61,6 @@ def schema(
         def jo_schema(cls):
             sc = Object(
                 additional_properties=additional_properties,
-                required=req,
                 min_properties=min_properties,
                 max_properties=max_properties,
                 xml=xml,
@@ -72,9 +71,12 @@ def schema(
                 psc = attrib.metadata[JO_SCHEMA]
                 is_required = attrib.metadata.get(JO_REQUIRED, False)
                 field_name = camel_case(attrib.name) if camel_case_props else attrib.name
-                if is_required and field_name not in sc.required:
-                    sc.required.append(field_name)
+                if is_required and field_name not in req:
+                    req.append(field_name)
                 sc.properties[field_name] = psc
+
+            if req:
+                sc.required = req
             return sc
 
         setattr(cls, "jo_schema", classmethod(jo_schema))

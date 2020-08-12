@@ -38,5 +38,5 @@ def test_registered_openapi(client):
 
 def test_mocks_spec_is_valid(client):
     r = client.get("/docs/openapi.json")
-    # print(json.dumps(r.json, indent=2))
+    print(json.dumps(r.json, indent=2))
     validate_spec(r.json)

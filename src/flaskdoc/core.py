@@ -26,8 +26,13 @@ class DictMixin:
             if k.startswith("__") or k == "_camel_case_fields_":
                 # skip private properties
                 continue
-            # skip extensions and None values
-            if k == "extensions" or v is None:
+            # skipNone values
+            if v is None:
+                continue
+            if k == "extensions":
+                # handle extensions
+                extensions = self._parse_dict(v)
+                parsed.update(extensions)
                 continue
             # map ref
             if k == "ref":

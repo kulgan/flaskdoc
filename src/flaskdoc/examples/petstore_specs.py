@@ -108,6 +108,7 @@ update_pet_spec = swagger.PUT(
         "405": swagger.ResponseObject(description="Validation exception"),
     },
     security=[{"petstore_auth": ["write:pets", "read:pets"]}],
+    extensions={"x-codegen-request-body-name": "body"},
 )
 
 
@@ -120,6 +121,7 @@ add_pet_spec = swagger.POST(
     ),
     responses={"405": swagger.ResponseObject(description="Invalid input")},
     security=[{"petstore_auth": ["write:pets", "read:pets"]}],
+    extensions={"x-codegen-request-body-name": "body"},
 )
 
 
