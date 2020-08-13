@@ -43,7 +43,7 @@ class ContainerModel(ModelMixin):
             yield item
 
     def to_dict(self):
-        return self._parse_dict(self.items)
+        return self.parse(self.items)
 
 
 @attr.s

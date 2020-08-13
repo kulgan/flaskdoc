@@ -16,9 +16,9 @@ class DictMixin:
     def to_dict(self):
         """ Converts object to dictionary """
 
-        return self._parse_dict(self.__dict__)
+        return self.parse(self.__dict__)
 
-    def _parse_dict(self, val):
+    def parse(self, val):
         parsed = {}
         convert_to_came_case = val.get("_camel_case_fields_", False)
         for k, v in val.items():
@@ -30,7 +30,7 @@ class DictMixin:
                 continue
             if k == "extensions":
                 # handle extensions
-                extensions = self._parse_dict(v)
+                extensions = self.parse(v)
                 parsed.update(extensions)
                 continue
             # map ref
@@ -49,9 +49,9 @@ class DictMixin:
         if isinstance(val, list):
             return [self._to_dict(v) for v in val]
         if isinstance(val, collections.Mapping):
-            return self._parse_dict(val)
+            return self.parse(val)
         if hasattr(val, "__dict__"):
-            return self._parse_dict(val.__dict__)
+            return self.parse(val.__dict__)
 
         return val
 

@@ -231,7 +231,8 @@ update_by_id_spec = swagger.POST(
                 properties=dict(
                     name=swagger.String(description="Updated name of the pet"),
                     status=swagger.String(description="Updated status of the pet"),
-                )
+                ),
+                example={"name": "Sylvester Stallone", "status": "available"},
             ),
         )
     ),
@@ -250,6 +251,11 @@ delete_by_id_spec = swagger.DELETE(
             name="petId",
             description="ID of pet that needs to be updated",
             schema=swagger.Int64(),
+            examples={
+                "negative": swagger.Example(
+                    summary="negative value", value=-100, description="deeper negative"
+                )
+            },
         ),
     ],
     responses={
@@ -266,7 +272,7 @@ place_order_spec = swagger.POST(
     operation_id="placeOrder",
     request_body=swagger.RequestBody(
         description="order placed for purchasing the pet",
-        content=swagger.JsonType(schema=Order),
+        content=swagger.JsonType(schema=Order, examples={"order": Order()}),
         required=True,
     ),
     responses={

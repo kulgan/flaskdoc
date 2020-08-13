@@ -113,13 +113,21 @@ def docs_ui(path="default.html"):
 
 
 def register_openapi(
-    app, info, servers=None, tags=None, security=None, docs_path="/docs", use_redoc=False,
+    app,
+    info,
+    examples=None,
+    servers=None,
+    tags=None,
+    security=None,
+    docs_path="/docs",
+    use_redoc=False,
 ):
     """ Registers flaskdoc api specs to an existing flask app
 
     Args:
         app (flask.Flask): an existing flask app instance
         info (swagger.Info): OpenAPI info block
+        examples {dict[str, swagger.Example]}: reusable list of examples
         servers (list[swagger.Server]): list of servers used for testing
         tags (list[swagger.Tag]): list of tags with name and description
         security (dict[str, swagger.SecurityScheme]): security schemes to apply
@@ -135,6 +143,7 @@ def register_openapi(
     ui.add_url_rule("/openapi.json", view_func=json_path, methods=["GET"])
     ui.add_url_rule("/openapi.yaml", view_func=yaml_path, methods=["GET"])
 
+    components = dict(examples=examples)
     app.register_blueprint(ui, url_prefix=docs_path)
     app.openapi = swagger.OpenApi(
         info=info,
@@ -143,6 +152,7 @@ def register_openapi(
         servers=servers,
         tags=tags,
         security=security,
+        components=components,
     )
 
 

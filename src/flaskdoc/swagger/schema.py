@@ -21,7 +21,7 @@ from typing import AnyStr, ByteString, Dict, List, Set, Text, Union
 
 import attr
 
-from flaskdoc.core import ExtensionMixin, ModelMixin
+from flaskdoc.core import DictMixin, ExtensionMixin, ModelMixin
 
 
 @attr.s
@@ -67,6 +67,7 @@ class Schema(ModelMixin):
     xml = attr.ib(default=None, type="XML")
     external_docs = None
     deprecated = attr.ib(default=None, type=bool)
+    example = attr.ib(default=None, type=dict)
 
     def q_not(self):
         return self._not
