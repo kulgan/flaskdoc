@@ -14,7 +14,10 @@ def flaskdoc():
 @click.option(
     "--name",
     "-n",
-    type=click.Choice(["inventory", "petstore", "all"], case_sensitive=False),
+    type=click.Choice(
+        ["inventory", "petstore", "all", "mocks", "api-with-examples", "link-example"],
+        case_sensitive=False,
+    ),
     default="inventory",
 )
 def start_examples(name):

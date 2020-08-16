@@ -1,6 +1,7 @@
 # Standard Library
 import enum
 import logging
+import re
 from collections import OrderedDict
 from typing import Union
 
@@ -193,6 +194,25 @@ class ReferenceObject(ModelMixin):
 
     ref = attr.ib(type=str)
 
+    _ref_object = attr.ib(default="schemas", init=False)
+
+    def __attrs_post_init__(self):
+        if "#/components" not in self.ref:
+            self.ref = "#/components/{}/{}".format(self._ref_object, self.ref)
+
+    def to_dict(self):
+        return {"$ref": self.ref}
+
+
+@attr.s
+class ExampleReference(ReferenceObject):
+    _ref_object = attr.ib(default="examples", init=False)
+
+
+@attr.s
+class LinkReference(ReferenceObject):
+    _ref_object = attr.ib(default="links", init=False)
+
 
 @attr.s
 class ExternalDocumentation(ExtensionMixin):
@@ -209,35 +229,6 @@ class RequestBody(ContentMixin, ExtensionMixin):
     description = attr.ib(default=None, type=str)
     required = attr.ib(default=None)
     extensions = attr.ib(default={})
-
-
-@attr.s
-class Component(ExtensionMixin):
-    """ Holds a set of reusable objects for different aspects of the OAS.
-
-    All objects defined within the components object will have no effect on the API unless they are explicitly
-    referenced from properties outside the components object.
-
-    This object MAY be extended with Specification Extensions. All the fixed fields declared above are objects that
-    MUST use keys that match the regular expression: ^[a-zA-Z0-9\\.\\-_]+$.
-
-    Properties:
-        schemas: An object to hold reusable Schema Objects.
-    """
-
-    schemas = attr.ib(default={})
-    responses = attr.ib(default=None, type=dict)
-    parameters = attr.ib(default=None, type=dict)
-    examples = attr.ib(default=None, type=dict)
-    request_bodies = attr.ib(default={})
-    headers = attr.ib(default={})
-    security_schemes = attr.ib(default={})
-    links = attr.ib(default={})
-    callbacks = attr.ib(default={})
-    extensions = attr.ib(default={})
-
-    def add_response(self, response_name: str, response):
-        self.responses[response_name] = response
 
 
 @attr.s
@@ -805,6 +796,62 @@ class OAuthFlow(ExtensionMixin):
     extensions = attr.ib(default={})
 
 
+class ComponentType(enum.Enum):
+
+    EXAMPLE = "examples"
+    CALLBACKS = "callbacks"
+    HEADER = "headers"
+    LINK = "links"
+    PARAMETER = "parameters"
+    REQUEST_BODY = "request+bodies"
+    RESPONSE = "responses"
+    SCHEMA = "schemas"
+    SECURITY_SCHEME = "security_schemes"
+
+
+@attr.s
+class Components(ExtensionMixin):
+    """ Holds a set of reusable objects for different aspects of the OAS.
+
+    All objects defined within the components object will have no effect on the API unless they are explicitly
+    referenced from properties outside the components object.
+    """
+
+    schemas = attr.ib(default=None, type=dict)
+    responses = attr.ib(default=None, type=dict)
+    parameters = attr.ib(default=None, type=dict)
+    examples = attr.ib(default=None, type=dict)
+    request_bodies = attr.ib(default=None, type=dict)
+    headers = attr.ib(default=None, type=dict)
+    security_schemes = attr.ib(default=None, type=dict)
+    links = attr.ib(default=None, type=dict)
+    callbacks = attr.ib(default=None, type=dict)
+    extensions = attr.ib(default={})
+
+    PATTERN = re.compile("^[a-zA-Z0-9.-_]+$")
+
+    def add_component(self, component_type, components):
+        """ Adds components
+
+        Args:
+            component_type (ComponentType): type of component
+            components (dict[str, Any]): key value mapping of components
+        Raises:
+            ValueError: If key is not a valid value for regex ``^[a-zA-Z0-9.-_]+$``
+        """
+        if not components:
+            return
+
+        attrib_name = component_type.value
+        values = getattr(self, attrib_name)
+        if values is None:
+            values = {}
+            setattr(self, attrib_name, values)
+        for key, component in components.items():
+            Components.PATTERN.match(key)
+            values[key] = component
+
+
 class OpenApi(ModelMixin):
     """ This is the root document object of the OpenAPI document.
 
@@ -824,18 +871,14 @@ class OpenApi(ModelMixin):
         servers=None,
         external_docs=None,
         components=None,
-        security=None,
     ):
         self.info = info
         self.paths = paths
         self.openapi = version
         self.tags = tags or []
         self.servers = servers or []
-        self.components = components or {}
+        self.components = components or Components()
         self.external_docs = external_docs
-
-        if security:
-            self.components["securitySchemes"] = security
 
     def add_tag(self, tag):
         """

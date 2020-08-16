@@ -121,18 +121,20 @@ def register_openapi(
     security=None,
     docs_path="/docs",
     use_redoc=False,
+    links=None,
 ):
     """ Registers flaskdoc api specs to an existing flask app
 
     Args:
         app (flask.Flask): an existing flask app instance
         info (swagger.Info): OpenAPI info block
-        examples {dict[str, swagger.Example]}: reusable list of examples
+        examples (dict[str, swagger.Example]): reusable mappings of examples
         servers (list[swagger.Server]): list of servers used for testing
         tags (list[swagger.Tag]): list of tags with name and description
         security (dict[str, swagger.SecurityScheme]): security schemes to apply
         docs_path (str): custom path name for the swagger ui docs, defaults to docs
         use_redoc (bool): disable normal swagger ui and use redoc ui instead
+        links (dict[str, swagger.Link]): reusable links mapping
     """
     docs_path = docs_path or "docs"
     CONFIG["use_redoc"] = use_redoc
@@ -143,7 +145,10 @@ def register_openapi(
     ui.add_url_rule("/openapi.json", view_func=json_path, methods=["GET"])
     ui.add_url_rule("/openapi.yaml", view_func=yaml_path, methods=["GET"])
 
-    components = dict(examples=examples)
+    components = swagger.Components()
+    components.add_component(swagger.ComponentType.EXAMPLE, examples)
+    components.add_component(swagger.ComponentType.LINK, links)
+    components.add_component(swagger.ComponentType.SECURITY_SCHEME, security)
     app.register_blueprint(ui, url_prefix=docs_path)
     app.openapi = swagger.OpenApi(
         info=info,
@@ -151,7 +156,6 @@ def register_openapi(
         version="3.0.3",
         servers=servers,
         tags=tags,
-        security=security,
         components=components,
     )
 
@@ -175,7 +179,7 @@ def get_api_docs(app):
             pi = parse_specs(rule, spec, api)
             pi.description = docs
             api.paths.add(plugins.parse_flask_rule(rule.rule), pi)
-    api.components["schemas"] = swagger.schema_factory.schemas
+    api.components.add_component(swagger.ComponentType.SCHEMA, swagger.schema_factory.schemas)
     return 1
 
 

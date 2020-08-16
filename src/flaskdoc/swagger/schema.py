@@ -197,6 +197,7 @@ class SchemaFactory(object):
 
     ref_base = attr.ib(default="#/components/schemas")
     schemas = attr.ib(init=False, default={})
+    examples = attr.ib(init=False, default={})
 
     def parse_data_fields(self, cls, fields):
         """ Parses classes implemented using either py37 dataclasses or attrs
@@ -274,16 +275,13 @@ class SchemaFactory(object):
 
         if isinstance(cls, enum.EnumMeta):
             enums = []
-            sch = None
+            sch_type = Schema
             for c in cls.__members__.values():
                 v = c._value_
                 enums.append(v)
                 if v:
-                    sch_typ = SCHEMA_TYPES_MAP.get(type(v))
-                    sch = sch_typ(enum=enums, description=description)
-                    break
-            if not sch:
-                sch = Schema(enum=enums, description=description)
+                    sch_type = SCHEMA_TYPES_MAP.get(type(v))
+            sch = sch_type(enum=enums, description=description)
         # handle custom jo objects
         elif hasattr(cls, "jo_schema"):
             sch = cls.jo_schema()
@@ -307,6 +305,9 @@ class MediaType(ModelMixin):
     examples = attr.ib(default=None, type=dict)
 
     def to_schema(self):
+
+        if not self.schema:
+            return None
 
         # handle primitives
         if self.schema in [str, int, bool, dict]:
