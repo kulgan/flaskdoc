@@ -21,7 +21,7 @@ from typing import AnyStr, ByteString, Dict, List, Set, Text, Union
 
 import attr
 
-from flaskdoc.core import DictMixin, ExtensionMixin, ModelMixin
+from flaskdoc.core import ExtensionMixin, ModelMixin
 
 
 @attr.s
@@ -353,9 +353,13 @@ class MultipartType(UrlEncodedFormType):
     content_type = attr.ib(default="multipart/form-data")
 
     @content_type.validator
-    def validate(self, _, ctype: str):
+    def validate(self, attribute, ctype):
         if not ctype.startswith("multipart"):
-            raise ValueError("Multipart type must start with multipart")
+            raise ValueError(
+                "Attribue {} value must start with multipart and not {}".format(
+                    attribute, self.content_type
+                )
+            )
 
 
 @attr.s
