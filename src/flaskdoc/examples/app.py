@@ -57,7 +57,7 @@ def make_app(name="inventory"):
     elif name == "link-example":
         from flaskdoc.examples import link_example as le
 
-        app.register_blueprint(le.api)
+        app.register_blueprint(le.api, url_prefix="/")
         info = le.info
         links = le.links
     else:

@@ -42,7 +42,7 @@ get_repository = swagger.GET(
 )
 
 
-get_pull_request_by_repository = swagger.GET(
+get_pull_requests_by_repository = swagger.GET(
     operation_id="getPullRequestByRepository",
     parameters=[
         swagger.PathParameter(name="username", schema=str,),
@@ -55,4 +55,31 @@ get_pull_request_by_repository = swagger.GET(
             content=swagger.JsonType(schema=[schemas.PullRequest]),
         )
     },
+)
+
+
+get_pull_requests_by_id = swagger.GET(
+    operation_id="getPullRequestsById",
+    parameters=[
+        swagger.PathParameter(name="username", schema=str,),
+        swagger.PathParameter(name="slug", schema=str),
+        swagger.PathParameter(name="pid", schema=str),
+    ],
+    responses={
+        "200": swagger.ResponseObject(
+            description="an array of pull request objects",
+            content=swagger.JsonType(schema=[schemas.PullRequest]),
+            links={"pullRequestMerge": swagger.LinkReference("PullRequestMerge")},
+        ),
+    },
+)
+
+merge_pull_request = swagger.POST(
+    operation_id="mergePullRequest",
+    parameters=[
+        swagger.PathParameter(name="username", schema=str,),
+        swagger.PathParameter(name="slug", schema=str),
+        swagger.PathParameter(name="pid", schema=str),
+    ],
+    responses={"204": swagger.ResponseObject(description="This PR was successfully merged")},
 )

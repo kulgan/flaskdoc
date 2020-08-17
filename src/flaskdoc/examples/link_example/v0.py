@@ -48,7 +48,24 @@ def get_repository(username, slug):
     pass
 
 
-@specs.get_pull_request_by_repository
+@specs.get_pull_requests_by_repository
 @api.route("/2.0/repositories/<string:username>/<string:slug>/pullrequests", methods=["GET"])
-def get_pul_request_by_repository(username, slug):
+def get_pull_requests_by_repository(username, slug):
+    pass
+
+
+@specs.get_pull_requests_by_id
+@api.route(
+    "/2.0/repositories/<string:username>/<string:slug>/pullrequests/<string:pid>", methods=["GET"]
+)
+def get_pull_requests_by_id(username, slug, pid):
+    pass
+
+
+@specs.merge_pull_request
+@api.route(
+    "/2.0/repositories/<string:username>/<string:slug>/pullrequests/<string:pid>/merge",
+    methods=["POST"],
+)
+def merge_pull_request(username, slug, pid):
     pass
