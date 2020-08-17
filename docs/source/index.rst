@@ -15,6 +15,7 @@ This section provides documentation on how to get started using flaskdoc in your
 
    tutorial
    examples
+   snippets
    flaskdoc
    changelog
 
@@ -69,9 +70,9 @@ Add top level openapi objects like `Info <https://swagger.io/specification/#info
 
 This adds the following endpoints to your list
 
-* /openapi.yaml
-* /openapi.json
-* /swagger-ui
+* /docs
+* /docs/openapi.yaml
+* /docs/openapi.json
 
 Start Documenting
 """""""""""""""""
@@ -116,7 +117,7 @@ A GET example with path parameter
         """
         return sample
 
-Run your app and visit `/swagger-ui` to see the generated openapi specs.
+Run your app and visit `/docs` to see the generated openapi specs.
 
 Contributing
 ------------

@@ -84,9 +84,9 @@ Add top level openapi objects like `Info <https://swagger.io/specification/#info
 
 This adds the following endpoints to your list
 
-* /openapi.yaml
-* /openapi.json
-* /swagger-ui
+* /docs
+* /docs/openapi.yaml
+* /docs/openapi.json
 
 Start Documenting
 """""""""""""""""
@@ -133,7 +133,7 @@ A GET example with path parameter
         """
         return sample
 
-Run your app and visit `/swagger-ui` to see the generated openapi specs
+Run your app and visit `/docs` to see the generated openapi specs
 
 Running Examples
 ================
@@ -141,7 +141,9 @@ Running Examples
 Two example projects are currently provided
 
 * `inventory <src/flaskdoc/examples/inventory.py>`_
-* `petstore <src/flaskdoc/examples/petstore.py>`_
+* `petstore <src/flaskdoc/examples/petstore.py>`_ source `OpenAPI Petstore <https://petstore.swagger.io>`_
+* `link-example <src/flaskdoc/examples/link_example/v0.py>`_ - source `OpenAPI link example <https://github.com/OAI/OpenAPI-Specification/blob/master/examples/v3.0/link-example.json>`_
+* `api-with-example <src/flaskdoc/examples/api_with_example.py>`_ - source `OpenAPI api_with_examples <https://github.com/OAI/OpenAPI-Specification/blob/master/examples/v3.0/api-with-examples.json>`_
 
 To run
 

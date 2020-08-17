@@ -44,6 +44,10 @@ Flaskdoc exposes swagger specific models via ``flaskdoc.swagger``
 
 Registering openapi routes using openapi involves simply doing
 
+.. note::
+    See :ref:`snippets` section for more detailed examples on how to use the register_openapi function
+
+
 .. code-block:: python
 
     import flask
@@ -55,7 +59,7 @@ Registering openapi routes using openapi involves simply doing
     register_openapi(app, info=info)
 
 
-Under the hood, flaskdoc simply does a:
+Under the hood, flaskdoc simply does:
 
 .. code-block:: python
 

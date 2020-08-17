@@ -1,3 +1,5 @@
+.. _flaskdoc-examples:
+
 Examples
 ========
 
@@ -22,7 +24,13 @@ flaskdoc examples can be invoked as follows:
 
     $ flaskdoc start -n <example>
 
-Where example can either be petstore or inventory, use ``all`` to register all examples at once
+Where example can either be one of
+
+* petstore
+* inventory
+* link-example
+* api-with-example
+
 
 Petstore Example
 ----------------
@@ -42,5 +50,4 @@ Implements the simple inventory api provided by swaggerhub. To run inventory exa
 
     $ flaskdoc start -n inventory
 
-Visit http://localhost:{port}/swagger-ui to see the SwaggerUI or http://localhost:{port}/swagger-ui/redoc to see
-the redoc version
+Visit http://localhost:15172/docs to see the UI

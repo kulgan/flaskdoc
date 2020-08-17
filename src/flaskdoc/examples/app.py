@@ -16,7 +16,13 @@ class AppConfig:
 def make_app(name="inventory"):
     app = flask.Flask("Test API")
 
-    info = servers = tags = security = None
+    info = None
+    servers = []
+    tags = []
+    security = {}
+    examples = {}
+    links = {}
+
     if name == "inventory":
         from flaskdoc.examples import inventory
 
@@ -42,19 +48,46 @@ def make_app(name="inventory"):
         info = mocks.info
         tags = mocks.tags
         servers = mocks.servers
+    elif name == "api-with-examples":
+        from flaskdoc.examples import api_with_examples as apw
+
+        app.register_blueprint(apw.api)
+        info = apw.info
+        examples = apw.examples
+    elif name == "link-example":
+        from flaskdoc.examples import link_example as le
+
+        app.register_blueprint(le.api, url_prefix="/")
+        info = le.info
+        links = le.links
     else:
-        from flaskdoc.examples import inventory, mocks, petstore
+        from flaskdoc.examples import (
+            api_with_examples,
+            inventory,
+            link_example,
+            mocks,
+            petstore,
+        )
 
         app.register_blueprint(inventory.blp)
         app.register_blueprint(petstore.pet)
         app.register_blueprint(mocks.blp)
+        app.register_blueprint(api_with_examples.api)
         info = petstore.info
         servers = petstore.servers
         tags = petstore.tags
+        examples.update(api_with_examples.examples)
         security = petstore.security_schemes
+        links.update(link_example.links)
 
     flaskdoc.register_openapi(
-        app, info=info, servers=servers, tags=tags, security=security,
+        app,
+        info=info,
+        servers=servers,
+        tags=tags,
+        security=security,
+        examples=examples,
+        links=links,
     )
 
     # examples somehow appends an extra docs in the url path, use this force it to empty

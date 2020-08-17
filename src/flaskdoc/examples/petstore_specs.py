@@ -74,7 +74,7 @@ upload_image_spec = swagger.POST(
         )
     ],
     request_body=swagger.RequestBody(
-        content=swagger.Content(
+        content=swagger.MediaType(
             content_type="multipart/form-data",
             schema=swagger.Schema(
                 properties=dict(
@@ -193,7 +193,18 @@ get_by_id_spec = swagger.GET(
     responses={
         "200": swagger.ResponseObject(
             description="Successful operation",
-            content=[swagger.JsonType(schema=Pet), swagger.XmlType(schema=Pet)],
+            content=[
+                swagger.JsonType(
+                    schema=Pet,
+                    example=Pet(
+                        id=10456,
+                        name="spidey",
+                        status="pending",
+                        category=Category(id=123, name="smoked"),
+                    ),
+                ),
+                swagger.XmlType(schema=Pet),
+            ],
         ),
         "400": swagger.ResponseObject(description="Invalid ID supplied"),
         "404": swagger.ResponseObject(description="Pet not found"),
@@ -214,13 +225,14 @@ update_by_id_spec = swagger.POST(
         )
     ],
     request_body=swagger.RequestBody(
-        content=swagger.Content(
+        content=swagger.MediaType(
             content_type="application/x-www-form-urlencoded",
             schema=swagger.Schema(
                 properties=dict(
                     name=swagger.String(description="Updated name of the pet"),
                     status=swagger.String(description="Updated status of the pet"),
-                )
+                ),
+                example={"name": "Sylvester Stallone", "status": "available"},
             ),
         )
     ),
@@ -239,6 +251,11 @@ delete_by_id_spec = swagger.DELETE(
             name="petId",
             description="ID of pet that needs to be updated",
             schema=swagger.Int64(),
+            examples={
+                "negative": swagger.Example(
+                    summary="negative value", value=-100, description="deeper negative"
+                )
+            },
         ),
     ],
     responses={
@@ -255,7 +272,7 @@ place_order_spec = swagger.POST(
     operation_id="placeOrder",
     request_body=swagger.RequestBody(
         description="order placed for purchasing the pet",
-        content=swagger.JsonType(schema=Order),
+        content=swagger.JsonType(schema=Order, examples={"order": Order()}),
         required=True,
     ),
     responses={

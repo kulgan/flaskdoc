@@ -1,12 +1,13 @@
 # Standard Library
 import enum
 import logging
+import re
 from collections import OrderedDict
 from typing import Union
 
 import attr
 
-from flaskdoc.core import ApiDecoratorMixin, DictMixin, ModelMixin
+from flaskdoc.core import ApiDecoratorMixin, DictMixin, ExtensionMixin, ModelMixin
 from flaskdoc.swagger import validators
 from flaskdoc.swagger.schema import ContentMixin, schema_factory
 
@@ -20,49 +21,6 @@ class SwaggerDict(OrderedDict, DictMixin):
         if value not in [False, True] and not value:
             return
         super(SwaggerDict, self).__setitem__(key, value)
-
-
-class ExtensionMixin(ModelMixin):
-
-    extensions = attr.ib(default={})
-
-    def add_extension(self, name, value):
-        """ Allows extensions to the Swagger Schema.
-
-        The field name MUST begin with x-, for example, x-internal-id. The value can be null, a primitive,
-        an array or an object.
-        Args:
-            name (str): custom extension name, must begin with x-
-            value (Any): value, can be None, any object or list
-        Returns:
-            ModelMixin: for chaining
-        Raises:
-            ValueError: if key name is invalid
-        """
-        self.validate_extension_name(name)
-        if not self.extensions:
-            self.extensions = SwaggerDict()
-        self.extensions[name] = value
-        return self
-
-    @staticmethod
-    def validate_extension_name(value):
-        """
-        Validates a custom extension name
-        Args:
-            value (str): custom extension name
-        Raises:
-            ValueError: if key name is invalid
-        """
-        if value and not value.startswith("x-"):
-            raise ValueError("Custom extension must start with x-")
-
-    @extensions.validator
-    def validate(self, _, ext):
-        """ Validates the name of all provided extensions """
-        if ext:
-            for k in ext:
-                self.validate_extension_name(k)
 
 
 @attr.s
@@ -86,7 +44,7 @@ class ContainerModel(ModelMixin):
             yield item
 
     def to_dict(self):
-        return self._parse_dict(self.items)
+        return self.parse(self.items)
 
 
 @attr.s
@@ -236,6 +194,25 @@ class ReferenceObject(ModelMixin):
 
     ref = attr.ib(type=str)
 
+    _ref_object = attr.ib(default="schemas", init=False)
+
+    def __attrs_post_init__(self):
+        if "#/components" not in self.ref:
+            self.ref = "#/components/{}/{}".format(self._ref_object, self.ref)
+
+    def to_dict(self):
+        return {"$ref": self.ref}
+
+
+@attr.s
+class ExampleReference(ReferenceObject):
+    _ref_object = attr.ib(default="examples", init=False)
+
+
+@attr.s
+class LinkReference(ReferenceObject):
+    _ref_object = attr.ib(default="links", init=False)
+
 
 @attr.s
 class ExternalDocumentation(ExtensionMixin):
@@ -247,67 +224,11 @@ class ExternalDocumentation(ExtensionMixin):
 
 
 @attr.s
-class Encoding(ExtensionMixin):
-    """ A single encoding definition applied to a single schema property. """
-
-    content_type = attr.ib(type=str)
-    headers = attr.ib(default=None, type=SwaggerDict)
-    style = attr.ib(default=None, type=Style)
-    explode = attr.ib(default=True)
-    allow_reserved = attr.ib(default=False)
-    extensions = attr.ib(default={})
-
-    def add_header(self, name, header):
-        if not self.headers:
-            self.headers = SwaggerDict()
-        self.headers[name] = header
-
-
-@attr.s
-class Example(ExtensionMixin):
-
-    summary = attr.ib(default=None, type=str)
-    description = attr.ib(default=None, type=str)
-    value = attr.ib(default=None)
-    external_value = attr.ib(default=None, type=str)
-    extensions = attr.ib(default={})
-
-
-@attr.s
 class RequestBody(ContentMixin, ExtensionMixin):
 
     description = attr.ib(default=None, type=str)
-    required = attr.ib(default=False)
+    required = attr.ib(default=None)
     extensions = attr.ib(default={})
-
-
-@attr.s
-class Component(ExtensionMixin):
-    """ Holds a set of reusable objects for different aspects of the OAS.
-
-    All objects defined within the components object will have no effect on the API unless they are explicitly
-    referenced from properties outside the components object.
-
-    This object MAY be extended with Specification Extensions. All the fixed fields declared above are objects that
-    MUST use keys that match the regular expression: ^[a-zA-Z0-9\\.\\-_]+$.
-
-    Properties:
-        schemas: An object to hold reusable Schema Objects.
-    """
-
-    schemas = attr.ib(default={})
-    responses = attr.ib(default=None, type=dict)
-    parameters = attr.ib(default=None, type=dict)
-    examples = attr.ib(default=None, type=dict)
-    request_bodies = attr.ib(default={})
-    headers = attr.ib(default={})
-    security_schemes = attr.ib(default={})
-    links = attr.ib(default={})
-    callbacks = attr.ib(default={})
-    extensions = attr.ib(default={})
-
-    def add_response(self, response_name: str, response):
-        self.responses[response_name] = response
 
 
 @attr.s
@@ -875,6 +796,62 @@ class OAuthFlow(ExtensionMixin):
     extensions = attr.ib(default={})
 
 
+class ComponentType(enum.Enum):
+
+    EXAMPLE = "examples"
+    CALLBACKS = "callbacks"
+    HEADER = "headers"
+    LINK = "links"
+    PARAMETER = "parameters"
+    REQUEST_BODY = "request+bodies"
+    RESPONSE = "responses"
+    SCHEMA = "schemas"
+    SECURITY_SCHEME = "security_schemes"
+
+
+@attr.s
+class Components(ExtensionMixin):
+    """ Holds a set of reusable objects for different aspects of the OAS.
+
+    All objects defined within the components object will have no effect on the API unless they are explicitly
+    referenced from properties outside the components object.
+    """
+
+    schemas = attr.ib(default=None, type=dict)
+    responses = attr.ib(default=None, type=dict)
+    parameters = attr.ib(default=None, type=dict)
+    examples = attr.ib(default=None, type=dict)
+    request_bodies = attr.ib(default=None, type=dict)
+    headers = attr.ib(default=None, type=dict)
+    security_schemes = attr.ib(default=None, type=dict)
+    links = attr.ib(default=None, type=dict)
+    callbacks = attr.ib(default=None, type=dict)
+    extensions = attr.ib(default={})
+
+    PATTERN = re.compile("^[a-zA-Z0-9.-_]+$")
+
+    def add_component(self, component_type, components):
+        """ Adds components
+
+        Args:
+            component_type (ComponentType): type of component
+            components (dict[str, Any]): key value mapping of components
+        Raises:
+            ValueError: If key is not a valid value for regex ``^[a-zA-Z0-9.-_]+$``
+        """
+        if not components:
+            return
+
+        attrib_name = component_type.value
+        values = getattr(self, attrib_name)
+        if values is None:
+            values = {}
+            setattr(self, attrib_name, values)
+        for key, component in components.items():
+            Components.PATTERN.match(key)
+            values[key] = component
+
+
 class OpenApi(ModelMixin):
     """ This is the root document object of the OpenAPI document.
 
@@ -894,18 +871,14 @@ class OpenApi(ModelMixin):
         servers=None,
         external_docs=None,
         components=None,
-        security=None,
     ):
         self.info = info
         self.paths = paths
         self.openapi = version
         self.tags = tags or []
         self.servers = servers or []
-        self.components = components or {}
+        self.components = components or Components()
         self.external_docs = external_docs
-
-        if security:
-            self.components["securitySchemes"] = security
 
     def add_tag(self, tag):
         """
