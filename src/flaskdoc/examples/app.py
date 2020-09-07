@@ -60,6 +60,14 @@ def make_app(name="inventory"):
         app.register_blueprint(le.api, url_prefix="/")
         info = le.info
         links = le.links
+    elif name == "uspto":
+        from flaskdoc.examples import uspto
+
+        app.register_blueprint(uspto.api, url_prefix="/")
+        servers = uspto.servers
+        info = uspto.info
+        tags = uspto.tags
+
     else:
         from flaskdoc.examples import (
             api_with_examples,

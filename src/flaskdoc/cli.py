@@ -15,7 +15,7 @@ def flaskdoc():
     "--name",
     "-n",
     type=click.Choice(
-        ["inventory", "petstore", "all", "mocks", "api-with-examples", "link-example"],
+        ["inventory", "petstore", "all", "mocks", "api-with-examples", "link-example", "uspto"],
         case_sensitive=False,
     ),
     default="inventory",
