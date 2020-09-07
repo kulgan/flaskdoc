@@ -13,6 +13,10 @@ class Item:
     api_documentation_url = jo.string(
         str_format="urlref", description="A URL to the API console for each API"
     )
+    api_status = jo.string()
+    field_count = jo.integer()
+    fields = jo.array(item=swagger.String())
+    last_data_updated_date = jo.string()
 
 
 @jo.schema()
@@ -72,19 +76,19 @@ get_info = swagger.GET(
         swagger.PathParameter(
             name="version",
             description="Version of the dataset.",
-            example="v1s",
+            example="v1",
             schema=swagger.String(),
         ),
     ],
     responses={
         "200": swagger.ResponseObject(
             description="The dataset API for the given version is found and it is accessible to consume.",
-            content=swagger.JsonType(swagger.String()),
+            content=swagger.JsonType(Item),
         ),
         "404": swagger.ResponseObject(
             description="The combination of dataset name and version is not found in the system or it is not "
             "published yet toc be consumed by public.",
-            content=swagger.JsonType(swagger.String()),
+            content=swagger.JsonType(Item),
         ),
     },
 )
