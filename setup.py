@@ -50,6 +50,7 @@ setup(
             "black; python_version >= '3.6'",
             "click",
             "coverage[toml]",
+            "detect-secrets",
             "flake8",
             "openapi-spec-validator",
             "pre-commit",
