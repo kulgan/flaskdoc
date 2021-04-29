@@ -118,7 +118,7 @@ def static_resources(path="default.html"):
 @ui.route("/", methods=["GET"])
 def docs():
     template = "redoc.html" if CONFIG["use_redoc"] else "index.html"
-    return flask.render_template(template, path=CONFIG["path"])
+    return flask.render_template(template)
 
 
 def register_openapi(
@@ -147,7 +147,6 @@ def register_openapi(
     """
     docs_path = docs_path or "docs"
     CONFIG["use_redoc"] = use_redoc
-    CONFIG["path"] = docs_path
 
     components = swagger.Components()
     components.add_component(swagger.ComponentType.EXAMPLE, examples)
