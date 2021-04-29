@@ -8,7 +8,7 @@ from openapi_spec_validator import validate_spec
 
 @pytest.mark.parametrize("sample", ["hulu", "polo"])
 def test_route_decorator(client, sample):
-    """ Tests extension registers routes as expected """
+    """Tests extension registers routes as expected"""
 
     resp = client.get(flask.url_for("mocks.echo", sample=sample))
     assert resp.status_code == 200
@@ -21,7 +21,7 @@ def test_route_decorator(client, sample):
 
 
 def test_registered_openapi(client):
-    """ Tests the endpoints for downloading openapi spec was registered """
+    """Tests the endpoints for downloading openapi spec was registered"""
 
     # test availability of /openapi.json
     response = client.get(flask.url_for("flaskdoc.json_path"))

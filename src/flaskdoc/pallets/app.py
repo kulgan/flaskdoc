@@ -15,7 +15,10 @@ API_DOCS = {}
 static_ui = pkg_resources.resource_filename("flaskdoc", "static")
 static_templates = pkg_resources.resource_filename("flaskdoc", "templates")
 ui = flask.Blueprint(
-    "flaskdoc", __name__, static_folder=static_ui, template_folder=static_templates,
+    "flaskdoc",
+    __name__,
+    static_folder=static_ui,
+    template_folder=static_templates,
 )
 
 CONFIG = {}
@@ -56,7 +59,8 @@ class Flask(flask.Flask, SwaggerMixin):
         info_block = swagger.Info(title=self.api_title, version=self.api_version)
         if "API_LICENSE_NAME" in self.config:
             license_block = swagger.License(
-                name=self.config["API_LICENSE_NAME"], url=self.config.get("API_LICENSE_URL"),
+                name=self.config["API_LICENSE_NAME"],
+                url=self.config.get("API_LICENSE_URL"),
             )
             info_block.license = license_block
         if "API_CONTACT_NAME" in self.config:
@@ -66,7 +70,9 @@ class Flask(flask.Flask, SwaggerMixin):
             info_block.contact = contact_block
 
         self._doc = swagger.OpenApi(
-            version=self.open_api_version, info=info_block, paths=swagger.Paths(),
+            version=self.open_api_version,
+            info=info_block,
+            paths=swagger.Paths(),
         )
         self.add_url_rule("/openapi.json", view_func=self.register_json_path, methods=["GET"])
         self.add_url_rule("/openapi.yaml", view_func=self.register_yaml_path, methods=["GET"])
@@ -94,22 +100,31 @@ class Flask(flask.Flask, SwaggerMixin):
         return super(Flask, self).register_blueprint(blueprint, **options)
 
 
+@ui.route("/openapi.json", methods=["GET"])
 def json_path():
     get_api_docs(flask.current_app)
     return flask.jsonify(flask.current_app.openapi.to_dict()), 200
 
 
+@ui.route("/openapi.yaml", methods=["GET"])
 def yaml_path():
     get_api_docs(flask.current_app)
     fk = json.dumps(flask.current_app.openapi.to_dict())
     return flask.Response(yaml.safe_dump(json.loads(fk)), mimetype="application/yaml")
 
 
-def docs_ui(path="default.html"):
+@ui.route("/<path:path>", methods=["GET"])
+def static_resources(path="default.html"):
     if path == "default.html":
         template = "redoc.html" if CONFIG["use_redoc"] else "index.html"
         return flask.render_template(template, path=CONFIG["path"])
     return flask.send_from_directory(static_ui, path)
+
+
+@ui.route("/", methods=["GET"])
+def docs():
+    template = "redoc.html" if CONFIG["use_redoc"] else "index.html"
+    return flask.render_template(template)
 
 
 def register_openapi(
@@ -123,7 +138,7 @@ def register_openapi(
     use_redoc=False,
     links=None,
 ):
-    """ Registers flaskdoc api specs to an existing flask app
+    """Registers flaskdoc api specs to an existing flask app
 
     Args:
         app (flask.Flask): an existing flask app instance
@@ -138,12 +153,6 @@ def register_openapi(
     """
     docs_path = docs_path or "docs"
     CONFIG["use_redoc"] = use_redoc
-    CONFIG["path"] = docs_path
-
-    ui.add_url_rule("/", view_func=docs_ui, methods=["GET"])
-    ui.add_url_rule("/<path:path>", view_func=docs_ui, methods=["GET"])
-    ui.add_url_rule("/openapi.json", view_func=json_path, methods=["GET"])
-    ui.add_url_rule("/openapi.yaml", view_func=yaml_path, methods=["GET"])
 
     components = swagger.Components()
     components.add_component(swagger.ComponentType.EXAMPLE, examples)
@@ -162,7 +171,7 @@ def register_openapi(
 
 @functools.lru_cache(maxsize=10)
 def get_api_docs(app):
-    """ Traverses all flask mappings and retrieves all specified paths and parsing the specs
+    """Traverses all flask mappings and retrieves all specified paths and parsing the specs
 
     Args:
         app (flask.Flask): flask app instance
@@ -193,7 +202,7 @@ def get_api_rule(fn, app):
 
 
 def parse_specs(rule, spec, api):
-    """ Parses spec for a given flask route
+    """Parses spec for a given flask route
 
     Args:
         rule (werkzeug.routing.Rule): route rule

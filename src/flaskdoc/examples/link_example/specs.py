@@ -29,7 +29,10 @@ get_repository_by_owner = swagger.GET(
 get_repository = swagger.GET(
     operation_id="getRepository",
     parameters=[
-        swagger.PathParameter(name="username", schema=str,),
+        swagger.PathParameter(
+            name="username",
+            schema=str,
+        ),
         swagger.PathParameter(name="slug", schema=str),
     ],
     responses={
@@ -45,7 +48,10 @@ get_repository = swagger.GET(
 get_pull_requests_by_repository = swagger.GET(
     operation_id="getPullRequestByRepository",
     parameters=[
-        swagger.PathParameter(name="username", schema=str,),
+        swagger.PathParameter(
+            name="username",
+            schema=str,
+        ),
         swagger.PathParameter(name="slug", schema=str),
         swagger.QueryParameter(name="state", schema=schemas.RepositoryState),
     ],
@@ -61,7 +67,10 @@ get_pull_requests_by_repository = swagger.GET(
 get_pull_requests_by_id = swagger.GET(
     operation_id="getPullRequestsById",
     parameters=[
-        swagger.PathParameter(name="username", schema=str,),
+        swagger.PathParameter(
+            name="username",
+            schema=str,
+        ),
         swagger.PathParameter(name="slug", schema=str),
         swagger.PathParameter(name="pid", schema=str),
     ],
@@ -77,7 +86,10 @@ get_pull_requests_by_id = swagger.GET(
 merge_pull_request = swagger.POST(
     operation_id="mergePullRequest",
     parameters=[
-        swagger.PathParameter(name="username", schema=str,),
+        swagger.PathParameter(
+            name="username",
+            schema=str,
+        ),
         swagger.PathParameter(name="slug", schema=str),
         swagger.PathParameter(name="pid", schema=str),
     ],

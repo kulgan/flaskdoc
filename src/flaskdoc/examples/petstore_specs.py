@@ -17,7 +17,7 @@ class Category(object):
 
 
 class Status(Enum):
-    """ Pet status in the store """
+    """Pet status in the store"""
 
     available = "available"
     pending = "pending"
@@ -36,7 +36,9 @@ class Pet(object):
     category = jo.object(item=Category)
     name = jo.string(required=True, example="doggie")
     photo_urls = jo.array(
-        item=swagger.String(xml="photoUrl"), required=True, xml=swagger.XML(wrapped=True),
+        item=swagger.String(xml="photoUrl"),
+        required=True,
+        xml=swagger.XML(wrapped=True),
     )
     status = jo.object(item=Status)
     tags = jo.array(item=Tag, xml=swagger.XML(wrapped=True))
@@ -70,7 +72,9 @@ upload_image_spec = swagger.POST(
     operation_id="uploadFile",
     parameters=[
         swagger.PathParameter(
-            name="petId", description="ID of pet to update", schema=swagger.Int64(),
+            name="petId",
+            description="ID of pet to update",
+            schema=swagger.Int64(),
         )
     ],
     request_body=swagger.RequestBody(
@@ -88,7 +92,8 @@ upload_image_spec = swagger.POST(
     ),
     responses={
         "200": swagger.ResponseObject(
-            description="successful operation", content=swagger.JsonType(schema=ApiResponse),
+            description="successful operation",
+            content=swagger.JsonType(schema=ApiResponse),
         )
     },
     security=[{"petstore_auth": ["write:pets", "read:pets"]}],
@@ -100,7 +105,8 @@ update_pet_spec = swagger.PUT(
     summary="Update an existing pet",
     operation_id="updatePet",
     request_body=swagger.RequestBody(
-        content=[swagger.JsonType(schema=Pet), swagger.XmlType(schema=Pet)], required=True,
+        content=[swagger.JsonType(schema=Pet), swagger.XmlType(schema=Pet)],
+        required=True,
     ),
     responses={
         "400": swagger.ResponseObject(description="Invalid ID supplied"),
@@ -187,7 +193,9 @@ get_by_id_spec = swagger.GET(
     operation_id="getPetById",
     parameters=[
         swagger.PathParameter(
-            name="petId", description="ID of pet to return", schema=swagger.Int64(),
+            name="petId",
+            description="ID of pet to return",
+            schema=swagger.Int64(),
         )
     ],
     responses={
@@ -341,7 +349,9 @@ create_with_array_spec = swagger.POST(
     summary="Creates list off users with given input array",
     operation_id="createUsersWithArrayInput",
     request_body=swagger.RequestBody(
-        description="List of user object", content=swagger.JsonType(schema=[User]), required=True,
+        description="List of user object",
+        content=swagger.JsonType(schema=[User]),
+        required=True,
     ),
     responses={"200": swagger.ResponseObject(description="successful operation")},
 )
@@ -352,7 +362,9 @@ create_with_list_spec = swagger.POST(
     summary="Creates list off users with given input array",
     operation_id="createUsersWithListInput",
     request_body=swagger.RequestBody(
-        description="List of user object", content=swagger.JsonType(schema=[User]), required=True,
+        description="List of user object",
+        content=swagger.JsonType(schema=[User]),
+        required=True,
     ),
     responses={"200": swagger.ResponseObject(description="successful operation")},
 )
@@ -391,7 +403,8 @@ update_user_spec = swagger.PUT(
         )
     ],
     request_body=swagger.RequestBody(
-        description="Updated user object", content=swagger.JsonType(User),
+        description="Updated user object",
+        content=swagger.JsonType(User),
     ),
     responses={
         "400": swagger.ResponseObject(description="Invalid ID supplied"),
@@ -441,7 +454,8 @@ login_spec = swagger.GET(
             description="successful operation",
             headers={
                 "X-Rate-Limit": swagger.Header(
-                    description="calls oer hour allowed by user", schema=swagger.Integer(),
+                    description="calls oer hour allowed by user",
+                    schema=swagger.Integer(),
                 ),
                 "X-Expires-After": swagger.Header(
                     description="date in UTC when token expires",
@@ -471,7 +485,9 @@ create_user_spec = swagger.POST(
     description="This can only be done by the logged in user",
     operation_id="createUser",
     request_body=swagger.RequestBody(
-        description="Created user object", content=swagger.JsonType(schema=User), required=True,
+        description="Created user object",
+        content=swagger.JsonType(schema=User),
+        required=True,
     ),
     responses=swagger.ResponsesObject(
         default=swagger.ResponseObject(description="successful operation")

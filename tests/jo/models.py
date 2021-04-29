@@ -7,7 +7,7 @@ from flaskdoc import jo
 
 @attr.s
 class SoapStar(object):
-    """ Simple attr based class """
+    """Simple attr based class"""
 
     meal = attr.ib(type=float)
     smokes = attr.ib(default=10)
@@ -15,7 +15,7 @@ class SoapStar(object):
 
 @attr.s
 class Sample(object):
-    """ Class with mixed attribute definitions """
+    """Class with mixed attribute definitions"""
 
     danni = "fear"
     palo = attr.ib(type=int)
@@ -24,7 +24,7 @@ class Sample(object):
 
 
 class OakTown:
-    """ Sample class without any special annotations """
+    """Sample class without any special annotations"""
 
     oaks = None
     smugs = 1  # type: int
@@ -33,7 +33,7 @@ class OakTown:
 
 
 class Squeezed:
-    """ Sample class with typed annotations """
+    """Sample class with typed annotations"""
 
     sample = 1
     spaces = 6

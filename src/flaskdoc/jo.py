@@ -28,7 +28,7 @@ def schema(
     xml=None,
     camel_case_props=False,
 ):
-    """ decorates a class automatically binding it to a Schema instance
+    """decorates a class automatically binding it to a Schema instance
 
     This technically extends `attr.s` amd pulls out a Schema instance in the process
 
@@ -96,7 +96,7 @@ def string(
     description=None,
     xml=None,
 ):
-    """ Creates a json schema of type string
+    """Creates a json schema of type string
 
     Args:
         default (str): default value
@@ -145,7 +145,7 @@ def number(
     description=None,
     xml=None,
 ):
-    """ Create a schema of type number"""
+    """Create a schema of type number"""
 
     sc = Number(
         format=int_format,
@@ -178,7 +178,7 @@ def integer(
     description=None,
     xml=None,
 ):
-    """ Create a schema of type integer """
+    """Create a schema of type integer"""
 
     sc = Integer(
         format=int_format,
@@ -197,7 +197,7 @@ def integer(
 
 
 def one_of(types, default=None, discriminator=None, description=None):
-    """ Applies to properties and complies with JSON schema oneOf property
+    """Applies to properties and complies with JSON schema oneOf property
 
     Args:
         types (list[type]): list of types that will be allowed
@@ -214,7 +214,7 @@ def one_of(types, default=None, discriminator=None, description=None):
 
 
 def all_of(types, default=None, discriminator=None, description=None):
-    """ JSON schema allOf """
+    """JSON schema allOf"""
 
     items = [schema_factory.get_schema(cls) for cls in types]
     sc = Schema(all_of=items, discriminator=discriminator, description=description)
@@ -222,7 +222,7 @@ def all_of(types, default=None, discriminator=None, description=None):
 
 
 def any_of(types, default=None, discriminator=None):
-    """ JSON schema anyOf """
+    """JSON schema anyOf"""
 
     items = [schema_factory.get_schema(cls) for cls in types]
     sc = Schema(any_of=items, discriminator=discriminator)
@@ -230,9 +230,14 @@ def any_of(types, default=None, discriminator=None):
 
 
 def boolean(
-    default=None, required=None, read_only=None, write_only=None, description=None, xml=None,
+    default=None,
+    required=None,
+    read_only=None,
+    write_only=None,
+    description=None,
+    xml=None,
 ):
-    """ Boolean schema data type
+    """Boolean schema data type
 
     Args:
         default:
@@ -258,7 +263,7 @@ def array(
     required=None,
     xml=None,
 ):
-    """ Array data type """
+    """Array data type"""
     sc = Array(
         items=item, min_items=min_items, max_items=max_items, unique_items=unique_items, xml=xml
     )
@@ -266,7 +271,7 @@ def array(
 
 
 def object(item, default=None, required=None, description=None):
-    """ Raw object data type """
+    """Raw object data type"""
 
     sc = schema_factory.get_schema(item, description=description)
     return attr.ib(type=item, default=default, metadata={JO_SCHEMA: sc, JO_REQUIRED: required})

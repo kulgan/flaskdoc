@@ -15,7 +15,7 @@ def get_docs():
 
 
 def parse_flask_rule(rule: str):
-    """ Parses a flask rule (URL), and returns an openapi compatible version of the url"""
+    """Parses a flask rule (URL), and returns an openapi compatible version of the url"""
 
     parsed_rule = []
     index = -1
