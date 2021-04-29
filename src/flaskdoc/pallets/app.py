@@ -15,7 +15,10 @@ API_DOCS = {}
 static_ui = pkg_resources.resource_filename("flaskdoc", "static")
 static_templates = pkg_resources.resource_filename("flaskdoc", "templates")
 ui = flask.Blueprint(
-    "flaskdoc", __name__, static_folder=static_ui, template_folder=static_templates,
+    "flaskdoc",
+    __name__,
+    static_folder=static_ui,
+    template_folder=static_templates,
 )
 
 CONFIG = {}
@@ -56,7 +59,8 @@ class Flask(flask.Flask, SwaggerMixin):
         info_block = swagger.Info(title=self.api_title, version=self.api_version)
         if "API_LICENSE_NAME" in self.config:
             license_block = swagger.License(
-                name=self.config["API_LICENSE_NAME"], url=self.config.get("API_LICENSE_URL"),
+                name=self.config["API_LICENSE_NAME"],
+                url=self.config.get("API_LICENSE_URL"),
             )
             info_block.license = license_block
         if "API_CONTACT_NAME" in self.config:
@@ -66,7 +70,9 @@ class Flask(flask.Flask, SwaggerMixin):
             info_block.contact = contact_block
 
         self._doc = swagger.OpenApi(
-            version=self.open_api_version, info=info_block, paths=swagger.Paths(),
+            version=self.open_api_version,
+            info=info_block,
+            paths=swagger.Paths(),
         )
         self.add_url_rule("/openapi.json", view_func=self.register_json_path, methods=["GET"])
         self.add_url_rule("/openapi.yaml", view_func=self.register_yaml_path, methods=["GET"])
@@ -132,7 +138,7 @@ def register_openapi(
     use_redoc=False,
     links=None,
 ):
-    """ Registers flaskdoc api specs to an existing flask app
+    """Registers flaskdoc api specs to an existing flask app
 
     Args:
         app (flask.Flask): an existing flask app instance
@@ -165,7 +171,7 @@ def register_openapi(
 
 @functools.lru_cache(maxsize=10)
 def get_api_docs(app):
-    """ Traverses all flask mappings and retrieves all specified paths and parsing the specs
+    """Traverses all flask mappings and retrieves all specified paths and parsing the specs
 
     Args:
         app (flask.Flask): flask app instance
@@ -196,7 +202,7 @@ def get_api_rule(fn, app):
 
 
 def parse_specs(rule, spec, api):
-    """ Parses spec for a given flask route
+    """Parses spec for a given flask route
 
     Args:
         rule (werkzeug.routing.Rule): route rule

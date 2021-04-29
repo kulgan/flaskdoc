@@ -26,7 +26,7 @@ from flaskdoc.core import ExtensionMixin, ModelMixin
 
 @attr.s
 class Schema(ModelMixin):
-    """ The Schema Object allows the definition of input and output data types.
+    """The Schema Object allows the definition of input and output data types.
 
     These types can be objects, but also primitives and arrays. This object is an extended subset of the JSON Schema
     Specification Wright Draft 00. For more information about the properties, see JSON Schema Core and JSON Schema
@@ -142,7 +142,7 @@ class Object(Schema):
 
 @attr.s
 class XML(ModelMixin):
-    """ A metadata object that allows for more fine-tuned XML model definitions. When using arrays, XML element names
+    """A metadata object that allows for more fine-tuned XML model definitions. When using arrays, XML element names
     are not inferred (for singular/plural forms) and the name property SHOULD be used to add that information. See
     examples for expected behavior.
     """
@@ -156,10 +156,10 @@ class XML(ModelMixin):
 
 @attr.s
 class Discriminator(ModelMixin):
-    """ When request bodies or response payloads may be one of a number of different schemas, a discriminator object
+    """When request bodies or response payloads may be one of a number of different schemas, a discriminator object
     can be used to aid in serialization, deserialization, and validation. The discriminator is a specific object in a
     schema which is used to inform the consumer of the specification of an alternative schema based on the value
-    associated with it. """
+    associated with it."""
 
     property_name = attr.ib(type=str)
     mapping = attr.ib(default=dict)
@@ -188,7 +188,7 @@ class Array(Schema):
 
 @attr.s
 class SchemaFactory(object):
-    """ Converts an object into a json schema and returns a reference
+    """Converts an object into a json schema and returns a reference
 
     Properties:
         ref_base (str): json schema reference base, defaults to `#/components/schema`
@@ -200,7 +200,7 @@ class SchemaFactory(object):
     examples = attr.ib(init=False, default={})
 
     def parse_data_fields(self, cls, fields):
-        """ Parses classes implemented using either py37 dataclasses or attrs
+        """Parses classes implemented using either py37 dataclasses or attrs
 
         Args:
             cls (class):
@@ -297,7 +297,7 @@ class SchemaFactory(object):
 
 @attr.s
 class MediaType(ModelMixin):
-    """ Each Media Type Object provides schema and examples for the media type identified by its key. """
+    """Each Media Type Object provides schema and examples for the media type identified by its key."""
 
     content_type = attr.ib(type=str)
     schema = attr.ib(default=None, type="Schema")
@@ -321,12 +321,16 @@ class MediaType(ModelMixin):
         return schema_factory.get_schema(self.schema)
 
     def to_dict(self):
-        return dict(schema=self.to_schema(), example=self.example, examples=self.examples,)
+        return dict(
+            schema=self.to_schema(),
+            example=self.example,
+            examples=self.examples,
+        )
 
 
 @attr.s
 class JsonType(MediaType):
-    """ mime type application/json content type """
+    """mime type application/json content type"""
 
     content_type = attr.ib(default="application/json", init=False)
 
@@ -407,7 +411,7 @@ class ContentMixin(object):
 
 @attr.s
 class Encoding(ExtensionMixin):
-    """ A single encoding definition applied to a single schema property. """
+    """A single encoding definition applied to a single schema property."""
 
     content_type = attr.ib(type=str)
     headers = attr.ib(default=None, type=dict)

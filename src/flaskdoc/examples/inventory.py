@@ -50,7 +50,9 @@ search_inventory_docs = swagger.GET(
             description="pass an optional search string for looking up inventory",
         ),
         swagger.QueryParameter(
-            name="skip", schema=int, description="number of records to skip for pagination",
+            name="skip",
+            schema=int,
+            description="number of records to skip for pagination",
         ),
         swagger.QueryParameter(
             name="limit",
@@ -74,7 +76,8 @@ add_inventory_docs = swagger.POST(
     summary="adds an inventory item",
     description="adds an item to the system",
     request_body=swagger.RequestBody(
-        content=swagger.JsonType(schema=InventoryItem), description="Inventory item to add",
+        content=swagger.JsonType(schema=InventoryItem),
+        description="Inventory item to add",
     ),
     responses={
         "201": swagger.ResponseObject(description="item created"),

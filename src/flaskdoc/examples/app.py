@@ -89,7 +89,7 @@ def make_app(name="inventory"):
         examples=examples,
         links=links,
         docs_path="/docs",
-        use_redoc=False
+        use_redoc=False,
     )
 
     # examples somehow appends an extra docs in the url path, use this force it to empty

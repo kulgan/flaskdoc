@@ -5,7 +5,7 @@ from flaskdoc.swagger import models
 
 
 def test_dict_set_item():
-    """ Test SwaggerDict instances does not allow null/empty values """
+    """Test SwaggerDict instances does not allow null/empty values"""
 
     e1 = models.SwaggerDict()
     e1["dummy"] = False
@@ -18,7 +18,7 @@ def test_dict_set_item():
 
 
 def test_extension_model_usage():
-    """ Tests adding and validating extensions to models """
+    """Tests adding and validating extensions to models"""
     print("SSSSSSSSSSSSSSSSSSSSs")
     lc = models.License(name="Dummy License", url="http://dummy")
 

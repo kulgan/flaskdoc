@@ -13,7 +13,10 @@ simple_get = swagger.GET(
             name="id",
             description="root id",
             allow_empty_value=True,
-            schema=swagger.Schema(type="string", format="email",),
+            schema=swagger.Schema(
+                type="string",
+                format="email",
+            ),
         ),
         swagger.QueryParameter(name="age", description="age of user", schema=swagger.Integer()),
     ],
@@ -50,7 +53,8 @@ servers = [
     description="Retrieve echos wit Get",
     responses={
         "200": swagger.ResponseObject(
-            description="Success", content=swagger.PlainText(schema=swagger.Email()),
+            description="Success",
+            content=swagger.PlainText(schema=swagger.Email()),
         )
     },
 )

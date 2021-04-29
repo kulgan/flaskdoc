@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class SwaggerDict(OrderedDict, DictMixin):
-    """ Used to filter out properties that are not set """
+    """Used to filter out properties that are not set"""
 
     def __setitem__(self, key, value):
         if value not in [False, True] and not value:
@@ -29,7 +29,7 @@ class ContainerModel(ModelMixin):
     items = attr.ib(default=SwaggerDict())
 
     def add(self, key, item):
-        """ Adds an item
+        """Adds an item
         Args:
             key (str): item key
             item (dict): item
@@ -49,7 +49,7 @@ class ContainerModel(ModelMixin):
 
 @attr.s
 class License(ExtensionMixin):
-    """ License information for the exposed API.
+    """License information for the exposed API.
 
     This object MAY be extended with Specification Extensions.
 
@@ -70,7 +70,7 @@ class License(ExtensionMixin):
 
 @attr.s
 class Contact(ExtensionMixin):
-    """ Contact information for the exposed API.
+    """Contact information for the exposed API.
 
     This object MAY be extended with Specification Extensions.
 
@@ -93,7 +93,7 @@ class Contact(ExtensionMixin):
 
 @attr.s
 class Info(ExtensionMixin):
-    """ The object provides metadata about the API.
+    """The object provides metadata about the API.
 
     The metadata MAY be used by the clients if needed, and MAY be presented in editing or documentation generation
     tools for convenience. This object MAY be extended with Specification Extensions.
@@ -119,7 +119,7 @@ class Info(ExtensionMixin):
 
 @attr.s
 class ServerVariable(ExtensionMixin):
-    """ An object representing a Server Variable for server URL template substitution.
+    """An object representing a Server Variable for server URL template substitution.
 
     This object MAY be extended with Specification Extensions.
 
@@ -141,7 +141,7 @@ class ServerVariable(ExtensionMixin):
 
 @attr.s
 class Server(ExtensionMixin):
-    """ An object representing a Server.
+    """An object representing a Server.
 
     This object MAY be extended with Specification Extensions.
 
@@ -161,7 +161,7 @@ class Server(ExtensionMixin):
     extensions = attr.ib(default={})
 
     def add_variable(self, name: str, variable: ServerVariable):
-        """ Adds a server variable
+        """Adds a server variable
         Args:
             name: variable name
             variable: Server variable instance
@@ -172,7 +172,7 @@ class Server(ExtensionMixin):
 
 
 class Style(enum.Enum):
-    """ Style values defined to aid serializing different simple parameters """
+    """Style values defined to aid serializing different simple parameters"""
 
     FORM = "form"
     LABEL = "label"
@@ -216,7 +216,7 @@ class LinkReference(ReferenceObject):
 
 @attr.s
 class ExternalDocumentation(ExtensionMixin):
-    """ Allows referencing an external resource for extended documentation. """
+    """Allows referencing an external resource for extended documentation."""
 
     url = attr.ib(type=str)
     description = attr.ib(default=None, type=str)
@@ -425,7 +425,7 @@ class Tag(ExtensionMixin, ApiDecoratorMixin):
 
 @attr.s
 class Operation(ExtensionMixin, ApiDecoratorMixin):
-    """ Describes a single API operation on a path. """
+    """Describes a single API operation on a path."""
 
     responses = attr.ib(type=dict)
     tags = attr.ib(default=None, type=list)
@@ -452,7 +452,7 @@ class Operation(ExtensionMixin, ApiDecoratorMixin):
 
     @staticmethod
     def from_op(http_method: str, responses: SwaggerDict):
-        """ Factory for creating instances of Http Operations """
+        """Factory for creating instances of Http Operations"""
 
         http_method = HttpMethod(http_method)
         if http_method == HttpMethod.GET:
@@ -658,7 +658,7 @@ class SecuritySchemeType(enum.Enum):
 
 @attr.s
 class SecurityScheme(ExtensionMixin):
-    """ Defines a security scheme that can be used by the operations.
+    """Defines a security scheme that can be used by the operations.
 
     Supported schemes are HTTP authentication, an API key (either as a header or as a query parameter), OAuth2's
     common flows (implicit, password, application and access code) as defined in RFC6749, and OpenID Connect Discovery.
@@ -674,7 +674,7 @@ class SecurityScheme(ExtensionMixin):
 
 @attr.s
 class ApiKeySecurityScheme(SecurityScheme):
-    """ OpenAPI security scheme definition with type apiKey
+    """OpenAPI security scheme definition with type apiKey
 
     Example:
         Sample security requirements
@@ -698,7 +698,7 @@ class ApiKeySecurityScheme(SecurityScheme):
 
 @attr.s
 class HttpSecurityScheme(SecurityScheme):
-    """ OpenAPI security scheme definition with type http """
+    """OpenAPI security scheme definition with type http"""
 
     scheme = attr.ib(type="string")
     bearer_format = attr.ib(default="bearer")
@@ -709,7 +709,7 @@ class HttpSecurityScheme(SecurityScheme):
 
 @attr.s
 class OpenIDConnectScheme(SecurityScheme):
-    """ OpenAPI security scheme definition with type openidConnect """
+    """OpenAPI security scheme definition with type openidConnect"""
 
     open_id_connect_url = attr.ib(type=str)
     _type = attr.ib(default=SecuritySchemeType.OPEN_ID_CONNECT, init=False)
@@ -723,7 +723,7 @@ class OpenIDConnectScheme(SecurityScheme):
 
 @attr.s
 class OAuth2SecurityScheme(SecurityScheme):
-    """ OpenAPI security scheme definition with type oauth2 """
+    """OpenAPI security scheme definition with type oauth2"""
 
     flows = attr.ib()
     _type = attr.ib(default=SecuritySchemeType.OAUTH2, init=False)
@@ -731,7 +731,7 @@ class OAuth2SecurityScheme(SecurityScheme):
 
 
 class ImplicitOAuthFlow(ExtensionMixin):
-    """ Implicit OAuth2 Flow """
+    """Implicit OAuth2 Flow"""
 
     def __init__(self, authorization_url, scopes, token_url=None, refresh_url=None):
         self.implicit = OAuthFlow(
@@ -743,7 +743,7 @@ class ImplicitOAuthFlow(ExtensionMixin):
 
 
 class AuthorizationCodeOAuthFlow(ExtensionMixin):
-    """ Authorization Code OAuth2 Flow """
+    """Authorization Code OAuth2 Flow"""
 
     def __init__(self, authorization_url, token_url, scopes, refresh_url=None, extensions=None):
         self.authorization_code = OAuthFlow(
@@ -756,7 +756,7 @@ class AuthorizationCodeOAuthFlow(ExtensionMixin):
 
 
 class PasswordOAuthFlow(ExtensionMixin):
-    """ Password based OAuth2 Flow """
+    """Password based OAuth2 Flow"""
 
     def __init__(
         self, token_url, scopes, authorization_url=None, refresh_url=None, extensions=None
@@ -771,7 +771,7 @@ class PasswordOAuthFlow(ExtensionMixin):
 
 
 class ClientCredentialsOAuthFlow(ExtensionMixin):
-    """ Client Credentials OAuth FLow """
+    """Client Credentials OAuth FLow"""
 
     def __init__(
         self, token_url, scopes, authorization_url=None, refresh_url=None, extensions=None
@@ -787,7 +787,7 @@ class ClientCredentialsOAuthFlow(ExtensionMixin):
 
 @attr.s
 class OAuthFlow(ExtensionMixin):
-    """ Configuration details for a supported OAuth Flow """
+    """Configuration details for a supported OAuth Flow"""
 
     authorization_url = attr.ib(type=str)
     token_url = attr.ib(type=str)
@@ -811,7 +811,7 @@ class ComponentType(enum.Enum):
 
 @attr.s
 class Components(ExtensionMixin):
-    """ Holds a set of reusable objects for different aspects of the OAS.
+    """Holds a set of reusable objects for different aspects of the OAS.
 
     All objects defined within the components object will have no effect on the API unless they are explicitly
     referenced from properties outside the components object.
@@ -831,7 +831,7 @@ class Components(ExtensionMixin):
     PATTERN = re.compile("^[a-zA-Z0-9.-_]+$")
 
     def add_component(self, component_type, components):
-        """ Adds components
+        """Adds components
 
         Args:
             component_type (ComponentType): type of component
@@ -853,7 +853,7 @@ class Components(ExtensionMixin):
 
 
 class OpenApi(ModelMixin):
-    """ This is the root document object of the OpenAPI document.
+    """This is the root document object of the OpenAPI document.
 
     OpenApi specs tree, contains the overall specs for the API
     Properties:

@@ -35,9 +35,12 @@ info = swagger.Info(
     "http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger]("
     "http://swagger.io/irc/).  For this sample, you can use the api key `special-key` to test the "
     "authorization filters.",
-    contact=swagger.Contact(email="apiteam@swagger.io",),
+    contact=swagger.Contact(
+        email="apiteam@swagger.io",
+    ),
     license=swagger.License(
-        name="Apache 2.0", url="http://www.apache.org/licenses/LICENSE-2.0.html",
+        name="Apache 2.0",
+        url="http://www.apache.org/licenses/LICENSE-2.0.html",
     ),
     terms_of_service="http://swagger.io/terms/",
 )

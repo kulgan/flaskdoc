@@ -9,12 +9,12 @@ from flaskdoc.pallets import plugins
 
 
 class DictMixin:
-    """ General usage mixin for handling nested dictionary conversion. """
+    """General usage mixin for handling nested dictionary conversion."""
 
     _camel_case_fields_ = False
 
     def to_dict(self):
-        """ Converts object to dictionary """
+        """Converts object to dictionary"""
 
         return self.parse(self.__dict__)
 
@@ -57,7 +57,7 @@ class DictMixin:
 
 
 def camel_case(snake_case):
-    """ Converts snake case strings to camel case
+    """Converts snake case strings to camel case
 
     Args:
         snake_case (str): raw snake case string, eg `sample_text`
@@ -70,7 +70,7 @@ def camel_case(snake_case):
 
 
 class ApiDecoratorMixin(object):
-    """ Makes a model a decorator that registers itself """
+    """Makes a model a decorator that registers itself"""
 
     def __call__(self, func):
         plugins.register_spec(func, self)
@@ -79,7 +79,7 @@ class ApiDecoratorMixin(object):
 
 @attr.s
 class ModelMixin(DictMixin):
-    """ Swagger Model mixin that provides common methods like to dict and to json """
+    """Swagger Model mixin that provides common methods like to dict and to json"""
 
     _camel_case_fields_ = attr.ib(default=True, init=False)
 
@@ -100,7 +100,7 @@ class ExtensionMixin(ModelMixin):
     extensions = attr.ib(default={})
 
     def add_extension(self, name, value):
-        """ Allows extensions to the Swagger Schema.
+        """Allows extensions to the Swagger Schema.
 
         The field name MUST begin with x-, for example, x-internal-id. The value can be null, a primitive,
         an array or an object.
@@ -132,7 +132,7 @@ class ExtensionMixin(ModelMixin):
 
     @extensions.validator
     def validate(self, _, ext):
-        """ Validates the name of all provided extensions """
+        """Validates the name of all provided extensions"""
         if ext:
             for k in ext:
                 self.validate_extension_name(k)
